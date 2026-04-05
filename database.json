@@ -1,585 +1,769 @@
 {
-    "6175559434": {
-        "name": "\ua66e\u0e4a \u300e\ud83c\uddfb\u20ea\u0362\ud835\udddc\ud835\udde3\u300f\ud835\ude51\ud835\ude44\ud835\ude4e\ud835\ude43\ud835\ude3c\ud835\ude47\u0fd0\u0f3b\u2620\ufe0f\u2728\ud83e\udd85",
-        "money": 21366,
-        "status": "alive",
-        "kills": 16,
-        "last_daily": 1772633636.2275393,
-        "protection_until": 1772910369.931927
+  "6175559434": {
+    "name": "\ua66e\u0e4a \u300e\ud83c\uddfb\u20ea\u0362\ud835\udddc\ud835\udde3\u300f\ud835\ude51\ud835\ude44\ud835\ude4e\ud835\ude43\ud835\ude3c\ud835\ude47\u0fd0\u0f3b\u2620\ufe0f\u2728\ud83e\udd85",
+    "money": 73848,
+    "status": "alive",
+    "kills": 21,
+    "last_daily": 1775375740.0279691,
+    "protection_until": 1775638280.1529741,
+    "revive_attempts": {
+      "6175559434": 2
     },
-    "7974841147": {
-        "name": "\ud835\udc01\u1d00\u1d0b\u1d00 \ud83d\udc93",
-        "money": 1000,
-        "status": "dead",
-        "kills": 0,
-        "last_daily": 0,
-        "protection_until": 0
-    },
-    "8312901913": {
-        "name": "Vishal (BAJARANGBALI \ud83d\ude4f\ud83d\ude4f)",
-        "money": 2663,
-        "status": "alive",
-        "kills": 1,
-        "last_daily": 1772727649.7461023,
-        "protection_until": 0
-    },
-    "8592849218": {
-        "name": "\ud81a\udcd4\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua66e\u0e4a \u300e\ud83c\uddfb\u20ea\u0362\ud835\udddc\ud835\udde3\u300f\ud835\udc11\ud835\udc08\ud835\udc13\ud835\udc15\ud835\udc08\u02f9\u0fd0\u0f3b\u2620\ufe0f\u2728\ud83e\udd85",
-        "money": 1144700,
-        "status": "alive",
-        "kills": 0,
-        "last_daily": 1772300435.7717025,
-        "protection_until": 1772387031.4312704
-    },
-    "8533598800": {
-        "name": "Miku",
-        "money": 1020,
-        "status": "dead",
-        "kills": 0,
-        "last_daily": 0,
-        "protection_until": 0
-    },
-    "609517172": {
-        "name": "Rose",
-        "money": 1000,
-        "status": "dead",
-        "kills": 0,
-        "last_daily": 0,
-        "protection_until": 0
-    },
-    "8080035914": {
-        "name": "Niki\u2764\ufe0f",
-        "money": 1200,
-        "status": "dead",
-        "kills": 0,
-        "last_daily": 0,
-        "protection_until": 0
-    },
-    "7283793308": {
-        "name": "\u2e19 \u13b7\u0280 \u3006 \ud835\uddd5\ud835\udddc\ud835\udddf\ud835\udddf\ud835\uddd4 \u2654\ufe0e",
-        "money": 1000,
-        "status": "dead",
-        "kills": 0,
-        "last_daily": 0,
-        "protection_until": 0
-    },
-    "8327856122": {
-        "name": "\u3164\u3164\u3164\u3164\u3164\u3164\u3164\u3164\ud835\ude19\ud835\ude12\ud835\ude16>",
-        "money": 0,
-        "status": "dead",
-        "kills": 0,
-        "last_daily": 0,
-        "protection_until": 0,
-        "dead": true,
-        "dead_until": 1772365301.606747
-    },
-    "6212406274": {
-        "name": "\ud80c\udda9\ud835\udde7 \ud835\udddb \ud835\uddd8 \ud83e\udebd\ud835\uddda \ud835\udde5 \ud835\uddd8 \ud835\uddd4 \ud835\udde7",
-        "money": 0,
-        "status": "dead",
-        "kills": 0,
-        "last_daily": 0,
-        "protection_until": 0,
-        "dead": true,
-        "dead_until": 1772365619.3664577
-    },
-    "8289163899": {
-        "name": "\ud835\uddd7\ud835\uddee\ud835\uddff\ud835\uddf8 \ud835\udddb\ud835\uddf2\ud835\uddff\ud835\uddfc\ud835\uddef\ud835\uddff\ud835\uddf6\ud835\uddfb\ud835\uddf2 \u232f\u300e \ud835\udc02\ud835\udc19\ud835\udc0d \u300f\u269a",
-        "money": 1000,
-        "status": "dead",
-        "kills": 0,
-        "last_daily": 0,
-        "protection_until": 0
-    },
-    "8706947091": {
-        "name": "As\u1d1b\u0280\u1d0f\u0274\u1d00\u1d1c\u1d1b \u30c4",
-        "money": 0,
-        "status": "alive",
-        "kills": 0,
-        "last_daily": 0,
-        "protection_until": 0,
-        "dead": true,
-        "dead_until": 1772364973.3244996
-    },
-    "8573309431": {
-        "name": "\u300e\ud835\udd72\ud835\udd94\ud835\udd89\u300f \u300e\ud835\udd7a\ud835\udd8b\u300f \u300e\ud835\udd7e\ud835\udd8d\ud835\udd86\ud835\udd89\ud835\udd94\ud835\udd9c\ud835\udd98\u300f",
-        "money": 127144,
-        "status": "alive",
-        "kills": 0,
-        "last_daily": 0,
-        "protection_until": 1772539689.171528,
-        "dead": true,
-        "dead_until": 1772366818.7591772
-    },
-    "8712764327": {
-        "name": "HW",
-        "money": 1100,
-        "status": "alive",
-        "kills": 0,
-        "last_daily": 0,
-        "protection_until": 0,
-        "dead": true,
-        "dead_until": 1772373002.448963
-    },
-    "8165245118": {
-        "name": "\u4e97 \ud835\udc12\ud835\udc14\ud835\udc0d\ud835\udc06\ud835\udc09\ud835\udc08\ud835\udc0d\ud835\udc16\ud835\udc0e\ud835\udc0e - \u2770 \ud835\udeab\ud835\udc06\ud835\udebb \u2771\u2122",
-        "money": 1194,
-        "status": "alive",
-        "kills": 2,
-        "last_daily": 0,
-        "protection_until": 1772367096.2061126
-    },
-    "8024136203": {
-        "name": "Harshu",
-        "money": 0,
-        "status": "alive",
-        "kills": 0,
-        "last_daily": 0,
-        "protection_until": 0
-    },
-    "2034054424": {
-        "name": "Investigator",
-        "money": 100,
-        "status": "alive",
-        "kills": 0,
-        "last_daily": 0,
-        "protection_until": 0
-    },
-    "8102918997": {
-        "name": "\u0f12\u1b44\u1d18\u0280\uaadd\u0274\uaadd\ud835\ude37 \u0fd0\u2770 \ud835\udeab\ud835\udc06\ud835\udebb \u2771\u2122",
-        "money": 1000,
-        "status": "alive",
-        "kills": 0,
-        "last_daily": 0,
-        "protection_until": 0,
-        "dead": true,
-        "dead_until": 1772367892.0132487
-    },
-    "8225092237": {
-        "name": "\u300e\ud835\udd72\ud835\udd94\ud835\udd89\u300f \u300e\ud835\udd7a\ud835\udd8b\u300f \u300e\ud835\udd6f\ud835\udd8a\ud835\udd98\ud835\udd99\ud835\udd97\ud835\udd9a\ud835\udd88\ud835\udd99\ud835\udd8e\ud835\udd94\ud835\udd93\u300f",
-        "money": 2000,
-        "status": "alive",
-        "kills": 0,
-        "last_daily": 0,
-        "protection_until": 0
-    },
-    "8650404021": {
-        "name": "\ud83e\uddf8",
-        "money": 3582,
-        "status": "alive",
-        "kills": 2,
-        "last_daily": 0,
-        "protection_until": 1772373186.368433
-    },
-    "8334231455": {
-        "name": "Yuvii",
-        "money": 330,
-        "status": "alive",
-        "kills": 0,
-        "last_daily": 0,
-        "protection_until": 0,
-        "dead": true,
-        "dead_until": 1772372946.7527795
-    },
-    "8295791692": {
-        "name": "> \ud835\udc0a\u0280\u026a\ua731\u029c\u0274\u1d00 \ud835\udc0e\u1d29 !! \ud83c\udde8\ud83c\udde6",
-        "money": 1396,
-        "kills": 1,
-        "dead": false,
-        "dead_until": 0,
-        "protection_until": 0,
-        "last_daily": 0,
-        "inventory": {}
-    },
-    "5448111016": {
-        "name": "Obito !",
-        "money": 1000,
-        "kills": 0,
-        "dead": true,
-        "dead_until": 1772629263.8319278,
-        "protection_until": 0,
-        "last_daily": 0,
-        "inventory": {}
-    },
-    "8203466847": {
-        "name": "E\u0337\u0337R\u0337\u0337R\u0337\u0337O\u0337\u0337R\u0337 \u03374\u0337\u03370\u0337\u03374\u0337 \u0337N\u0337\u0337O\u0337\u0337T\u0337 \u0337F\u0337\u0337O\u0337\u0337U\u0337\u0337N\u0337\u0337D\u0337",
-        "money": 2000,
-        "kills": 0,
-        "dead": true,
-        "dead_until": 1772714788.1482089,
-        "protection_until": 1772887635.1994245,
-        "last_daily": 1772705498.5557408,
-        "inventory": {}
-    },
-    "8600225050": {
-        "name": "Ash",
-        "money": 0,
-        "kills": 0,
-        "dead": false,
-        "dead_until": 0,
-        "protection_until": 0,
-        "last_daily": 0,
-        "inventory": {}
-    },
-    "7549010765": {
-        "name": "(a+b) (a-b)",
-        "money": 1474,
-        "kills": 1,
-        "dead": true,
-        "dead_until": 1772772884.4361327,
-        "protection_until": 0,
-        "last_daily": 0,
-        "inventory": {}
-    },
-    "8248441592": {
-        "name": "\ud808\uddec\ud808\udc3c\ud808\ude26\ud808\udc3c\ud808\uddf2",
-        "money": 1000,
-        "kills": 0,
-        "dead": true,
-        "dead_until": 1772690732.4570315,
-        "protection_until": 0,
-        "last_daily": 0,
-        "inventory": {}
-    },
-    "7215847990": {
-        "name": "\u30c4 \u13d9 \u13ac \u13df \u039d \u13aa",
-        "money": 0,
-        "kills": 1,
-        "dead": true,
-        "dead_until": 1772776912.1852129,
-        "protection_until": 0,
-        "last_daily": 0,
-        "inventory": {}
-    },
-    "8022357033": {
-        "name": "> \ud835\udc00\u0299\u029c\u1d00\u028f \ud835\udc0e\u1d29 !! \ud83c\udde8\ud83c\udde6",
-        "money": 22207,
-        "inventory": {},
-        "kills": 3,
-        "protection_until": 1772945716.890269
-    },
-    "6430271851": {
-        "name": "Siku rock",
-        "money": 1000,
-        "inventory": {}
-    },
-    "8331750516": {
-        "name": "swapnarani",
-        "money": 0,
-        "inventory": {
-            "teddy": 1
-        }
-    },
-    "8099624266": {
-        "name": {
-            "6175559434": {
-                "name": "\ua66e\u0e4a \u300e\ud83c\uddfb\u20ea\u0362\ud835\udddc\ud835\udde3\u300f\ud835\ude51\ud835\ude44\ud835\ude4e\ud835\ude43\ud835\ude3c\ud835\ude47\u0fd0\u0f3b\u2620\ufe0f\u2728\ud83e\udd85",
-                "money": 14194,
-                "status": "alive",
-                "kills": 15,
-                "last_daily": 1772633636.2275393,
-                "protection_until": 1772910369.931927
-            },
-            "7974841147": {
-                "name": "\ud835\udc01\u1d00\u1d0b\u1d00 \ud83d\udc93",
-                "money": 1000,
-                "status": "dead",
-                "kills": 0,
-                "last_daily": 0,
-                "protection_until": 0
-            },
-            "8312901913": {
-                "name": "Vishal (BAJARANGBALI \ud83d\ude4f\ud83d\ude4f)",
-                "money": 1383,
-                "status": "alive",
-                "kills": 1,
-                "last_daily": 1772535774.4107938,
-                "protection_until": 0
-            },
-            "8592849218": {
-                "name": "\ud81a\udcd4\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua66e\u0e4a \u300e\ud83c\uddfb\u20ea\u0362\ud835\udddc\ud835\udde3\u300f\ud835\udc11\ud835\udc08\ud835\udc13\ud835\udc15\ud835\udc08\u02f9\u0fd0\u0f3b\u2620\ufe0f\u2728\ud83e\udd85",
-                "money": 1142200,
-                "status": "alive",
-                "kills": 0,
-                "last_daily": 1772300435.7717025,
-                "protection_until": 1772387031.4312704
-            },
-            "8533598800": {
-                "name": "Miku",
-                "money": 1000,
-                "status": "dead",
-                "kills": 0,
-                "last_daily": 0,
-                "protection_until": 0
-            },
-            "609517172": {
-                "name": "Rose",
-                "money": 1000,
-                "status": "dead",
-                "kills": 0,
-                "last_daily": 0,
-                "protection_until": 0
-            },
-            "8080035914": {
-                "name": "Niki\u2764\ufe0f",
-                "money": 1100,
-                "status": "dead",
-                "kills": 0,
-                "last_daily": 0,
-                "protection_until": 0
-            },
-            "7283793308": {
-                "name": "\u2e19 \u13b7\u0280 \u3006 \ud835\uddd5\ud835\udddc\ud835\udddf\ud835\udddf\ud835\uddd4 \u2654\ufe0e",
-                "money": 1000,
-                "status": "dead",
-                "kills": 0,
-                "last_daily": 0,
-                "protection_until": 0
-            },
-            "8327856122": {
-                "name": "\u3164\u3164\u3164\u3164\u3164\u3164\u3164\u3164\ud835\ude19\ud835\ude12\ud835\ude16>",
-                "money": 0,
-                "status": "dead",
-                "kills": 0,
-                "last_daily": 0,
-                "protection_until": 0,
-                "dead": true,
-                "dead_until": 1772365301.606747
-            },
-            "6212406274": {
-                "name": "\ud80c\udda9\ud835\udde7 \ud835\udddb \ud835\uddd8 \ud83e\udebd\ud835\uddda \ud835\udde5 \ud835\uddd8 \ud835\uddd4 \ud835\udde7",
-                "money": 0,
-                "status": "dead",
-                "kills": 0,
-                "last_daily": 0,
-                "protection_until": 0,
-                "dead": true,
-                "dead_until": 1772365619.3664577
-            },
-            "8289163899": {
-                "name": "\ud835\uddd7\ud835\uddee\ud835\uddff\ud835\uddf8 \ud835\udddb\ud835\uddf2\ud835\uddff\ud835\uddfc\ud835\uddef\ud835\uddff\ud835\uddf6\ud835\uddfb\ud835\uddf2 \u232f\u300e \ud835\udc02\ud835\udc19\ud835\udc0d \u300f\u269a",
-                "money": 1000,
-                "status": "dead",
-                "kills": 0,
-                "last_daily": 0,
-                "protection_until": 0
-            },
-            "8706947091": {
-                "name": "As\u1d1b\u0280\u1d0f\u0274\u1d00\u1d1c\u1d1b \u30c4",
-                "money": 0,
-                "status": "alive",
-                "kills": 0,
-                "last_daily": 0,
-                "protection_until": 0,
-                "dead": true,
-                "dead_until": 1772364973.3244996
-            },
-            "8573309431": {
-                "name": "\u300e\ud835\udd72\ud835\udd94\ud835\udd89\u300f \u300e\ud835\udd7a\ud835\udd8b\u300f \u300e\ud835\udd7e\ud835\udd8d\ud835\udd86\ud835\udd89\ud835\udd94\ud835\udd9c\ud835\udd98\u300f",
-                "money": 127144,
-                "status": "alive",
-                "kills": 0,
-                "last_daily": 0,
-                "protection_until": 1772539689.171528,
-                "dead": true,
-                "dead_until": 1772366818.7591772
-            },
-            "8712764327": {
-                "name": "HW",
-                "money": 1100,
-                "status": "alive",
-                "kills": 0,
-                "last_daily": 0,
-                "protection_until": 0,
-                "dead": true,
-                "dead_until": 1772373002.448963
-            },
-            "8165245118": {
-                "name": "\u4e97 \ud835\udc12\ud835\udc14\ud835\udc0d\ud835\udc06\ud835\udc09\ud835\udc08\ud835\udc0d\ud835\udc16\ud835\udc0e\ud835\udc0e - \u2770 \ud835\udeab\ud835\udc06\ud835\udebb \u2771\u2122",
-                "money": 786,
-                "status": "alive",
-                "kills": 1,
-                "last_daily": 0,
-                "protection_until": 1772367096.2061126
-            },
-            "8024136203": {
-                "name": "Harshu",
-                "money": 0,
-                "status": "alive",
-                "kills": 0,
-                "last_daily": 0,
-                "protection_until": 0
-            },
-            "2034054424": {
-                "name": "Investigator",
-                "money": 100,
-                "status": "alive",
-                "kills": 0,
-                "last_daily": 0,
-                "protection_until": 0
-            },
-            "8102918997": {
-                "name": "\u0f12\u1b44\u1d18\u0280\uaadd\u0274\uaadd\ud835\ude37 \u0fd0\u2770 \ud835\udeab\ud835\udc06\ud835\udebb \u2771\u2122",
-                "money": 1000,
-                "status": "alive",
-                "kills": 0,
-                "last_daily": 0,
-                "protection_until": 0,
-                "dead": true,
-                "dead_until": 1772367892.0132487
-            },
-            "8225092237": {
-                "name": "\u300e\ud835\udd72\ud835\udd94\ud835\udd89\u300f \u300e\ud835\udd7a\ud835\udd8b\u300f \u300e\ud835\udd6f\ud835\udd8a\ud835\udd98\ud835\udd99\ud835\udd97\ud835\udd9a\ud835\udd88\ud835\udd99\ud835\udd8e\ud835\udd94\ud835\udd93\u300f",
-                "money": 2000,
-                "status": "alive",
-                "kills": 0,
-                "last_daily": 0,
-                "protection_until": 0
-            },
-            "8650404021": {
-                "name": "\ud83e\uddf8",
-                "money": 3582,
-                "status": "alive",
-                "kills": 2,
-                "last_daily": 0,
-                "protection_until": 1772373186.368433
-            },
-            "8334231455": {
-                "name": "Yuvii",
-                "money": 330,
-                "status": "alive",
-                "kills": 0,
-                "last_daily": 0,
-                "protection_until": 0,
-                "dead": true,
-                "dead_until": 1772372946.7527795
-            },
-            "8295791692": {
-                "name": "> \ud835\udc0a\u0280\u026a\ua731\u029c\u0274\u1d00 \ud835\udc0e\u1d29 !! \ud83c\udde8\ud83c\udde6",
-                "money": 1396,
-                "kills": 1,
-                "dead": false,
-                "dead_until": 0,
-                "protection_until": 0,
-                "last_daily": 0,
-                "inventory": {}
-            },
-            "5448111016": {
-                "name": "Obito !",
-                "money": 1000,
-                "kills": 0,
-                "dead": true,
-                "dead_until": 1772629263.8319278,
-                "protection_until": 0,
-                "last_daily": 0,
-                "inventory": {}
-            },
-            "8203466847": {
-                "name": "E\u0337\u0337R\u0337\u0337R\u0337\u0337O\u0337\u0337R\u0337 \u03374\u0337\u03370\u0337\u03374\u0337 \u0337N\u0337\u0337O\u0337\u0337T\u0337 \u0337F\u0337\u0337O\u0337\u0337U\u0337\u0337N\u0337\u0337D\u0337",
-                "money": 500,
-                "kills": 0,
-                "dead": true,
-                "dead_until": 1772714788.1482089,
-                "protection_until": 1772887635.1994245,
-                "last_daily": 1772545732.4204214,
-                "inventory": {}
-            },
-            "8600225050": {
-                "name": "Ash",
-                "money": 0,
-                "kills": 0,
-                "dead": false,
-                "dead_until": 0,
-                "protection_until": 0,
-                "last_daily": 0,
-                "inventory": {}
-            },
-            "7549010765": {
-                "name": "(a+b) (a-b)",
-                "money": 1474,
-                "kills": 1,
-                "dead": false,
-                "dead_until": 0,
-                "protection_until": 0,
-                "last_daily": 0,
-                "inventory": {}
-            },
-            "8248441592": {
-                "name": "\ud808\uddec\ud808\udc3c\ud808\ude26\ud808\udc3c\ud808\uddf2",
-                "money": 1000,
-                "kills": 0,
-                "dead": true,
-                "dead_until": 1772690732.4570315,
-                "protection_until": 0,
-                "last_daily": 0,
-                "inventory": {}
-            },
-            "7215847990": {
-                "name": "\u30c4 \u13d9 \u13ac \u13df \u039d \u13aa",
-                "money": 1358,
-                "kills": 1,
-                "dead": false,
-                "dead_until": 0,
-                "protection_until": 0,
-                "last_daily": 0,
-                "inventory": {}
-            },
-            "8022357033": {
-                "name": "> \ud835\udc00\u0299\u029c\u1d00\u028f \ud835\udc0e\u1d29 !! \ud83c\udde8\ud83c\udde6",
-                "money": 11000,
-                "inventory": {}
-            },
-            "6430271851": {
-                "name": "Siku rock",
-                "money": 1000,
-                "inventory": {}
-            },
-            "8331750516": {
-                "name": "swapnarani",
-                "money": 0,
-                "inventory": {
-                    "teddy": 1
-                }
-            }
-        },
-        "money": 820,
-        "inventory": {},
-        "dead": true,
-        "dead_until": 1772814297.0520341
-    },
-    "6122855454": {
-        "name": "Dora:The explorer",
-        "money": 434,
-        "inventory": {},
-        "kills": 1,
-        "protection_until": 1772797707.4809752
-    },
-    "6547849934": {
-        "name": "\uff2f\ud835\udc2d\ud835\udd52\u13e6\u03c5",
-        "money": 1500,
-        "inventory": {},
-        "dead": true,
-        "dead_until": 1772772864.0662544,
-        "last_daily": 1772686560.9107587
-    },
-    "8498813416": {
-        "name": "\ud83c\udf37\ud835\ude4f\ud835\ude3c\ud835\ude49\ud835\ude45\ud835\ude44\ud835\ude4d\ud835\ude4a~\ud83e\udd8b",
-        "money": 0,
-        "inventory": {},
-        "dead": true,
-        "dead_until": 1772773049.235446
-    },
-    "8395788083": {
-        "name": "\ud834\udd1f\u0362\ud83e\udd8b\u20df\u00a0\uff25\uff36\uff29\uff2c\u0fd0",
-        "money": 2731,
-        "inventory": {},
-        "kills": 1
-    },
-    "2041628861": {
-        "name": "naitik",
-        "money": 999,
-        "inventory": {},
-        "dead": true,
-        "dead_until": 1772797694.9230876
+    "xp": 50,
+    "level": 1,
+    "inventory": {},
+    "claimed_levels": [],
+    "self_revive_warn": 2
+  },
+  "7974841147": {
+    "name": "\ud835\udc01\u1d00\u1d0b\u1d00 \ud83d\udc93",
+    "money": 1000,
+    "status": "dead",
+    "kills": 0,
+    "last_daily": 0,
+    "protection_until": 0
+  },
+  "8312901913": {
+    "name": "Vishal (BAJARANGBALI \ud83d\ude4f\ud83d\ude4f)",
+    "money": 7008,
+    "status": "alive",
+    "kills": 1,
+    "last_daily": 1774457226.8271577,
+    "protection_until": 0,
+    "dead": false,
+    "dead_until": 0,
+    "xp": 0,
+    "level": 2,
+    "inventory": {},
+    "claimed_levels": [],
+    "self_revive_warn": 1
+  },
+  "8592849218": {
+    "name": "\ud81a\udcd4\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua80b\ua66e\u0e4a \u300e\ud83c\uddfb\u20ea\u0362\ud835\udddc\ud835\udde3\u300f\ud835\udc11\ud835\udc08\ud835\udc13\ud835\udc15\ud835\udc08\u02f9\u0fd0\u0f3b\u2620\ufe0f\u2728\ud83e\udd85",
+    "money": 1144700,
+    "status": "alive",
+    "kills": 0,
+    "last_daily": 1772300435.7717025,
+    "protection_until": 1772387031.4312704
+  },
+  "8533598800": {
+    "name": "Miku",
+    "money": 1020,
+    "status": "dead",
+    "kills": 0,
+    "last_daily": 0,
+    "protection_until": 0
+  },
+  "609517172": {
+    "name": "Rose",
+    "money": 1000,
+    "status": "dead",
+    "kills": 0,
+    "last_daily": 0,
+    "protection_until": 0
+  },
+  "8080035914": {
+    "name": "Niki\u2764\ufe0f",
+    "money": 1203,
+    "status": "dead",
+    "kills": 0,
+    "last_daily": 0,
+    "protection_until": 0,
+    "xp": 0,
+    "level": 1,
+    "inventory": {}
+  },
+  "7283793308": {
+    "name": "\u2e19 \u13b7\u0280 \u3006 \ud835\uddd5\ud835\udddc\ud835\udddf\ud835\udddf\ud835\uddd4 \u2654\ufe0e",
+    "money": 1000,
+    "status": "dead",
+    "kills": 0,
+    "last_daily": 0,
+    "protection_until": 0
+  },
+  "8327856122": {
+    "name": "\u3164\u3164\u3164\u3164\u3164\u3164\u3164\u3164\ud835\ude19\ud835\ude12\ud835\ude16>",
+    "money": 0,
+    "status": "dead",
+    "kills": 0,
+    "last_daily": 0,
+    "protection_until": 0,
+    "dead": true,
+    "dead_until": 1772365301.606747
+  },
+  "6212406274": {
+    "name": "\ud80c\udda9\ud835\udde7 \ud835\udddb \ud835\uddd8 \ud83e\udebd\ud835\uddda \ud835\udde5 \ud835\uddd8 \ud835\uddd4 \ud835\udde7",
+    "money": 0,
+    "status": "dead",
+    "kills": 0,
+    "last_daily": 0,
+    "protection_until": 0,
+    "dead": true,
+    "dead_until": 1772365619.3664577
+  },
+  "8289163899": {
+    "name": "\ud835\uddd7\ud835\uddee\ud835\uddff\ud835\uddf8 \ud835\udddb\ud835\uddf2\ud835\uddff\ud835\uddfc\ud835\uddef\ud835\uddff\ud835\uddf6\ud835\uddfb\ud835\uddf2 \u232f\u300e \ud835\udc02\ud835\udc19\ud835\udc0d \u300f\u269a",
+    "money": 1000,
+    "status": "dead",
+    "kills": 0,
+    "last_daily": 0,
+    "protection_until": 0
+  },
+  "8706947091": {
+    "name": "As\u1d1b\u0280\u1d0f\u0274\u1d00\u1d1c\u1d1b \u30c4",
+    "money": 0,
+    "status": "alive",
+    "kills": 0,
+    "last_daily": 0,
+    "protection_until": 0,
+    "dead": true,
+    "dead_until": 1772364973.3244996
+  },
+  "8573309431": {
+    "name": "\u300e\ud835\udd72\ud835\udd94\ud835\udd89\u300f \u300e\ud835\udd7a\ud835\udd8b\u300f \u300e\ud835\udd7e\ud835\udd8d\ud835\udd86\ud835\udd89\ud835\udd94\ud835\udd9c\ud835\udd98\u300f",
+    "money": 127144,
+    "status": "alive",
+    "kills": 0,
+    "last_daily": 0,
+    "protection_until": 1772539689.171528,
+    "dead": true,
+    "dead_until": 1772366818.7591772
+  },
+  "8712764327": {
+    "name": "HW",
+    "money": 1100,
+    "status": "alive",
+    "kills": 0,
+    "last_daily": 0,
+    "protection_until": 0,
+    "dead": true,
+    "dead_until": 1772373002.448963
+  },
+  "8165245118": {
+    "name": "\u4e97 \ud835\udc12\ud835\udc14\ud835\udc0d\ud835\udc06\ud835\udc09\ud835\udc08\ud835\udc0d\ud835\udc16\ud835\udc0e\ud835\udc0e - \u2770 \ud835\udeab\ud835\udc06\ud835\udebb \u2771\u2122",
+    "money": 1993,
+    "status": "alive",
+    "kills": 3,
+    "last_daily": 0,
+    "protection_until": 1772367096.2061126
+  },
+  "8024136203": {
+    "name": "Harshu",
+    "money": 0,
+    "status": "alive",
+    "kills": 0,
+    "last_daily": 0,
+    "protection_until": 0
+  },
+  "2034054424": {
+    "name": "Investigator",
+    "money": 100,
+    "status": "alive",
+    "kills": 0,
+    "last_daily": 0,
+    "protection_until": 0
+  },
+  "8102918997": {
+    "name": "\u0f12\u1b44\u1d18\u0280\uaadd\u0274\uaadd\ud835\ude37 \u0fd0\u2770 \ud835\udeab\ud835\udc06\ud835\udebb \u2771\u2122",
+    "money": -233,
+    "status": "alive",
+    "kills": 3,
+    "last_daily": 0,
+    "protection_until": 0,
+    "dead": false,
+    "dead_until": 0,
+    "xp": 0,
+    "level": 1,
+    "inventory": {},
+    "claimed_levels": []
+  },
+  "8225092237": {
+    "name": "\u300e\ud835\udd72\ud835\udd94\ud835\udd89\u300f \u300e\ud835\udd7a\ud835\udd8b\u300f \u300e\ud835\udd6f\ud835\udd8a\ud835\udd98\ud835\udd99\ud835\udd97\ud835\udd9a\ud835\udd88\ud835\udd99\ud835\udd8e\ud835\udd94\ud835\udd93\u300f",
+    "money": 2000,
+    "status": "alive",
+    "kills": 0,
+    "last_daily": 0,
+    "protection_until": 0
+  },
+  "8650404021": {
+    "name": "\ud83e\uddf8",
+    "money": 3582,
+    "status": "alive",
+    "kills": 2,
+    "last_daily": 0,
+    "protection_until": 1772373186.368433
+  },
+  "8334231455": {
+    "name": "Yuvii",
+    "money": 330,
+    "status": "alive",
+    "kills": 0,
+    "last_daily": 0,
+    "protection_until": 0,
+    "dead": true,
+    "dead_until": 1772372946.7527795
+  },
+  "8295791692": {
+    "name": "> \ud835\udc0a\u0280\u026a\ua731\u029c\u0274\u1d00 \ud835\udc0e\u1d29 !! \ud83c\udde8\ud83c\udde6",
+    "money": 1396,
+    "kills": 1,
+    "dead": false,
+    "dead_until": 0,
+    "protection_until": 0,
+    "last_daily": 0,
+    "inventory": {}
+  },
+  "5448111016": {
+    "name": "Obito !",
+    "money": 1000,
+    "kills": 0,
+    "dead": true,
+    "dead_until": 1772629263.8319278,
+    "protection_until": 0,
+    "last_daily": 0,
+    "inventory": {}
+  },
+  "8203466847": {
+    "name": "E\u0337\u0337R\u0337\u0337R\u0337\u0337O\u0337\u0337R\u0337 \u03374\u0337\u03370\u0337\u03374\u0337 \u0337N\u0337\u0337O\u0337\u0337T\u0337 \u0337F\u0337\u0337O\u0337\u0337U\u0337\u0337N\u0337\u0337D\u0337",
+    "money": 5000,
+    "kills": 0,
+    "dead": true,
+    "dead_until": 1772714788.1482089,
+    "protection_until": 1772887635.1994245,
+    "last_daily": 1775375663.9924219,
+    "inventory": {}
+  },
+  "8600225050": {
+    "name": "Ash",
+    "money": 0,
+    "kills": 0,
+    "dead": false,
+    "dead_until": 0,
+    "protection_until": 0,
+    "last_daily": 0,
+    "inventory": {}
+  },
+  "7549010765": {
+    "name": "(a+b) (a-b)",
+    "money": 1474,
+    "kills": 1,
+    "dead": true,
+    "dead_until": 1772772884.4361327,
+    "protection_until": 0,
+    "last_daily": 0,
+    "inventory": {}
+  },
+  "8248441592": {
+    "name": "\ud808\uddec\ud808\udc3c\ud808\ude26\ud808\udc3c\ud808\uddf2",
+    "money": 1000,
+    "kills": 0,
+    "dead": true,
+    "dead_until": 1772690732.4570315,
+    "protection_until": 0,
+    "last_daily": 0,
+    "inventory": {}
+  },
+  "7215847990": {
+    "name": "\u30c4 \u13d9 \u13ac \u13df \u039d \u13aa",
+    "money": 0,
+    "kills": 1,
+    "dead": true,
+    "dead_until": 1772776912.1852129,
+    "protection_until": 0,
+    "last_daily": 0,
+    "inventory": {}
+  },
+  "8022357033": {
+    "name": "> \ud835\udc00\u0299\u029c\u1d00\u028f \ud835\udc0e\u1d29 !! \ud83c\udde8\ud83c\udde6",
+    "money": 22207,
+    "inventory": {},
+    "kills": 3,
+    "protection_until": 1772945716.890269,
+    "dead": true,
+    "dead_until": 1773732965.6687772
+  },
+  "6430271851": {
+    "name": "Siku rock",
+    "money": 1000,
+    "inventory": {}
+  },
+  "8331750516": {
+    "name": "swapnarani",
+    "money": 0,
+    "inventory": {
+      "teddy": 1
     }
-}
+  },
+  "6122855454": {
+    "name": "Dora:The explorer",
+    "money": 0,
+    "inventory": {},
+    "kills": 1,
+    "protection_until": 1772797707.4809752,
+    "dead": true,
+    "dead_until": 1773721869.2548234
+  },
+  "6547849934": {
+    "name": "\uff2f\ud835\udc2d\ud835\udd52\u13e6\u03c5",
+    "money": 2319,
+    "inventory": {},
+    "dead": false,
+    "dead_until": 0,
+    "last_daily": 1772686560.9107587,
+    "kills": 2
+  },
+  "8498813416": {
+    "name": "\ud83c\udf37\ud835\ude4f\ud835\ude3c\ud835\ude49\ud835\ude45\ud835\ude44\ud835\ude4d\ud835\ude4a~\ud83e\udd8b",
+    "money": 0,
+    "inventory": {},
+    "dead": true,
+    "dead_until": 1772773049.235446
+  },
+  "8395788083": {
+    "name": "\ud834\udd1f\u0362\ud83e\udd8b\u20df\u00a0\uff25\uff36\uff29\uff2c\u0fd0",
+    "money": 2731,
+    "inventory": {},
+    "kills": 1
+  },
+  "2041628861": {
+    "name": "naitik",
+    "money": 999,
+    "inventory": {},
+    "dead": false,
+    "dead_until": 0
+  },
+  "8752529434": {
+    "name": "Ankit",
+    "money": 1000,
+    "inventory": {}
+  },
+  "7920779216": {
+    "name": "Died",
+    "money": 1891,
+    "inventory": {},
+    "kills": 1,
+    "dead": true,
+    "dead_until": 1772940783.89319
+  },
+  "7879080264": {
+    "name": "\u22c6\u2736 \ud835\udc9e\ud835\udcb6\ud835\udcc9 \u2736\u22c6",
+    "money": 1000,
+    "inventory": {},
+    "dead": true,
+    "dead_until": 1772940781.1142988
+  },
+  "8327837344": {
+    "name": "\ud835\udd66 \ud835\udd64 \ud835\udd63 \ud835\udd59 \ud835\udd65",
+    "money": 900,
+    "inventory": {}
+  },
+  "8094820891": {
+    "name": "\ud835\udd6d\ud835\udd8a\ud835\udd93\ud835\udd86\ud835\udd92 \ud835\udd87\ud835\udd86\ud835\udd89\ud835\udd98\ud835\udd8d\ud835\udd86\ud835\udd8d",
+    "money": 1000,
+    "inventory": {},
+    "dead": true,
+    "dead_until": 1773664891.1479821
+  },
+  "7573764181": {
+    "name": "Jee",
+    "money": 1000,
+    "inventory": {},
+    "dead": false,
+    "dead_until": 0,
+    "xp": 0,
+    "level": 1,
+    "claimed_levels": []
+  },
+  "6165455982": {
+    "name": "A",
+    "money": 1299,
+    "inventory": {}
+  },
+  "6190073273": {
+    "name": "VAN5h_Verma",
+    "money": 1023,
+    "inventory": {},
+    "dead": false,
+    "dead_until": 0,
+    "protection_until": 1774011784.4587135,
+    "kills": 4,
+    "xp": 0,
+    "level": 1,
+    "level_reward_claimed": [],
+    "claimed_levels": []
+  },
+  "8182926587": {
+    "name": "Saee",
+    "money": 0,
+    "inventory": {},
+    "dead": true,
+    "dead_until": 1773721841.0837991
+  },
+  "8407421523": {
+    "name": "Shlok",
+    "money": 0,
+    "inventory": {}
+  },
+  "8208913942": {
+    "name": "\ud835\udd4b\ud835\udd59\ud835\udd60\ud835\udd5e\ud835\udd52\ud835\udd64_\ud835\udd4a\ud835\udd59\ud835\udd56\ud835\udd5d\ud835\udd53\ud835\udd6a",
+    "money": 600,
+    "inventory": {},
+    "protection_until": 1773808198.1743085
+  },
+  "7984772078": {
+    "name": "Priyanshu",
+    "money": 0,
+    "inventory": {},
+    "protection_until": 1773808200.46947,
+    "xp": 0,
+    "level": 1
+  },
+  "8108191460": {
+    "name": "\ufe3b\u2566\u2564\u2500 aspirant \u2500\u2564\u2566\ufe3b",
+    "money": 0,
+    "inventory": {},
+    "kills": 4,
+    "dead": true,
+    "dead_until": 1773724903.8055255
+  },
+  "6471723989": {
+    "name": "Lakshu",
+    "money": 0,
+    "inventory": {},
+    "dead": true,
+    "dead_until": 1773721812.1346805
+  },
+  "8685238928": {
+    "name": "\u1559\u2060P(\u2060\u00a0\u2060'-'\u00a0\u2060R\u2022\u2060\u00a0\u203f\u00a0\u2060\u2022E '-' )\u2060M\u1557",
+    "money": 0,
+    "inventory": {}
+  },
+  "7685062693": {
+    "name": "\u2727 \ud835\udd6f\ud835\udd8e\ud835\udd9b\ud835\udd8e\ud835\udd93\ud835\udd8a \ud835\udd83 \u2727",
+    "money": 0,
+    "inventory": {},
+    "dead": false,
+    "dead_until": 0,
+    "xp": 0,
+    "level": 1
+  },
+  "7852943139": {
+    "name": "Ayanokoji \ud83d\udc51",
+    "money": 13395,
+    "inventory": {},
+    "kills": 2
+  },
+  "8431880624": {
+    "name": "Maddy",
+    "money": 1253,
+    "inventory": {},
+    "kills": 1
+  },
+  "5997029151": {
+    "name": "Naveen",
+    "money": 1000,
+    "inventory": {}
+  },
+  "5894537826": {
+    "name": "P.M",
+    "money": 1000,
+    "inventory": {}
+  },
+  "8626646795": {
+    "name": "..",
+    "money": 12700,
+    "inventory": {},
+    "protection_until": 1773769443.2159564,
+    "kills": 1
+  },
+  "8295852945": {
+    "name": "\u2e3a\u200c\u20db\uabed\ud80c\udda9\u20dd\u20e1\u20e8\ud83c\uddf0\uabed\u1ab3\u274d\ud835\ude7c\u135d\u059f\u135d\u059f\ud835\ude70\ud835\udc0b\uabed\ud834\uddbc\uabed\ud834\udd04\u2665\ufe0f\uabed\uabed\ud834\udd04 \u0f0e\uabed\uabed\uabed\u0fd0",
+    "money": 1000,
+    "inventory": {},
+    "dead": true,
+    "dead_until": 1773798210.5219514
+  },
+  "8285750764": {
+    "name": "\u23b3\ud835\udcca\ud835\udcec\ud835\udcc0\ud835\udd02",
+    "money": 0,
+    "inventory": {}
+  },
+  "7715839684": {
+    "name": "\ud83e\udd70\ud83e\udd70\u2763\ufe0f\u2763\ufe0f",
+    "money": 0,
+    "inventory": {}
+  },
+  "6913097944": {
+    "name": "\ud83c\udf41\u2022\u2090\ud835\udc58\ud835\udd52\ud835\udc58\u015f\u04ba\ud835\udd52\u02b8\u2022\ud83c\udf41",
+    "money": 0,
+    "inventory": {}
+  },
+  "6645888136": {
+    "name": "",
+    "money": 1300,
+    "inventory": {}
+  },
+  "6720218541": {
+    "name": "\ud835\udc00\ud835\udc2c\ud835\udc21\ud835\udc2e\ud83c\udf77",
+    "money": 1000,
+    "inventory": {}
+  },
+  "8160457097": {
+    "name": "Vaishnavi \ud83e\udd79\ud83d\ude11",
+    "money": 1300,
+    "inventory": {},
+    "dead": true,
+    "dead_until": 1773839064.028769
+  },
+  "7775845954": {
+    "name": "chin tapak dam dam",
+    "money": 1000,
+    "inventory": {},
+    "dead": true,
+    "dead_until": 1773915824.0034077
+  },
+  "7050296804": {
+    "name": "RISHU EDITZ",
+    "money": 1300,
+    "inventory": {}
+  },
+  "6337864795": {
+    "name": "Sameer",
+    "money": 200,
+    "inventory": {}
+  },
+  "7908843965": {
+    "name": "\ud835\udc12 \u026a \u0299 \u0299 \u019b \u196b\u1a63 \ud83d\udc8e",
+    "money": 1000,
+    "inventory": {}
+  },
+  "8424811007": {
+    "name": "",
+    "money": 1000,
+    "inventory": {}
+  },
+  "groups": [
+    -1003350626282,
+    -1003057793953,
+    -1003722167182,
+    -5266510077,
+    -1003685419261,
+    -1003620411356,
+    -1003670438942,
+    -5080292499
+  ],
+  "8797200153": {
+    "name": "Marinette\u2728",
+    "money": 1300,
+    "kills": 0,
+    "dead": false,
+    "dead_until": 0,
+    "protection_until": 0,
+    "last_daily": 0,
+    "xp": 0,
+    "level": 1,
+    "inventory": {}
+  },
+  "8712195227": {
+    "name": "..",
+    "money": 1000,
+    "kills": 0,
+    "dead": false,
+    "dead_until": 0,
+    "protection_until": 0,
+    "last_daily": 0,
+    "xp": 0,
+    "level": 1,
+    "inventory": {},
+    "claimed_levels": []
+  },
+  "8333712001": {
+    "name": "Harshu",
+    "money": 1000,
+    "kills": 0,
+    "dead": true,
+    "dead_until": 1774278882.9933863,
+    "protection_until": 0,
+    "last_daily": 0
+  },
+  "8598966988": {
+    "name": "\ud835\udc7a\ud835\udc82\ud835\udc8c\u059f\u135d\ud835\udc96\ud835\udc93\ud835\udc82 \u250b \u196b\u1b61",
+    "money": 1000,
+    "kills": 0
+  },
+  "users": [
+    6175559434,
+    8022357033,
+    7515831215,
+    6913218444
+  ],
+  "7703955049": {
+    "name": "\ua66e\u0e4a \u300e\ud83c\uddfb\u20ea\u0362\ud835\udddc\ud835\udde3\u300f\ud835\ude81\ud835\ude78\ud835\ude83\ud835\ude85\ud835\ude78\u0fd0\u0f3b\u2620\ufe0f\u2728\ud83e\udd85",
+    "money": 2100,
+    "kills": 0,
+    "xp": 50,
+    "level": 1,
+    "inventory": {
+      "teddy": 1
+    },
+    "dead": false,
+    "dead_until": 0,
+    "protection_until": 0,
+    "last_daily": 1774351799.5212042
+  },
+  "shop_items": {
+    "rose": {
+      "emoji": "\ud83c\udf39",
+      "price": 500,
+      "gifs": []
+    },
+    "chocolate": {
+      "emoji": "\ud83c\udf6b",
+      "price": 800,
+      "gifs": []
+    },
+    "ring": {
+      "emoji": "\ud83d\udc8d",
+      "price": 2000,
+      "gifs": []
+    },
+    "teddy": {
+      "emoji": "\ud83e\uddf8",
+      "price": 1500,
+      "gifs": [
+        "CgACAgQAAxkBAAII0Gmm7IHBZss5ViZ3YGUxiQla3GN7AALYBwACHL3sUduANrsU4MPNOgQ"
+      ]
+    },
+    "pizza": {
+      "emoji": "\ud83c\udf55",
+      "price": 600,
+      "gifs": []
+    },
+    "surprise_box": {
+      "emoji": "\ud83c\udf81",
+      "price": 2500,
+      "gifs": []
+    },
+    "puppy": {
+      "emoji": "\ud83d\udc36",
+      "price": 3000,
+      "gifs": []
+    },
+    "cake": {
+      "emoji": "\ud83c\udf82",
+      "price": 1000,
+      "gifs": []
+    },
+    "love_letter": {
+      "emoji": "\ud83d\udc8c",
+      "price": 400,
+      "gifs": []
+    },
+    "cat": {
+      "emoji": "\ud83d\udc31",
+      "price": 2500,
+      "gifs": []
+    }
+  },
+  "7603304249": {
+    "name": "\u23af\u1ab5\u23af\uabed\u033d\ud834\uddbc\uabed\ud835\udec5\uabed\u02eb\u1c3b\uabed\u0361\u059f\u135d\u0280\uabed\ud835\udec6\uabed\ud835\udec6\ud834\udc58\u20db\u20ea\uabed\ud80c\uddaa\uabed\ud834\uddac\u23af\uabed\u23af",
+    "money": 1000,
+    "kills": 0,
+    "xp": 0,
+    "level": 1,
+    "inventory": {},
+    "dead": false,
+    "dead_until": 0,
+    "protection_until": 0,
+    "last_daily": 0
+  },
+  "8515172224": {
+    "name": "NeoDarkOsint",
+    "money": 1000,
+    "kills": 0,
+    "xp": 0,
+    "level": 1,
+    "inventory": {},
+    "dead": false,
+    "dead_until": 0,
+    "protection_until": 0,
+    "last_daily": 0
+  },
+  "6724260328": {
+    "name": "\u1d3e\u1d43\u207f\u1d48\u1d43\ud83d\udc97\ud83c\udf3b",
+    "money": 1000,
+    "kills": 0,
+    "xp": 0,
+    "level": 1,
+    "inventory": {},
+    "dead": false,
+    "dead_until": 0,
+    "protection_until": 0,
+    "last_daily": 0
+  },
+  "7851307404": {
+    "name": "\ud835\ude49\ud835\ude5a\ud835\ude6f\ud835\ude6a\ud835\ude60\ud835\ude64 \ud83c\udf80",
+    "money": 1000,
+    "kills": 0,
+    "xp": 0,
+    "level": 1,
+    "inventory": {},
+    "dead": false,
+    "dead_until": 0,
+    "protection_until": 0,
+    "last_daily": 0                                                                                                     },
+  "8348511677": {
+    "name": "Sushant",
+    "money": 1000,
+    "kills": 0,
+    "xp": 0,
+    "level": 1,
+    "inventory": {},
+    "dead": false,
+    "dead_until": 0,
+    "protection_until": 0,
+    "last_daily": 0
+  },
+  "6913218444": {
+    "name": ".nazik",
+    "money": 13035,
+    "kills": 1,
+    "xp": 0,
+    "level": 1,
+    "inventory": {},
+    "dead": false,
+    "dead_until": 0,
+    "protection_until": 0,
+    "last_daily": 1775377568.9536543
+  },
+  "7601074589": {
+    "name": "Hihihihi",
+    "money": 1000,
+    "kills": 0,
+    "inventory": {},
+    "dead": false,
+    "dead_until": 0,
+    "protection_until": 0,
+    "last_daily": 0
+  },
+  "7515831215": {
+    "name": "\u0418\u043b\u044c\u044f",
+    "money": 1000,
+    "kills": 0
+  },
+  "8596930369": {
+    "name": "HACKERS CLAN Info bot",
+    "money": 1000,
+    "kills": 0,
+    "inventory": {},
+    "dead": false,
+    "dead_until": 0,
+    "protection_until": 0,
+    "last_daily": 0
+  },
+  "claimed_groups": {
+    "-1003528274904": {
+      "claimed_by": 6175559434,
+      "reward": 20000
+    }
+  }
