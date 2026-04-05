@@ -1,10 +1,17 @@
+
 # =================== IMPORTS ===================
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, CallbackQueryHandler
 
 import json
-import operator
+import os
+import time
+import random
+import time
+import random
 
+kill_cooldown = {}
+rob_cooldown = {}
 
 from telegram.ext import (
     ApplicationBuilder,
@@ -22,44 +29,34 @@ BOT_USERNAME= "@im_suvabot"
 DATABASE_FILE = "database.json"
 
 # =================== HELPERS ===================
-def load_data():
-    try:
-        with open(DATABASE_FILE, "r") as f:
-            return json.load(f)
-    except:
-        return {}
-
-def save_data(data):
-    with open(DATABASE_FILE, "w") as f:
-        json.dump(data, f, indent=4)
-
 # =================== START COMMAND ===================
 # =================== START COMMAND ===================
+# =================== START COMMAND ===================
+
 # =================== START COMMAND ===================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
-    data = load_data()
+    load_data()
     uid = str(user.id)
 
     if uid not in data:
         data[uid] = {"name": user.first_name, "money": 1000, "kills": 0}
-        save_data(data)
+        save_data()
 
     welcome_text = (
-        f"👋 Hello {user.first_name}!\n\n"
-        "Mera naam Niki hai 💝\n"
-        "Welcome to Niki's world 🌸\n"
-        "I'm not just a bot… I'm your virtual girl 😌✨\n"
-        "I'll laugh with you, fight with you, protect you,\n"
-        "and maybe even get a little jealous sometimes 💘\n"
-        "Earn money 💰\n"
-        "Fight enemies ⚔\n"
-        "Rob people 😈\n"
-        "Protect yourself 🛡\n"
-        "Climb the leaderboard 🏆\n"
-        "But remember… Niki is always watching you 👀🔥\n"
-        "Apna maza lo aur commands use karo 😎\n"
-        "Mera owner ye hai: @YT_BISHALL"
+        f"👋 Hᴇʟʟᴏ {user.first_name}!\n\n"
+        "💝 Mʏ Nᴀᴍᴇ Iꜱ Nɪᴋɪ\n"
+        "Wᴇʟᴄᴏᴍᴇ Tᴏ Nɪᴋɪ'ꜱ Wᴏʀʟᴅ 🌸\n\n"
+        "I'ᴍ Nᴏᴛ Jᴜꜱᴛ A Bᴏᴛ…\n"
+        "I'ᴍ Yᴏᴜʀ Vɪʀᴛᴜᴀʟ Gɪʀʟ 😌✨\n\n"
+        "💰 Eᴀʀɴ Mᴏɴᴇʏ\n"
+        "⚔ Fɪɢʜᴛ Eɴᴇᴍɪᴇꜱ\n"
+        "😈 Rᴏʙ Pᴇᴏᴘʟᴇ\n"
+        "🛡 Pʀᴏᴛᴇᴄᴛ Yᴏᴜʀꜱᴇʟꜰ\n"
+        "🏆 Cʟɪᴍʙ Tʜᴇ Lᴇᴀᴅᴇʀʙᴏᴀʀᴅ\n\n"
+        "❗ Nɪᴋɪ Iꜱ Aʟᴡᴀʏꜱ Wᴀᴛᴄʜɪɴɢ Yᴏᴜ 👀🔥\n\n"
+        "⚡ Tʏᴘᴇ /economy Tᴏ Sᴇᴇ Aʟʟ Cᴏᴍᴍᴀɴᴅꜱ\n\n"
+        "👑 Oᴡɴᴇʀ: @YT_BISHALL"
     )
 
     # ✅ Inline buttons
@@ -69,9 +66,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             InlineKeyboardButton("🎮 Game", callback_data="game_info")
         ],
         [
-            InlineKeyboardButton("➕ Add me to your group 💌", url="https://t.me/im_suvabot")
+            InlineKeyboardButton("➕ Add me to your group 💌", url="https://t.me/im_suvabot?startgroup=true")
         ]
     ]
+
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await update.message.reply_text(
@@ -105,22 +103,23 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     elif query.data == "economy":
         economy_text = (
-            "💰 NIKI ECONOMY SYSTEM OVERVIEW\n\n"
-            "💬 How it works:\n"
-            "Use Niki’s economy system to earn, manage, gift, and protect virtual money in your group.\n\n"
-            "• /daily — Claim $1500 daily reward\n"
-            "• /claim — Unlock group rewards based on members\n"
-            "• /bal — Check your or another user’s balance\n"
-            "• /rob (reply) <amount> — Rob money from a user\n"
-            "• /kill (reply) — Kill a user & earn $200–$600\n"
-            "• /revive — Revive yourself or a replied user\n"
-            "• /protect 1d|2d|3d — Buy protection from robbery\n"
-            "• /give (reply) <amount> — Transfer money\n"
-            "• /shop — Shop for gift items\n"
-            "• /items (reply) — View your/others inventory\n"
-            "• /toprich — Top 10 richest users\n"
-            "• /topkill — Top 10 killers\n"
-            "• /check  — Check protection status (Costs $2000)\n"
+                       "💰 *Nɪᴋɪ Eᴄᴏɴᴏᴍʏ Sʏꜱᴛᴇᴍ Oᴠᴇʀᴠɪᴇᴡ*\n\n"
+                      "💬 *Hᴏᴡ Iᴛ Wᴏʀᴋꜱ:*\n"
+                      "Uꜱᴇ Nɪᴋɪ’ꜱ Eᴄᴏɴᴏᴍʏ Sʏꜱᴛᴇᴍ Tᴏ Eᴀʀɴ, Mᴀɴᴀɢᴇ, Gɪꜰᴛ, Aɴᴅ Pʀᴏᴛᴇᴄᴛ Vɪʀᴛᴜᴀʟ Mᴏɴᴇʏ Iɴ Yᴏᴜʀ Gʀᴏᴜᴘ.\n\n"
+                      "• /daily — Cʟᴀɪᴍ $1500 Dᴀɪʟʏ Rᴇᴡᴀʀᴅ\n"
+                      "• /claim — Uɴʟᴏᴄᴋ Gʀᴏᴜᴘ Rᴇᴡᴀʀᴅꜱ Bᴀꜱᴇᴅ Oɴ Mᴇᴍʙᴇʀꜱ\n"
+                      "• /bal — Cʜᴇᴄᴋ Yᴏᴜʀ Oʀ Aɴᴏᴛʜᴇʀ Uꜱᴇʀ’ꜱ Bᴀʟᴀɴᴄᴇ\n"
+                      "• /rob (ʀᴇᴘʟʏ) <ᴀᴍᴏᴜɴᴛ> — Rᴏʙ Mᴏɴᴇʏ Fʀᴏᴍ A Uꜱᴇʀ\n"
+                      "• /kill (ʀᴇᴘʟʏ) — Kɪʟʟ A Uꜱᴇʀ & Eᴀʀɴ $200–$600\n"
+                      "• /revive — Rᴇᴠɪᴠᴇ Yᴏᴜʀꜱᴇʟꜰ Oʀ A Rᴇᴘʟɪᴇᴅ Uꜱᴇʀ\n"
+                      "• /protect 1ᴅ|2ᴅ|3ᴅ — Bᴜʏ Pʀᴏᴛᴇᴄᴛɪᴏɴ Fʀᴏᴍ Rᴏʙʙᴇʀʏ\n"
+                      "• /give (ʀᴇᴘʟʏ) <ᴀᴍᴏᴜɴᴛ> — Tʀᴀɴꜱꜰᴇʀ Mᴏɴᴇʏ\n"
+                      "• /shop — Sʜᴏᴘ Fᴏʀ Gɪꜰᴛ Iᴛᴇᴍꜱ\n"
+                      "• /items (ʀᴇᴘʟʏ) — Vɪᴇᴡ Yᴏᴜʀ / Oᴛʜᴇʀꜱ Iɴᴠᴇɴᴛᴏʀʏ\n"
+                      "• /toprich — Tᴏᴘ 10 Rɪᴄʜᴇꜱᴛ Uꜱᴇʀꜱ\n"
+                      "• /topkill — Tᴏᴘ 10 Kɪʟʟᴇʀꜱ\n"
+                      "• /check — Cʜᴇᴄᴋ Pʀᴏᴛᴇᴄᴛɪᴏɴ Sᴛᴀᴛᴜꜱ (Cᴏꜱᴛꜱ $2000)\n"
+
         )
         keyboard = [
             [InlineKeyboardButton("🔙 Back", callback_data="back_to_start")]
@@ -141,68 +140,86 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
 
+
     elif query.data == "back_to_start":
-        # ✅ Back button sends user to original start message
-        welcome_text = (
-            f"👋 Hello {query.from_user.first_name}!\n\n"
-            "Mera naam Niki hai 💝\n"
-            "Welcome to Niki's world 🌸\n"
-            "I'm not just a bot… I'm your virtual girl 😌✨\n"
-            "I'll laugh with you, fight with you, protect you,\n"
-            "and maybe even get a little jealous sometimes 💘\n"
-            "Earn money 💰\n"
-            "Fight enemies ⚔\n"
-            "Rob people 😈\n"
-            "Protect yourself 🛡\n"
-            "Climb the leaderboard 🏆\n"
-            "But remember… Niki is always watching you 👀🔥\n"
-            "Apna maza lo aur commands use karo 😎\n"
-            "Mera owner ye hai: @YT_BISHALL"
-        )
-        keyboard = [
-            [
-                InlineKeyboardButton("👑 Owner", url="https://t.me/YT_BISHALL"),
-                InlineKeyboardButton("🎮 Game", callback_data="game_info")
-            ],
-            [
-                InlineKeyboardButton("➕ Add me to your group 💌", url="https://t.me/im_suvabot?startgroup=true")
-            ]
+        user = query.from_user  # ✅ ye add karo
+
+    welcome_text = (
+        f"👋 Hᴇʟʟᴏ {user.first_name}!\n\n"
+        "💝 Mʏ Nᴀᴍᴇ Iꜱ Nɪᴋɪ\n"
+        "Wᴇʟᴄᴏᴍᴇ Tᴏ Nɪᴋɪ'ꜱ Wᴏʀʟᴅ 🌸\n\n"
+        "I'ᴍ Nᴏᴛ Jᴜꜱᴛ A Bᴏᴛ…\n"
+        "I'ᴍ Yᴏᴜʀ Vɪʀᴛᴜᴀʟ Gɪʀʟ 😌✨\n\n"
+        "💰 Eᴀʀɴ Mᴏɴᴇʏ\n"
+        "⚔ Fɪɢʜᴛ Eɴᴇᴍɪᴇꜱ\n"
+        "😈 Rᴏʙ Pᴇᴏᴘʟᴇ\n"
+        "🛡 Pʀᴏᴛᴇᴄᴛ Yᴏᴜʀꜱᴇʟꜰ\n"
+        "🏆 Cʟɪᴍʙ Tʜᴇ Lᴇᴀᴅᴇʀʙᴏᴀʀᴅ\n\n"
+        "❗ Nɪᴋɪ Iꜱ Aʟᴡᴀʏꜱ Wᴀᴛᴄʜɪɴɢ Yᴏᴜ 👀🔥\n\n"
+        "⚡ Tʏᴘᴇ /economy Tᴏ Sᴇᴇ Aʟʟ Cᴏᴍᴍᴀɴᴅꜱ\n\n"
+        "👑 Oᴡɴᴇʀ: @YT_BISHALL"
+    )
+
+    keyboard = [
+        [
+            InlineKeyboardButton("👑 Owner", url="https://t.me/YT_BISHALL"),
+            InlineKeyboardButton("🎮 Game", callback_data="game_info")
+        ],
+        [
+            InlineKeyboardButton("➕ Add me to your group 💌", url="https://t.me/im_suvabot?startgroup=true")
         ]
-        await query.edit_message_text(
-            welcome_text,
-            reply_markup=InlineKeyboardMarkup(keyboard)
-        )
+    ]
+
+    await query.edit_message_text(
+        welcome_text,
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
 # =================== TOP RICHEST COMMAND ===================
 async def toprich(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    data = load_data()
-    sorted_rich = sorted(data.items(), key=lambda x: x[1].get("money", 0), reverse=True)[:10]
+    load_data()
+
+    # ✅ sirf real users filter karo
+    users_only = {
+        uid: u for uid, u in data.items()
+        if isinstance(u, dict) and "money" in u
+    }
+
+    if not users_only:
+        await update.message.reply_text("❌ No data found!")
+        return
+
+    sorted_rich = sorted(users_only.items(), key=lambda x: x[1]["money"], reverse=True)[:10]
+
     msg = "🏆 Top 10 Richest Users:\n\n"
     for idx, (uid, user) in enumerate(sorted_rich, 1):
-        msg += f"{idx}. {user.get('name','Unknown')} — ${user.get('money',0)}\n"
-    await update.message.reply_text(msg)
+        msg += f"{idx}. {user.get('name','Unknown')} — ₹{user.get('money',0)}\n"
 
+    await update.message.reply_text(msg)
 # =================== TOP KILLERS COMMAND ===================
 async def topkill(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    data = load_data()
-    sorted_kills = sorted(data.items(), key=lambda x: x[1].get("kills", 0), reverse=True)[:10]
+    load_data()
+
+    users_only = {
+        uid: u for uid, u in data.items()
+        if isinstance(u, dict) and "kills" in u
+    }
+
+    if not users_only:
+        await update.message.reply_text("❌ No data found!")
+        return
+
+    sorted_kills = sorted(users_only.items(), key=lambda x: x[1]["kills"], reverse=True)[:10]
+
     msg = "⚔ Top 10 Killers:\n\n"
     for idx, (uid, user) in enumerate(sorted_kills, 1):
         msg += f"{idx}. {user.get('name','Unknown')} — {user.get('kills',0)} kills\n"
+
     await update.message.reply_text(msg)
 
 
-
-
-
-
 # ===================== PART 2 FULL ECONOMY BOT =====================
-import json, time, random, os
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
-
 # ------------------ GLOBAL DATA ------------------
 DATA_FILE = "database.json"
-data = {}
 jail_users = {}
 rob_cooldown = {}
 kill_cooldown = {}
@@ -213,82 +230,112 @@ OWNER_ID = 6175559434  # Apna Telegram ID
 # ------------------ LOAD / SAVE ------------------
 def load_data():
     global data
-    if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, "r") as f:
-            data = json.load(f)
-    else:
+    try:
+        if os.path.exists(DATA_FILE):
+            with open(DATA_FILE, "r") as f:
+                content = f.read().strip()
+
+                # ❌ extra JSON hatao (sirf pehla object lo)
+                if content.count("{") > 1:
+                    content = content[:content.rfind("}")+1]
+
+                data = json.loads(content)
+        else:
+            data = {}
+    except:
         data = {}
-    return data
 
-def save_data(d=None):
+def save_data():
     global data
-    if d is None:
-        d = data
     with open(DATA_FILE, "w") as f:
-        json.dump(d, f, indent=2)
-
+        json.dump(data, f, indent=2)
 # ------------------ USER HELP ------------------
+# ------------------ USER HELP ------------------
+
 def get_user(user_id, name):
+    global data
     uid = str(user_id)
+
     if uid not in data:
         data[uid] = {
             "name": name,
             "money": 1000,
             "kills": 0,
+            "inventory": {},
             "dead": False,
             "dead_until": 0,
             "protection_until": 0,
             "last_daily": 0
         }
-    return data[uid]
+        save_data()
 
-def is_protected(user_data):
-    return user_data.get("protection_until", 0) > time.time()
+    return data[uid]   # ✅ correct
 
+    return user
 def format_time(sec):
     sec = int(sec)
     h = sec // 3600
     m = (sec % 3600) // 60
     s = sec % 60
     return f"{h}h {m}m {s}s"
-
+# ------------------ PROTECTION CHECK ------------------
+def is_protected(user_data):
+    now = time.time()
+    return user_data.get("protection_until", 0) > now
+# ------------------ DAILY COMMAND ------------------
 # ------------------ DAILY COMMAND ------------------
 async def daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
     load_data()
     user = get_user(update.effective_user.id, update.effective_user.first_name)
     now = time.time()
+
     if now - user.get("last_daily", 0) < 86400:
         remain = 86400 - (now - user.get("last_daily", 0))
         await update.message.reply_text(f"⏳ Daily already claimed. Try after {format_time(remain)}")
         return
+
+    # 💰 MONEY
     user["money"] += 1500
+
+    # 🔥 XP ADD
+
     user["last_daily"] = now
     save_data()
-    await update.message.reply_text("💰 Daily reward: ₹1500\nNext daily available after 24h")
+
+    # 📩 FINAL MESSAGE
+    await update.message.reply_text(
+        f"💰 Daily reward: ₹1500\n"
+        f"Next daily available after 24h"
+    )
 
 # ------------------ BALANCE COMMAND ------------------
+
+# ------------------ BALANCE COMMAND ------------------
+
+# ------------------ BALANCE COMMAND ------------------
+
 async def balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
     load_data()
+
     if update.message.reply_to_message:
-        if update.message.reply_to_message.forward_from:
-            target_user = update.message.reply_to_message.forward_from
-        else:
-            target_user = update.message.reply_to_message.from_user
+        target_user = update.message.reply_to_message.from_user
     else:
         target_user = update.effective_user
-    user_data = get_user(target_user.id, target_user.first_name)
-    
-    # Restore after 24h if robbed
-    if str(target_user.id) in temp_rob:
-        info = temp_rob[str(target_user.id)]
-        if time.time() >= info["restore_time"]:
-            user_data["money"] = info["original_balance"]
-            del temp_rob[str(target_user.id)]
-            save_data()
 
-    sorted_users = sorted(data.items(), key=lambda x: x[1].get("money",0), reverse=True)
+    user_data = get_user(target_user.id, target_user.first_name)
+
+    # ✅ sirf real users filter karo
+    users_only = {
+        uid: u for uid, u in data.items()
+        if isinstance(u, dict) and "money" in u
+    }
+
+    sorted_users = sorted(users_only.items(), key=lambda x: x[1]["money"], reverse=True)
+
     rank = next((i+1 for i,(uid,u) in enumerate(sorted_users) if uid==str(target_user.id)), "N/A")
+
     status_text = "Alive ❤️" if not user_data.get("dead", False) else "Dead ☠️"
+
     await update.message.reply_text(
         f"┏━━━ 💼 PROFILE ━━━\n"
         f"👤 Name   : {target_user.first_name}\n"
@@ -298,7 +345,6 @@ async def balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"⚔ Kills  : {user_data.get('kills',0)}\n"
         f"┗━━━━━━━━━━━━━━━"
     )
-
 # ------------------ PROTECT COMMAND ------------------
 async def protect(update: Update, context: ContextTypes.DEFAULT_TYPE):
     load_data()
@@ -331,141 +377,233 @@ async def protect(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"🛡 Protection enabled for {choice}")
 
 # ------------------ CLAIM GROUP ------------------
-claimed_groups = set()
+# ------------------ CLAIM GROUP ------------------
 async def claim(update: Update, context: ContextTypes.DEFAULT_TYPE):
     load_data()
+
     chat = update.effective_chat
     user = update.effective_user
-    if chat.type not in ["group","supergroup"]:
+
+    # Only group
+    if chat.type not in ["group", "supergroup"]:
         await update.message.reply_text("❌ Works in groups only")
         return
-    if chat.id in claimed_groups:
+
+    # 🔥 Ensure claimed_groups exists in data
+    if "claimed_groups" not in data:
+        data["claimed_groups"] = {}
+
+    # Already claimed check (PERMANENT)
+    if str(chat.id) in data["claimed_groups"]:
         await update.message.reply_text("⚠️ This group has already claimed rewards")
         return
+
+    # Member count
     try:
         members_count = await chat.get_member_count()
     except:
         members_count = 0
-    reward = 10000
-    if members_count >= 500: reward=20000
-    if members_count >= 1000: reward=30000
+
+    # ❌ Minimum 100 members required
+    if members_count < 100:
+        await update.message.reply_text("❌ 100 members hone chahiye claim ke liye!")
+        return
+
+    # 💰 Reward logic
+    if members_count >= 1000:
+        reward = 30000
+    elif members_count >= 500:
+        reward = 20000
+    else:
+        reward = 10000
+
+    # User data
     user_data = get_user(user.id, user.first_name)
     user_data["money"] += reward
+
+    # 🔥 SAVE CLAIM PERMANENTLY (GROUP LOCK)
+    data["claimed_groups"][str(chat.id)] = {
+        "claimed_by": user.id,
+        "reward": reward
+    }
+
     save_data()
-    claimed_groups.add(chat.id)
-    await update.message.reply_text(f"💰 {user.first_name} claimed {reward} coins for this group!")
+
+    await update.message.reply_text(
+        f"💰 {user.first_name} claimed {reward} coins for this group!\n"
+        f"⚠️ Ab is group me dubara kabhi claim nahi hoga!"
+    )
+
+
+
+
+#===================register=====================
 
 
 # ------------------ ROB COMMAND ------------------
 async def rob(update: Update, context: ContextTypes.DEFAULT_TYPE):
     load_data()
     now = time.time()
+
     if not update.message.reply_to_message:
         await update.message.reply_text("⚠️ Reply karke rob karo!")
         return
+
     robber = update.message.from_user
     victim = update.message.reply_to_message.from_user
+
     robber_data = get_user(robber.id, robber.first_name)
     victim_data = get_user(victim.id, victim.first_name)
+
     robber_id = str(robber.id)
     victim_id = str(victim.id)
-    
+
     # ⛓ Jail check
-    if robber_id in jail_users and now<jail_users[robber_id]:
-        fine = 500
-        robber_data["money"] -= fine
-        jail_users[robber_id] += 120
-        save_data()
-        await update.message.reply_text(
-            f"🚨 Jail me hoke chori karega?! 😡⛓\n"
-            f"💸 ₹{fine} aur kat gaya tumhara!\n"
-            f"⛓ Tum aur 2 minute jail me rahoge!\n"
-            f"👑 Vishal Boss ko inform kar diya police ne! 🚔\n"
-            f"💰 ₹1000 dekar bail le sakte ho.\n(Command: /bail)\n\n"
-            f"🕒 Ab tum {int(jail_users[robber_id]-now)//60} minute {int(jail_users[robber_id]-now)%60} second baad bahar aaoge 😈"
-        )
-        return
-    
-    # Self/Owner/Bot checks
-    if robber.id==victim.id:
+    if robber_id in jail_users:
+        if now < jail_users[robber_id]:
+            fine = 500
+            robber_data["money"] -= fine
+            jail_users[robber_id] += 120
+            save_data()
+
+            await update.message.reply_text(
+                f"🚨 Jail me hoke chori karega?! 😡⛓\n"
+                f"💸 ₹{fine} aur kat gaya tumhara!\n"
+                f"⛓ Tum aur 2 minute jail me rahoge!\n"
+                f"👑 Vishal Boss ko inform kar diya police ne! 🚔\n"
+                f"💰 ₹1000 dekar bail le sakte ho.\n(Command: /bail)\n\n"
+                f"🕒 Ab tum {int(jail_users[robber_id]-now)//60} minute {int(jail_users[robber_id]-now)%60} second baad bahar aaoge 😈"
+            )
+            return
+        else:
+            del jail_users[robber_id]
+
+    # Self rob
+    if robber.id == victim.id:
         await update.message.reply_text("🤡 Khud ko rob nahi kar sakte!")
         return
-    if victim.id==OWNER_ID:
+
+    # Owner protection
+    if victim.id == OWNER_ID:
         await update.message.reply_text("☠️ Owner ko rob nahi kar sakte.. ☠️")
         return
+
+    # Bot check
     if victim.is_bot:
         await update.message.reply_text("🤖 Bot ko rob nahi kar sakte!")
         return
+
+    # Protection check
     if is_protected(victim_data):
         await update.message.reply_text(f"🛡 {victim.first_name} abhi protected hai!")
         return
-    if robber_id in rob_cooldown and now<rob_cooldown[robber_id]:
+
+    # Cooldown check
+    if robber_id in rob_cooldown and now < rob_cooldown[robber_id]:
         await update.message.reply_text("⏱ Rob cooldown active! Wait 6 sec")
         return
-    if victim_data["money"]<=0:
+
+    # Victim money check
+    if victim_data["money"] <= 0:
         await update.message.reply_text("Victim ke paas paisa nahi hai!")
         return
+# Amount check
+# Amount check
     if not context.args:
-        stolen = min(100000, victim_data["money"])
+        await update.message.reply_text(
+            "⚠️ Amount likho!\n\nExample:\n/rob 1000"
+        )
+        return
     else:
         try:
             amount = int(context.args[0])
-            if amount<=0: raise ValueError
+            if amount <= 0:
+                raise ValueError
             stolen = min(amount, victim_data["money"], 100000)
         except:
             await update.message.reply_text("Invalid amount!")
             return
-    if victim.id not in temp_rob:
-        temp_rob[victim.id] = {"original_balance": victim_data["money"], "restore_time": now+86400}
-    # 30% chance police
-    if random.random()<0.3:
-        fine=300
-        robber_data["money"]-=fine
-        victim_data["money"]+=fine
-        jail_users[robber_id]=now+180
-        rob_cooldown[robber_id]=now+6
+
+    # Save original balance for restore
+    if victim_id not in temp_rob:
+        temp_rob[victim_id] = {
+            "original_balance": victim_data["money"],
+            "restore_time": now + 86400
+        }
+
+    # 🚔 30% police chance
+    if random.random() < 0.3:
+        fine = 300
+        robber_data["money"] -= fine
+        victim_data["money"] += fine
+
+        jail_users[robber_id] = now + 180
+        rob_cooldown[robber_id] = now + 6
+
         save_data()
+
         await update.message.reply_text(
             f"🚔 Police ne pakad liya!\n"
             f"💸 ₹{fine} fine!\n"
             f"⛓ 3 min jail\n"
-            f"💰 Robbery fail!\n"
+            f"💰 Robbery fail!"
         )
         return
-    victim_data["money"]-=stolen
-    robber_data["money"]+=stolen
-    rob_cooldown[robber_id]=now+6
+
+    # Successful rob
+    victim_data["money"] -= stolen
+    robber_data["money"] += stolen
+
+    rob_cooldown[robber_id] = now + 6
+
     save_data()
-    await update.message.reply_text(
-        f"👤 {robber.first_name} robbed ₹{stolen} from {victim.first_name}\n"
-        f"💰 {victim.first_name}'s balance: ₹{victim_data['money']}\n"
-        f"💰 {robber.first_name}'s balance: ₹{robber_data['money']}"
-    )
+
+    try:
+        await update.message.reply_text(
+            f"👤 {robber.first_name} robbed ₹{stolen} from {victim.first_name}\n"
+            f"💰 {victim.first_name}'s balance: ₹{victim_data['money']}\n"
+            f"💰 {robber.first_name}'s balance: ₹{robber_data['money']}\n\n"
+        )
+    except Exception as e:
+        print("Send error:", e)
+
 
 # ------------------ KILL COMMAND ------------------
+
+# ------------------ KILL COMMAND ------------------
+# ------------------ KILL COMMAND ------------------
 async def kill(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print("KILL START")
+
     load_data()
+
     if not update.message.reply_to_message:
         await update.message.reply_text("Reply to someone to kill.")
         return
+
     killer = update.effective_user
     victim = update.message.reply_to_message.from_user
     now = time.time()
+
     killer_data = get_user(killer.id, killer.first_name)
     victim_data = get_user(victim.id, victim.first_name)
+
+    # 🔥 SAFETY FIX (IMPORTANT)
+
     # Auto revive
-    if killer_data.get("dead",False):
-        if now>=killer_data.get("dead_until",0):
-            killer_data["dead"]=False
-            killer_data["dead_until"]=0
+    if killer_data.get("dead", False):
+        if now >= killer_data.get("dead_until", 0):
+            killer_data["dead"] = False
+            killer_data["dead_until"] = 0
             save_data()
         else:
             await update.message.reply_text("💀 Tum already dead ho! 24hr baad revive hoga 😢")
             return
-    if victim_data.get("dead",False):
-        if now>=victim_data.get("dead_until",0):
-            victim_data["dead"]=False
-            victim_data["dead_until"]=0
+
+    if victim_data.get("dead", False):
+        if now >= victim_data.get("dead_until", 0):
+            victim_data["dead"] = False
+            victim_data["dead_until"] = 0
             save_data()
         else:
             await update.message.reply_text(
@@ -473,10 +611,12 @@ async def kill(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "Kisi aur ko try karo 😎"
             )
             return
+
     # Bot owner / self / bot checks
-    if victim.id==OWNER_ID:
+    if victim.id == OWNER_ID:
         await update.message.reply_text("☠️ Owner ko kill nahi kar sakte 😎 vo pesa ka malik he ☠️")
         return
+
     if victim.is_bot:
         await update.message.reply_text(
             f"😼 Meri billi mujhe meow?\n"
@@ -485,91 +625,91 @@ async def kill(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"👉 https://t.me/YT_BISHALL\n"
         )
         return
-    if killer.id==victim.id:
+
+    if killer.id == victim.id:
         await update.message.reply_text("🤡 Khud ko kill nahi kar sakte!")
         return
+
     if is_protected(victim_data):
         await update.message.reply_text(f"🛡 {victim.first_name} abhi protected hai!")
         return
-    if killer.id in kill_cooldown and now<kill_cooldown[killer.id]:
+
+    if str(killer.id) in kill_cooldown and now < kill_cooldown[str(killer.id)]:
         await update.message.reply_text("⏳ Wait 6 seconds before killing again!")
         return
-    # Kill victim
-    victim_data["dead"]=True
-    victim_data["dead_until"]=now+86400
-    reward=random.randint(200,600)
-    killer_data["money"]=killer_data.get("money",1000)+reward
-    killer_data["kills"]=killer_data.get("kills",0)+1
-    kill_cooldown[killer.id]=now+6
+
+    # 🔥 KILL LOGIC
+    victim_data["dead"] = True
+    victim_data["dead_until"] = now + 86400
+
+    reward = random.randint(200, 600)
+    killer_data["money"] = killer_data.get("money", 1000) + reward
+    killer_data["kills"] = killer_data.get("kills", 0) + 1
+
+    # cooldown + save
+    kill_cooldown[str(killer.id)] = now + 6
     save_data()
+
+    # ✅ SAME MESSAGE (UNCHANGED)
     await update.message.reply_text(
         f"☠️ {killer.first_name} killed {victim.first_name}!\n"
         f"💰 Earned: ₹{reward}\n"
-        f"⏳ Victim 24hr baad revive hoga!\n"
+        f"⏳ Victim 24hr baad revive hoga!"
     )
 
+    print("KILL END")
+
+
+# ------------------ BAIL COMMAND ------------------
 # ------------------ BAIL COMMAND ------------------
 async def bail(update: Update, context: ContextTypes.DEFAULT_TYPE):
     load_data()
     user = update.effective_user
-    if user.id not in jail_users:
+    user_id = str(user.id)
+    now = time.time()
+
+    # ❌ Not in jail
+    if user_id not in jail_users:
         await update.message.reply_text("😎 Tum jail me nahi ho!")
         return
+
+    # ✅ Auto free if time completed
+    if now >= jail_users[user_id]:
+        del jail_users[user_id]
+        save_data()
+        await update.message.reply_text("😎 Tum already free ho!")
+        return
+
     user_data = get_user(user.id, user.first_name)
-    if user_data["money"]<1000:
+
+    # 💸 Not enough money
+    if user_data["money"] < 1000:
         await update.message.reply_text("₹1000 chahiye bail ke liye!")
         return
-    user_data["money"]-=1000
-    del jail_users[user.id]
+
+    # 💰 Deduct money
+    user_data["money"] -= 1000
+
+    # 🔓 Remove jail
+    del jail_users[user_id]
+
     save_data()
+
     await update.message.reply_text("💸 Bail mil gayi! Ab free ho 😈")
 
 
-
 # ================= SHOP & GIFT COMMANDS (Part 1 JSON style) =================
-import random
-import json
-import os
-from telegram import Update
-from telegram.ext import ContextTypes
 
 # ---------------- DATA STORAGE ----------------
 DATA_FILE = "database.json"
 
-# Load main database
-if os.path.exists(DATA_FILE):
-    with open(DATA_FILE, "r") as f:
-        data = json.load(f)
-else:
-    data = {}
-
-def save_data():
-    global data
-    with open(DATA_FILE, "w") as f:
-        json.dump(data, f, indent=2)
-
-def get_user(user_id, name):
-    uid = str(user_id)
-    if uid not in data:
-        data[uid] = {
-            "name": name,
-            "money": 1000,
-            "kills": 0,
-            "dead": False,
-            "dead_until": 0,
-            "protection_until": 0,
-            "last_daily": 0,
-            "inventory": {}  # store shop items / gifts here
-        }
-        save_data()
-    return data[uid]
 
 # ---------------- SHOP ITEMS ----------------
 shop_items = {
     "rose": {"emoji": "🌹", "price": 500},
     "chocolate": {"emoji": "🍫", "price": 800},
     "ring": {"emoji": "💍", "price": 2000},
-    "teddy": {"emoji": "🧸", "price": 1500},
+    "teddy": {"emoji": "�", "price": 1500},
     "pizza": {"emoji": "🍕", "price": 600},
     "surprise_box": {"emoji": "🎁", "price": 2500},
     "puppy": {"emoji": "🐶", "price": 3000},
@@ -603,70 +743,53 @@ gift_messages = {name: make_messages(name) for name in shop_items}
 
 
 
-import json
-import random
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
-BOT_TOKEN = "8080035914:AAFYogx2dN-cbIPVNQfl9wgFAwpZ7d6Tvm4"
 
 DATA_FILE = "database.json"
 
-# ---------------- LOAD DATA ----------------
-def load_data():
-    try:
-        with open(DATA_FILE, "r") as f:
-            return json.load(f)
-    except:
-        return {}
-
-data = load_data()
-
-# ---------------- SAVE DATA ----------------
-def save_data():
-    with open(DATA_FILE, "w") as f:
-        json.dump(data, f, indent=4)
-
-# ---------------- GET USER ----------------
-def get_user(user_id, first_name):
-    uid = str(user_id)
-
-    if uid not in data:
-        data[uid] = {
-            "name": first_name,
-            "money": 1000,
-            "inventory": {}
-        }
-
-    return data[uid]
-
-
-
-
 # ---------------- ADD GIF ----------------
 async def addgif(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
     if not update.message.reply_to_message:
         await update.message.reply_text("GIF ko reply karo aur /addgif rose likho")
         return
+
     if not update.message.reply_to_message.animation:
         await update.message.reply_text("Ye GIF nahi hai")
         return
+
     if len(context.args) == 0:
         await update.message.reply_text("Example: /addgif rose")
         return
 
     gift_name = context.args[0].lower()
+
     if gift_name not in shop_items:
         await update.message.reply_text("Invalid gift name")
         return
 
     file_id = update.message.reply_to_message.animation.file_id
+
+    # duplicate GIF check
+    if file_id in shop_items[gift_name]["gifs"]:
+        await update.message.reply_text("⚠️ Ye GIF already add hai")
+        return
+
+    # GIF add
     shop_items[gift_name]["gifs"].append(file_id)
+
+    # SAVE DATA
+    load_data()
+    data["shop_items"] = shop_items
     save_data()
 
+    total = len(shop_items[gift_name]["gifs"])
+
     await update.message.reply_text(
-        f"✅ GIF added to {gift_name}\nTotal GIFs: {len(shop_items[gift_name]['gifs'])}"
+        f"✅ GIF added to {gift_name}\nTotal GIFs: {total}"
     )
+
+
 
 
 
@@ -746,23 +869,22 @@ from telegram import Update
 from telegram.ext import ContextTypes
 async def economy(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = (
-        "💰 *NIKI ECONOMY SYSTEM OVERVIEW*\n\n"
-        "💬 *How it works:*\n"
-        "Use Niki’s economy system to earn, manage, gift, and protect virtual money in your group.\n\n"
-        "• /daily — Claim $1500 daily reward\n"
-        "• /claim — Unlock group rewards based on members\n"
-        "• /bal — Check your or another user’s balance\n"
-        "• /rob (reply) <amount> — Rob money from a user\n"
-        "• /kill (reply) — Kill a user & earn $200–$600\n"
-        "• /revive — Revive yourself or a replied user\n"
-        "• /protect 1d|2d|3d — Buy protection from robbery\n"
-        "• /give (reply) <amount> — Transfer money\n"
-        "• /shop — Shop for gift items\n"
-        "• /items (reply) — View your/others inventory\n"
-        "• /toprich — Top 10 richest users\n"
-        "• /topkill — Top 10 killers\n"
-        "• /check  — Check protection status (Costs $2000)\n"
-
+         "💰 *Nɪᴋɪ Eᴄᴏɴᴏᴍʏ Sʏꜱᴛᴇᴍ Oᴠᴇʀᴠɪᴇᴡ*\n\n"
+       "💬 *Hᴏᴡ Iᴛ Wᴏʀᴋꜱ:*\n"
+       "Uꜱᴇ Nɪᴋɪ’ꜱ Eᴄᴏɴᴏᴍʏ Sʏꜱᴛᴇᴍ Tᴏ Eᴀʀɴ, Mᴀɴᴀɢᴇ, Gɪꜰᴛ, Aɴᴅ Pʀᴏᴛᴇᴄᴛ Vɪʀᴛᴜᴀʟ Mᴏɴᴇʏ Iɴ Yᴏᴜʀ Gʀᴏᴜᴘ.\n\n"
+       "• /daily — Cʟᴀɪᴍ $1500 Dᴀɪʟʏ Rᴇᴡᴀʀᴅ\n"
+       "• /claim — Uɴʟᴏᴄᴋ Gʀᴏᴜᴘ Rᴇᴡᴀʀᴅꜱ Bᴀꜱᴇᴅ Oɴ Mᴇᴍʙᴇʀꜱ\n"
+       "• /bal — Cʜᴇᴄᴋ Yᴏᴜʀ Oʀ Aɴᴏᴛʜᴇʀ Uꜱᴇʀ’ꜱ Bᴀʟᴀɴᴄᴇ\n"
+       "• /rob (ʀᴇᴘʟʏ) <ᴀᴍᴏᴜɴᴛ> — Rᴏʙ Mᴏɴᴇʏ Fʀᴏᴍ A Uꜱᴇʀ\n"
+       "• /kill (ʀᴇᴘʟʏ) — Kɪʟʟ A Uꜱᴇʀ & Eᴀʀɴ $200–$600\n"
+       "• /revive — Rᴇᴠɪᴠᴇ Yᴏᴜʀꜱᴇʟꜰ Oʀ A Rᴇᴘʟɪᴇᴅ Uꜱᴇʀ\n"
+       "• /protect 1ᴅ|2ᴅ|3ᴅ — Bᴜʏ Pʀᴏᴛᴇᴄᴛɪᴏɴ Fʀᴏᴍ Rᴏʙʙᴇʀʏ\n"
+       "• /give (ʀᴇᴘʟʏ) <ᴀᴍᴏᴜɴᴛ> — Tʀᴀɴꜱꜰᴇʀ Mᴏɴᴇʏ\n"
+       "• /shop — Sʜᴏᴘ Fᴏʀ Gɪꜰᴛ Iᴛᴇᴍꜱ\n"
+       "• /items (ʀᴇᴘʟʏ) — Vɪᴇᴡ Yᴏᴜʀ / Oᴛʜᴇʀꜱ Iɴᴠᴇɴᴛᴏʀʏ\n"
+       "• /toprich — Tᴏᴘ 10 Rɪᴄʜᴇꜱᴛ Uꜱᴇʀꜱ\n"
+       "• /topkill — Tᴏᴘ 10 Kɪʟʟᴇʀꜱ\n"
+       "• /check — Cʜᴇᴄᴋ Pʀᴏᴛᴇᴄᴛɪᴏɴ Sᴛᴀᴛᴜꜱ (Cᴏꜱᴛꜱ $2000)\n"
 
     )
 
@@ -770,100 +892,140 @@ async def economy(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(text, parse_mode="Markdown")
 
 # =================== REVIVE COMMAND ===================
+# =================== REVIVE COMMAND ===================
+
+# =================== REVIVE COMMAND ===================
 import time
 from telegram import Update
 from telegram.ext import ContextTypes
 
 async def revive(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    from random import choice
-
     reviver = update.effective_user
-    data = load_data()
+    load_data()
     reviver_data = get_user(reviver.id, reviver.first_name)
-
-    # Reply user
-    if update.message.reply_to_message:
-        target_user = update.message.reply_to_message.from_user
-        target_data = get_user(target_user.id, target_user.first_name)
-    else:
-        await update.message.reply_text("Reply karo jisko revive karna hai /revive command se 😅")
-        return
 
     now = time.time()
 
-    # ---------------- Case 1: Reviver is dead
-    if reviver_data.get("dead", False):
-        await update.message.reply_text("🤣 Arey rukja rukja beta tu abhi dead hai, tu khud ko revive mt kar sakta!")
-        return
+    # ---------------- SELF REVIVE (NO REPLY)
+    if not update.message.reply_to_message:
+        # Agar khud dead hai
+        if reviver_data.get("dead", False):
+            if reviver_data.get("money", 0) < 500:
+                await update.message.reply_text("😢 500₹ chahiye khudko revive karne ke liye!")
+                return
 
-    # ---------------- Case 2: Target is alive
-    if not target_data.get("dead", False):
-        # Track how many times reviver tried reviving alive target
-        if "revive_attempts" not in reviver_data:
-            reviver_data["revive_attempts"] = {}
-        attempts = reviver_data["revive_attempts"].get(str(target_user.id), 0)
-        reviver_data["revive_attempts"][str(target_user.id)] = attempts + 1
-
-        if attempts == 0:
-            await update.message.reply_text(
-                f"Arey rukja rukja beta {target_user.first_name} abhi jinda he 😅 abhi revive mt karo!"
-            )
-        elif attempts >= 1:
-            # Deduct 500₹ from reviver
-            reviver_data["money"] = reviver_data.get("money", 0) - 500
+            reviver_data["money"] -= 500
+            reviver_data["dead"] = False
+            reviver_data["dead_until"] = 0
             save_data()
 
-            # DM message to reviver
-            try:
-                await context.bot.send_message(
-                    chat_id=reviver.id,
-                    text="Apka bank account se 500 pesa kt ho chuka he... app glti kiye hamara bat nehi sune krupaya app hamar bat ko dhyaan me leke kam kare 🤣🤣"
-                )
-            except:
-                pass  # if DM fails
+            await update.message.reply_text(
+                f"😎 {reviver.first_name} khud revive ho gaya!\n💰 500₹ cut gaya!"
+            )
+            return
+
+        # Agar alive hoke khudko revive try kare
+        if "self_revive_warn" not in reviver_data:
+            reviver_data["self_revive_warn"] = 0
+
+        reviver_data["self_revive_warn"] += 1
+
+        if reviver_data["self_revive_warn"] == 1:
+            await update.message.reply_text(
+                "😂 Tu alive hai bhai! Revive mat kar!"
+            )
+        elif reviver_data["self_revive_warn"] == 2:
+            await update.message.reply_text(
+                "⚠️ Last warning! Tu alive hai 😡 Revive mat kar warna paisa katega!"
+            )
+        else:
+            reviver_data["money"] -= 500
+
+            # 🔥 RESET AFTER PENALTY
+            reviver_data["self_revive_warn"] = 0
 
             await update.message.reply_text(
-                f"Yar tujhe bolatha mene 🤣 tu or ek bar revive mt kr ab tera 500 balance ktchuka he msg dekhlo dm me 🤣 aur balance check krlo"
+                "💸 Bola tha na! 500₹ cut gaya 😈"
             )
+
         save_data()
         return
 
-    # ---------------- Case 3: Target is dead, proceed revive
+    # ---------------- REPLY USER CASE
+    target_user = update.message.reply_to_message.from_user
+    target_data = get_user(target_user.id, target_user.first_name)
+
+    # ---------------- Reviver dead (cannot revive others)
+    if reviver_data.get("dead", False):
+        await update.message.reply_text(
+            "🤣 Tu khud dead hai! Pehle khud revive ho ja!"
+        )
+        return
+
+    # ---------------- Target alive
+    if not target_data.get("dead", False):
+        if "revive_attempts" not in reviver_data:
+            reviver_data["revive_attempts"] = {}
+
+        attempts = reviver_data["revive_attempts"].get(str(target_user.id), 0)
+        attempts += 1
+        reviver_data["revive_attempts"][str(target_user.id)] = attempts
+
+        if attempts == 1:
+            await update.message.reply_text(
+                f"😂 {target_user.first_name} already alive hai! Isko revive mat de!"
+            )
+        elif attempts == 2:
+            await update.message.reply_text(
+                f"⚠️ Last warning! Ye user alive hai 😡 Dobara try kiya toh paisa katega!"
+            )
+        else:
+            reviver_data["money"] -= 500
+
+            # 🔥 RESET AFTER PENALTY
+            reviver_data["revive_attempts"][str(target_user.id)] = 0
+
+            await update.message.reply_text(
+                f"💸 Samjha nahi kya? 500₹ cut gaya 😈"
+            )
+
+        save_data()
+        return
+
+    # ---------------- Target dead (NORMAL REVIVE)
     if target_data.get("dead", False):
-        # Deduct 500₹ from reviver
         if reviver_data.get("money", 0) < 500:
-            await update.message.reply_text("😢 Paisa kam hai, 500₹ chahiye revive ke liye!")
+            await update.message.reply_text("😢 500₹ chahiye revive ke liye!")
             return
+
         reviver_data["money"] -= 500
         target_data["dead"] = False
         target_data["dead_until"] = 0
+
         save_data()
 
         await update.message.reply_text(
-            f"{reviver.first_name} ne {target_user.first_name} ko revive kiya! 🥰\n"
-            f"Tujhe jinda kiya he ab friend ban ke sbka badla le jao ❤️😁\n"
-            f"Protect lena mat bhulna!"
+            f"{reviver.first_name} ne {target_user.first_name} ko revive kiya! 💖\n"
+            f"Ab tu jinda hai 😎 Badla le jao!\nProtect lena mat bhulna!"
         )
 
-        # DM message to revived user
+        # DM target
         try:
             await context.bot.send_message(
                 chat_id=target_user.id,
-                text=f"{reviver.first_name} ne tujhe revive diya ab tu jinda ho gaya 😎💖\nProtect lena mat bhulna!"
+                text=f"{reviver.first_name} ne tujhe revive kiya 😎💖\nProtect lena mat bhulna!"
             )
         except:
             pass
 
-        # Optional: DM reviver to confirm 500₹ deducted
+        # DM reviver
         try:
             await context.bot.send_message(
                 chat_id=reviver.id,
-                text="✅ 500₹ deduct hua revive ke liye. Balance check karlo!"
+                text="✅ 500₹ deduct hua revive ke liye!"
             )
         except:
             pass
-
-
 # =================== HELP / ECONOMY COMMAND ===================
 from telegram import Update
 from telegram.ext import ContextTypes
@@ -912,7 +1074,7 @@ async def show_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Check if target is owner
     if target_user.id == OWNER_ID:
         await update.message.reply_text(
-            f"🤫 Abey yar tu mera owner ka id dekhna chahega 🤔 nehi ye thik bat ni 😎\n"
+            f"� Abey yar tu mera owner ka id dekhna chahega 🤔 nehi ye thik bat ni 😎\n"
             f"📝 Owner ka id secret hai, mt dekh 👉 @{OWNER_USERNAME}"
         )
         return
@@ -1016,16 +1178,7 @@ async def check(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 
-from telegram import Update
-from telegram.ext import (
-    ApplicationBuilder,
-    CommandHandler,
-    MessageHandler,
-    ContextTypes,
-    filters,
-)
 
-BOT_TOKEN = "8080035914:AAFYogx2dN-cbIPVNQfl9wgFAwpZ7d6Tvm4"
 
 pending_users = {}  # user_id : sticker_file_id
 
@@ -1077,8 +1230,6 @@ async def pack_name_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ---------------- Main ----------------
 
-    app.add_handler(CommandHandler("own", own))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, pack_name_handler))
 
 
 # ---------------- ITEM COMMAND ----------------
@@ -1110,95 +1261,10 @@ async def items(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # ---------------- BROADCAST ON START ----------------
-import json
-from telegram import Update
-from telegram.ext import (
-    ApplicationBuilder,
-    MessageHandler,
-    ContextTypes,
-    filters,
-)
 
-BOT_TOKEN = "8080035914:AAFYogx2dN-cbIPVNQfl9wgFAwpZ7d6Tvm4"
-CHAT_FILE = "chats.json"
 
-# ---------------- LOAD CHATS ----------------
-def load_chats():
-    try:
-        with open(CHAT_FILE, "r") as f:
-            return json.load(f)
-    except:
-        return []
 
-# ---------------- SAVE CHAT ----------------
-def save_chat(chat_id):
-    chats = load_chats()
-    if str(chat_id) not in chats:
-        chats.append(str(chat_id))
-        with open(CHAT_FILE, "w") as f:
-            json.dump(chats, f)
-
-# ---------------- TRACK ALL CHATS ----------------
-async def track_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    chat_id = update.effective_chat.id
-    save_chat(chat_id)
-
-# ---------------- BROADCAST ON START ----------------
-async def broadcast_start(context: ContextTypes.DEFAULT_TYPE):
-    chats = load_chats()
-
-    message = (
-        "Bot started\n"
-        "Ab khelo maja lo or han ab top me jyada coin nehi he so jldi jldi top chale jao mere friends🙄🫢🫢"
-    )
-
-    for chat_id in chats:
-        try:
-            await context.bot.send_message(chat_id=int(chat_id), text=message)
-        except:
-            pass
-
-#------------------GIVE-------------------------
-async def give(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    if not update.message.reply_to_message:
-        await update.message.reply_text("⚠️ Reply to a user to give money.")
-        return
-
-    if len(context.args) == 0:
-        await update.message.reply_text("❌ Usage: /give amount")
-        return
-
-    amount = int(context.args[0])
-
-    sender_id = str(update.message.from_user.id)
-    receiver_id = str(update.message.reply_to_message.from_user.id)
-
-    if sender_id == receiver_id:
-        await update.message.reply_text("❌ You cannot give money to yourself.")
-        return
-
-    data = load_data()
-
-    if sender_id not in data:
-        data[sender_id] = {"money": 0}
-
-    if receiver_id not in data:
-        data[receiver_id] = {"money": 0}
-
-    if data[sender_id]["money"] < amount:
-        await update.message.reply_text("❌ You don't have enough money.")
-        return
-
-    data[sender_id]["money"] -= amount
-    data[receiver_id]["money"] += amount
-
-    save_data(data)
-
-    await update.message.reply_text(
-        f"💸 {update.message.from_user.first_name} gave ${amount} to {update.message.reply_to_message.from_user.first_name}"
-    )
-
+# ------------------ GIVE COMMAND ------------------
 
 
 #-------------------AUTO REPLY----------------------
@@ -1225,11 +1291,13 @@ async def auto_niki_reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ------------------ GIVE COMMAND ------------------
 
+# ------------------ GIVE COMMAND ------------------
+
 async def give(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     message = update.message
     giver = message.from_user
-    data = load_data()
+    load_data()
 
     # Reply check
     if not message.reply_to_message:
@@ -1246,15 +1314,13 @@ async def give(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await message.reply_text("🤡 Khud ko paisa nahi de sakte!")
         return
 
-    # amount read
-    text = message.text.split()
-
-    if len(text) < 2:
+    # ✅ FIXED AMOUNT READ (IMPORTANT)
+    if not context.args:
         await message.reply_text("❌ Amount likho. Example: /give 500")
         return
 
     try:
-        amount = int(text[1])
+        amount = int(context.args[0])
     except:
         await message.reply_text("❌ Invalid amount! Use numbers only.")
         return
@@ -1263,8 +1329,8 @@ async def give(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await message.reply_text("💸 Amount must be greater than 0!")
         return
 
-    giver_data = get_user(giver.id, giver.first_name, data)
-    receiver_data = get_user(receiver.id, receiver.first_name, data)
+    giver_data = get_user(giver.id, giver.first_name)
+    receiver_data = get_user(receiver.id, receiver.first_name)
 
     # tax
     tax = int(amount * 0.10)
@@ -1280,7 +1346,7 @@ async def give(update: Update, context: ContextTypes.DEFAULT_TYPE):
     giver_data["money"] -= total
     receiver_data["money"] += amount
 
-    save_data(data)
+    save_data()
 
     msg = (
         f"💌 {giver.first_name} ne {receiver.first_name} ke liye paisa bheja ❤️\n\n"
@@ -1297,39 +1363,371 @@ async def give(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except:
         pass
 
+#====================file_id==========≠===============
+async def sticker_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.message.sticker:
+        file_id = update.message.sticker.file_id
+        await update.message.reply_text(f"Sticker File ID:\n{file_id}")
+
+
+#---------------------GIFSFILE ID========--------=======
+
+
+
+async def gif_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.message.animation:
+        file_id = update.message.animation.file_id
+        await update.message.reply_text(f"GIF File ID:\n{file_id}")
+
+#==================COIN GAME=====================
+
+# =================== COIN GAME ===================
+
+# =================== COIN GAME ===================
+import random
+import asyncio
+
+user_guess = {}
+
+async def coin(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    print("COIN RUNNING")  # debug
+
+    message = update.message
+    user = message.from_user
+    load_data()
+
+    # ================= RULES =================
+    if not context.args:
+        await message.reply_text(
+            "🔥 COIN GAME\n\n"
+            "➡️ /coin head\n"
+            "➡️ /coin tail\n\n"
+            "Phir reply karke likho ➜ /coin 100"
+        )
+        return
+
+    arg = context.args[0].lower()
+
+    # ================= GUESS =================
+    if arg in ["head", "tail"]:
+
+        user_guess[user.id] = arg
+
+        await message.reply_text(
+            f"🎯 Tumne {arg.upper()} choose kiya\n\n"
+            "💰 Ab reply karke likho ➜ /coin 100"
+        )
+        return
+
+    # ================= BET =================
+    elif arg.isdigit():
+
+        # MUST reply to bot
+        if not message.reply_to_message or message.reply_to_message.from_user.id != context.bot.id:
+            await message.reply_text("❌ Bot ke message ko reply karke bet lagao!")
+            return
+
+        if user.id not in user_guess:
+            await message.reply_text("❌ Pehle /coin head ya tail likho.")
+            return
+
+        guess = user_guess[user.id]
+        amount = int(arg)
+
+        if amount < 100:
+            await message.reply_text("❌ Minimum bet 100 hai.")
+            return
+
+        user_data = get_user(user.id, user.first_name)
+
+        if user_data["money"] < amount:
+            await message.reply_text("💸 Tumhare paas paisa nahi hai.")
+            return
+
+        # cut bet
+        user_data["money"] -= 100
+        save_data()
+
+        await message.reply_text(f"🎮 {user.first_name} game start!\n🍀 Best of luck!")
+
+        # animation
+        flip = await message.reply_text("� Flipping...")
+        await asyncio.sleep(1)
+        await flip.edit_text("� Flipping... ⏳")
+        await asyncio.sleep(1)
+        await flip.edit_text("� Flipping... 🔄")
+        await asyncio.sleep(1)
+
+        # result
+        result = random.choice(["head", "tail"])
+        await flip.edit_text(f"� RESULT ➜ {result.upper()}")
+
+        # win / loss
+        if guess == result:
+            win = random.randint(100, 1000)
+            user_data["money"] += win
+            save_data()
+
+            await message.reply_text(f"🎉 WIN! ₹{win} mila 😎")
+        else:
+            await message.reply_text("💔 LOSS! ₹100 gaya 😢")
+
+        await message.reply_text("🔁 Fir se try karo!")
+
+        # clear guess
+        del user_guess[user.id]
+
+        return
+
+    # ================= INVALID =================
+    else:
+        await message.reply_text("❌ Sirf head, tail ya amount likho.")
+
+# ================= NUMBER GUESS GAME =================
+import random
+
+async def guess(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    message = update.message
+    user = message.from_user
+    load_data()
+
+    if not context.args:
+        await message.reply_text(
+            "🎯 NUMBER GUESS GAME\n\n"
+            "1 se 10 ke beech number guess karo\n\n"
+            "➡️ Example: /guess 5"
+        )
+        return
+
+    try:
+        user_guess = int(context.args[0])
+    except:
+        await message.reply_text("❌ Sahi number likho (1-10)")
+        return
+
+    if user_guess < 1 or user_guess > 10:
+        await message.reply_text("❌ Number 1 se 10 ke beech hona chahiye")
+        return
+
+    bot_number = random.randint(1, 10)
+
+    user_data = get_user(user.id, user.first_name)
+
+    # result
+    if user_guess == bot_number:
+        win = random.randint(100, 500)
+        user_data["money"] += win
+        save_data()
+
+        await message.reply_text(
+            f"🎉 Sahi pakda!\n\n"
+            f"🤖 Bot number: {bot_number}\n"
+            f"💰 Tum jeete ₹{win}"
+        )
+    else:
+        loss = 50
+        user_data["money"] -= loss
+        save_data()
+
+        await message.reply_text(
+            f"💔 Galat guess\n\n"
+            f"🤖 Bot number: {bot_number}\n"
+            f"❌ ₹{loss} loss"
+        )
+
+
+# =================== DICE GAME ===================
+import random
+import asyncio
+
+async def dice(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    message = update.message
+    user = message.from_user
+    load_data()
+
+    # ================= RULES =================
+    if not context.args:
+        await message.reply_text(
+            "🎲 DICE GAME\n\n"
+            "1 se 6 ke beech number choose karo\n\n"
+            "➡️ Example: /dice 4\n\n"
+            "🎯 Sahi guess = paisa jeetoge\n"
+            "❌ Galat = ₹100 loss"
+        )
+        return
+
+    # ================= INPUT =================
+    try:
+        user_guess = int(context.args[0])
+    except:
+        await message.reply_text("❌ Number likho (1-6)")
+        return
+
+    if user_guess < 1 or user_guess > 6:
+        await message.reply_text("❌ Number 1 se 6 ke beech hona chahiye")
+        return
+
+    user_data = get_user(user.id, user.first_name)
+
+    # ================= START =================
+    await message.reply_text(f"🎮 {user.first_name} game start!\n🍀 Best of luck!")
+
+    # ================= ANIMATION =================
+    flip = await message.reply_text("🎲 Rolling...")
+    await asyncio.sleep(1)
+    await flip.edit_text("🎲 Rolling... ⏳")
+    await asyncio.sleep(1)
+    await flip.edit_text("🎲 Rolling... 🔄")
+    await asyncio.sleep(1)
+
+    # ================= RESULT =================
+    bot_roll = random.randint(1, 6)
+
+    await flip.edit_text(f"🎲 RESULT ➜ {bot_roll}")
+
+    # ================= WIN / LOSS =================
+
+    # ================= WIN / LOSS =================
+    try:
+        if user_guess == bot_roll:
+            win = random.randint(200, 800)
+            user_data["money"] += win
+
+            await message.reply_text(
+                f"🎉 WIN! ₹{win} mila 😎\n"
+                f"💰 Balance: ₹{user_data['money']}"
+            )
+
+        else:
+            loss = 100
+            user_data["money"] -= loss
+
+            if user_data["money"] < 0:
+                user_data["money"] = 0
+
+            await message.reply_text(
+                f"💔 LOSS! ₹{loss} gaya 😢\n"
+                f"💰 Balance: ₹{user_data['money']}"
+            )
+
+        save_data()
+
+    except Exception as e:
+        print("ERROR:", e)
+        await message.reply_text("💝BETTER LUCK NEXT TIME PHIRSE TRY KARONE 😁❤️")
+
+# =================== MINES GAME FINAL ===================
+# =================== MINES GAME FINAL (WORKING) ===================
+# =================== MINES GAME FINAL ===================
+
+
+#====================AUTO FORWARD MSG ONLY OWNER======================
+
+# =================== AUTO SAVE USERS & GROUPS ===================
+from telegram import Update
+from telegram.ext import ContextTypes, CommandHandler
+
+# =================== START / TRACK CHAT ===================
+async def track_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global data  # ensure your global data variable is defined
+
+    chat_id = update.effective_chat.id
+    user_id = update.effective_user.id
+    chat_type = update.effective_chat.type
+
+    # === GROUPS SAVE ===
+    if chat_type in ["group", "supergroup"]:
+        if "groups" not in data:
+            data["groups"] = []
+        if chat_id not in data["groups"]:
+            data["groups"].append(chat_id)
+            save_data()  # auto save groups
+            print(f"Group saved: {chat_id}")
+
+    # === USERS SAVE ===
+    if chat_type == "private":
+        if "users" not in data:
+            data["users"] = []
+        if user_id not in data["users"]:
+            data["users"].append(user_id)
+            save_data()  # auto save users
+            print(f"User saved: {user_id}")
+
+# =================== FORWARD COMMAND /fw ===================
+async def forward_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    OWNER_USERNAME = "@YT_BISHALL"  # sirf ye user use kar sake
+
+    # check if command from owner
+    if update.effective_user.username != OWNER_USERNAME.replace("@", ""):
+        return await update.message.reply_text("⚠️ Only owner can use this command!")
+
+    if not context.args:
+        return await update.message.reply_text("⚠️ Usage: /fw Your message here")
+
+    msg_text = " ".join(context.args)
+
+    # combine users + groups
+    recipients = data.get("users", []) + data.get("groups", [])
+    sent_count = 0
+    failed_count = 0
+
+    for chat_id in recipients:
+        try:
+            await context.bot.send_message(chat_id=chat_id, text=msg_text)
+            sent_count += 1
+        except Exception as e:
+            failed_count += 1
+            print(f"Failed to send to {chat_id}: {e}")
+
+    await update.message.reply_text(f"✅ Sent: {sent_count}\n❌ Failed: {failed_count}")
+
+# =================== MAIN FUNCTION ===================
 # =================== MAIN FUNCTION ===================
 if __name__ == "__main__":
+    load_data()   # 🔥 MUST ADD
+
     app = ApplicationBuilder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("toprich", toprich))
     app.add_handler(CommandHandler("topkill", topkill))
-    app.add_handler(CallbackQueryHandler(button_callback))
-    app.add_handler(CommandHandler("bal", balance))        
-    app.add_handler(CommandHandler("daily", daily))         
-    app.add_handler(CommandHandler("claim", claim))         
-    app.add_handler(CommandHandler("protect", protect))    
-    app.add_handler(CommandHandler("rob", rob))     
-    app.add_handler(CommandHandler("kill", kill))          
+    app.add_handler(CommandHandler("bal", balance))
+    app.add_handler(CommandHandler("daily", daily))
+    app.add_handler(CommandHandler("claim", claim))
+    app.add_handler(CommandHandler("protect", protect))
+    app.add_handler(CommandHandler("rob", rob))
+    app.add_handler(CommandHandler("kill", kill))
     app.add_handler(CommandHandler("give", give))
-    app.add_handler(CommandHandler("bail", bail))           
+    app.add_handler(CommandHandler("bail", bail))
     app.add_handler(CommandHandler("shop", shop))
     app.add_handler(CommandHandler("gift", gift))
     app.add_handler(CommandHandler("addgif", addgif))
     app.add_handler(CommandHandler("economy", economy))
     app.add_handler(CommandHandler("revive", revive))
-    app.add_handler(CommandHandler("help", economy_help))
     app.add_handler(CommandHandler("id", show_id))
     app.add_handler(CommandHandler("check", check))
     app.add_handler(CommandHandler("own", own))
     app.add_handler(CommandHandler("items", items))
     app.add_handler(CommandHandler("help", help))
-    app.add_handler(CommandHandler("give", give))
-# AUTO REPLY
-app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), auto_niki_reply))
-   
+    app.add_handler(CommandHandler("guess", guess))
+    app.add_handler(CommandHandler("dice", dice), group=0)
+    app.add_handler(CallbackQueryHandler(button_callback))
+    # =================== HANDLER ===================
+    from telegram.ext import CommandHandler
 
-print("🔥 Niki Bot is running...")
-app.run_polling()
+    fw_handler = CommandHandler("fw", forward_msg)
+    app.add_handler(fw_handler)  # Agar tumhare app ka naam app hai
+    # =================== HANDLERS ADD ===================
+    # Add these to your application
+
+    # ✅ YE ANDAR HONA CHAHIYE
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, track_chat))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, auto_niki_reply))
 
 
+    app.add_handler(MessageHandler(filters.ALL, track_chat))
 
+    print("🔥 Niki Bot is running...")
+    app.run_polling()
