@@ -1641,7 +1641,7 @@ async def track_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if chat_type in ["group", "supergroup"]:
         if "groups" not in data:
             data["groups"] = []
-        if chat_id not in data["groups"]:
+        if chat_id not in data["groups"]:🤔
             data["groups"].append(chat_id)
             save_data()  # auto save groups
             print(f"Group saved: {chat_id}")
@@ -1686,58 +1686,62 @@ async def forward_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # =================== MAIN FUNCTION ===================
 # =================== MAIN FUNCTION ===================
 
-    load_data()   # 🔥 MUST ADD
+    # =================== MAIN FUNCTION ===================
+import asyncio
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("toprich", toprich))
-    app.add_handler(CommandHandler("topkill", topkill))
-    app.add_handler(CommandHandler("bal", balance))
-    app.add_handler(CommandHandler("daily", daily))
-    app.add_handler(CommandHandler("claim", claim))
-    app.add_handler(CommandHandler("protect", protect))
-    app.add_handler(CommandHandler("rob", rob))
-    app.add_handler(CommandHandler("kill", kill))
-    app.add_handler(CommandHandler("give", give))
-    app.add_handler(CommandHandler("bail", bail))
-    app.add_handler(CommandHandler("shop", shop))
-    app.add_handler(CommandHandler("gift", gift))
-    app.add_handler(CommandHandler("addgif", addgif))
-    app.add_handler(CommandHandler("economy", economy))
-    app.add_handler(CommandHandler("revive", revive))
-    app.add_handler(CommandHandler("id", show_id))
-    app.add_handler(CommandHandler("check", check))
-    app.add_handler(CommandHandler("own", own))
-    app.add_handler(CommandHandler("items", items))
-    app.add_handler(CommandHandler("help", help))
-    app.add_handler(CommandHandler("guess", guess))
-    app.add_handler(CommandHandler("dice", dice), group=0)
-    app.add_handler(CallbackQueryHandler(button_callback))
-    # =================== HANDLER ===================
-  
+# 🔥 Load your data (JSON / DB / etc.)
+load_data()   # Make sure this function is defined
 
-    fw_handler = CommandHandler("fw", forward_msg)
-    app.add_handler(fw_handler)  # Agar tumhare app ka naam app hai
-    # =================== HANDLERS ADD ===================
-    # Add these to your application
+# =================== APP SETUP ===================
+app = ApplicationBuilder().token(BOT_TOKEN).build()
 
-    # ✅ YE ANDAR HONA CHAHIYE
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, track_chat))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, auto_niki_reply))
+# ---------------- Command Handlers ----------------
+app.add_handler(CommandHandler("start", start))
+app.add_handler(CommandHandler("toprich", toprich))
+app.add_handler(CommandHandler("topkill", topkill))
+app.add_handler(CommandHandler("bal", balance))
+app.add_handler(CommandHandler("daily", daily))
+app.add_handler(CommandHandler("claim", claim))
+app.add_handler(CommandHandler("protect", protect))
+app.add_handler(CommandHandler("rob", rob))
+app.add_handler(CommandHandler("kill", kill))
+app.add_handler(CommandHandler("give", give))
+app.add_handler(CommandHandler("bail", bail))
+app.add_handler(CommandHandler("shop", shop))
+app.add_handler(CommandHandler("gift", gift))
+app.add_handler(CommandHandler("addgif", addgif))
+app.add_handler(CommandHandler("economy", economy))
+app.add_handler(CommandHandler("revive", revive))
+app.add_handler(CommandHandler("id", show_id))
+app.add_handler(CommandHandler("check", check))
+app.add_handler(CommandHandler("own", own))
+app.add_handler(CommandHandler("items", items))
+app.add_handler(CommandHandler("help", help))
+app.add_handler(CommandHandler("guess", guess))
+app.add_handler(CommandHandler("dice", dice), group=0)
+app.add_handler(CallbackQueryHandler(button_callback))
 
+# Forward handler
+app.add_handler(CommandHandler("fw", forward_msg))
 
-    app.add_handler(MessageHandler(filters.ALL, track_chat))
+# Message Handlers
+app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, track_chat))
+app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, auto_niki_reply))
 
-    print("🔥 Niki Bot is running...")
-    import asyncio
+print("🔥 Niki Bot is ready to run...")
 
+# =================== ASYNC MAIN ===================
 async def main():
+    global app  # ✅ Fixes NameError
     await app.initialize()
     await app.start()
-    await app.run_polling()
-    
+    await app.run_polling()  # ✅ Runs the bot
+    # Optional infinite loop if you want background tasks later
     while True:
         await asyncio.sleep(10)
 
+# =================== ENTRY POINT ===================
 if __name__ == "__main__":
     asyncio.run(main())
