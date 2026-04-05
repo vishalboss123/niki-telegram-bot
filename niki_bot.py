@@ -1,8 +1,7 @@
-
 # =================== IMPORTS ===================
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, CallbackQueryHandler
-
+from telegram.ext import CommandHandler
 import json
 import os
 import time
@@ -1686,7 +1685,7 @@ async def forward_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # =================== MAIN FUNCTION ===================
 # =================== MAIN FUNCTION ===================
-if __name__ == "__main__":
+
     load_data()   # 🔥 MUST ADD
 
     app = ApplicationBuilder().token(BOT_TOKEN).build()
@@ -1715,7 +1714,7 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("dice", dice), group=0)
     app.add_handler(CallbackQueryHandler(button_callback))
     # =================== HANDLER ===================
-    from telegram.ext import CommandHandler
+  
 
     fw_handler = CommandHandler("fw", forward_msg)
     app.add_handler(fw_handler)  # Agar tumhare app ka naam app hai
@@ -1730,4 +1729,15 @@ if __name__ == "__main__":
     app.add_handler(MessageHandler(filters.ALL, track_chat))
 
     print("🔥 Niki Bot is running...")
-    app.run_polling()
+    import asyncio
+
+async def main():
+    await app.initialize()
+    await app.start()
+    await app.run_polling()
+    
+    while True:
+        await asyncio.sleep(10)
+
+if __name__ == "__main__":
+    asyncio.run(main())
