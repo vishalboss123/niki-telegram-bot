@@ -1641,7 +1641,7 @@ async def track_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if chat_type in ["group", "supergroup"]:
         if "groups" not in data:
             data["groups"] = []
-        if chat_id not in data["groups"]:🤔
+        if chat_id not in data["groups"]:
             data["groups"].append(chat_id)
             save_data()  # auto save groups
             print(f"Group saved: {chat_id}")
