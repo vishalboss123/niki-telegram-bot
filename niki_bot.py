@@ -1,17 +1,25 @@
+
+# =================== WEB SERVER (RENDER FIX) ===================
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
+import os
+
+class Handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"Bot is running!")
+
+def run_web():
+    port = int(os.environ.get("PORT", 10000))
+    server = HTTPServer(("0.0.0.0", port), Handler)
+    server.serve_forever()
+
+threading.Thread(target=run_web).start()
+
+
 # =================== IMPORTS ===================
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, CallbackQueryHandler
-from telegram.ext import CommandHandler
-import json
-import os
-import time
-import random
-import time
-import random
-
-kill_cooldown = {}
-rob_cooldown = {}
-
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
@@ -20,6 +28,16 @@ from telegram.ext import (
     ContextTypes,
     filters,
 )
+
+import json
+import time
+import random
+import os
+
+# =================== GLOBALS ===================
+kill_cooldown = {}
+rob_cooldown = {}
+
 
 # =================== BOT TOKEN ===================
 BOT_TOKEN = "8080035914:AAFYogx2dN-cbIPVNQfl9wgFAwpZ7d6Tvm4"
