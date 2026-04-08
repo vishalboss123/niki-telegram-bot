@@ -33,7 +33,12 @@ import json
 import time
 import random
 import os
+import requests
+import base64
 
+GITHUB_TOKEN = "8614646410:AAEDw9e9dJLxeElsixxCfolh2yrn8pBjxD4"
+REPO = "vishalboss123/niki-telegram-bot"
+FILE_PATH = "database.json"
 # =================== GLOBALS ===================
 kill_cooldown = {}
 rob_cooldown = {}
@@ -244,28 +249,41 @@ temp_rob = {}
 
 OWNER_ID = 6175559434  # Apna Telegram ID
 
-# ------------------ LOAD / SAVE ------------------
+# ------------------ LOAD / SAVE -----------------
 def load_data():
     global data
     try:
-        if os.path.exists(DATA_FILE):
-            with open(DATA_FILE, "r") as f:
-                content = f.read().strip()
-
-                # ❌ extra JSON hatao (sirf pehla object lo)
-                if content.count("{") > 1:
-                    content = content[:content.rfind("}")+1]
-
-                data = json.loads(content)
-        else:
-            data = {}
+        url = f"https://api.github.com/repos/{REPO}/contents/{FILE_PATH}"
+        headers = {"Authorization": f"token {GITHUB_TOKEN}"}
+        
+        res = requests.get(url, headers=headers)
+        content = res.json()
+        
+        data = json.loads(base64.b64decode(content['content']))
     except:
         data = {}
 
 def save_data():
     global data
-    with open(DATA_FILE, "w") as f:
-        json.dump(data, f, indent=2)
+    try:
+        url = f"https://api.github.com/repos/{REPO}/contents/{FILE_PATH}"
+        headers = {"Authorization": f"token {GITHUB_TOKEN}"}
+        
+        res = requests.get(url, headers=headers)
+        sha = res.json()['sha']
+        
+        content = base64.b64encode(json.dumps(data).encode()).decode()
+        
+        payload = {
+            "message": "update data",
+            "content": content,
+            "sha": sha
+        }
+        
+        requests.put(url, headers=headers, json=payload)
+    except:
+        pass
+
 # ------------------ USER HELP ------------------
 # ------------------ USER HELP ------------------
 
