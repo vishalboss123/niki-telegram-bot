@@ -39,9 +39,9 @@ kill_cooldown = {}
 rob_cooldown = {}
 
 
-# =================== BOT TOKEN ===================
-BOT_TOKEN= "8080035914:AAEZRDnFPNWs6M6VaTjJrMWxkZ1xOL0nWhk"
-BOT_USERNAME= "@im_suvabot"
+# =================== BOT TOKEN =======================
+BOT_TOKEN= "8614646410:AAEDw9e9dJLxeElsixxCfolh2yrn8pBjxD4"
+BOT_USERNAME= "@iim_Nikibot"
 # =================== DATABASE FILE ===================
 DATABASE_FILE = "database.json"
 
@@ -83,7 +83,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             InlineKeyboardButton("🎮 Game", callback_data="game_info")
         ],
         [
-            InlineKeyboardButton("➕ Add me to your group 💌", url="https://t.me/im_suvabot?startgroup=true")
+            InlineKeyboardButton("➕ Add me to your group 💌", url="https://t.me/iim_Nikibot?startgroup=true")
         ]
     ]
 
