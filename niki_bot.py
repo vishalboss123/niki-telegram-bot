@@ -1706,18 +1706,8 @@ async def forward_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # =================== MAIN FUNCTION ===================
 # =================== MAIN FUNCTION ===================
-import asyncio
-from telegram.ext import (
-    ApplicationBuilder,
-    CommandHandler,
-    CallbackQueryHandler,
-    MessageHandler,
-    ContextTypes,
-    filters,
-)
-
-async def main():
-    load_data()   # 🔥 Load your database
+def main():
+    load_data()
 
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
@@ -1749,24 +1739,14 @@ async def main():
     # Callback
     app.add_handler(CallbackQueryHandler(button_callback))
 
-    # Forward
-    app.add_handler(CommandHandler("fw", forward_msg))
-
     # Message Handlers
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, track_chat))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, auto_niki_reply))
 
-    print("🔥 Niki Bot is running...")
+    print("🔥 Bot started...")
 
-    # ✅ ONLY THIS (IMPORTANT)
-    await app.run_polling()
+    app.run_polling()
 
 
-# =================== ENTRY POINT ===================
 if __name__ == "__main__":
-    import asyncio
-
-    try:
-        asyncio.run(main())
-    except RuntimeError:
-        pass
+    main()
