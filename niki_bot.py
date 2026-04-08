@@ -40,7 +40,7 @@ rob_cooldown = {}
 
 
 # =================== BOT TOKEN ===================
-BOT_TOKEN = "8080035914:AAFYogx2dN-cbIPVNQfl9wgFAwpZ7d6Tvm4"
+BOT_TOKEN= "8080035914:AAEZRDnFPNWs6M6VaTjJrMWxkZ1xOL0nWhk"
 BOT_USERNAME= "@im_suvabot"
 # =================== DATABASE FILE ===================
 DATABASE_FILE = "database.json"
