@@ -249,7 +249,7 @@ temp_rob = {}
 
 OWNER_ID = 6175559434  # Apna Telegram ID
 
-# ------------------ LOAD / SAVE -----------------
+# ------------------ LOAD / SAVE ---------------------------
 def load_data():
     global data
     try:
@@ -260,17 +260,29 @@ def load_data():
         content = res.json()
         
         data = json.loads(base64.b64decode(content['content']))
-    except:
+        print("✅ DATA LOADED:", data)
+    except Exception as e:
+        print("❌ LOAD ERROR:", e)
         data = {}
-
+        
 def save_data():
     global data
     try:
         url = f"https://api.github.com/repos/{REPO}/contents/{FILE_PATH}"
-        headers = {"Authorization": f"token {GITHUB_TOKEN}"}
+        headers = {
+            "Authorization": f"token {GITHUB_TOKEN}",
+            "Accept": "application/vnd.github+json"
+        }
         
+        # latest sha lo
         res = requests.get(url, headers=headers)
-        sha = res.json()['sha']
+        res_json = res.json()
+        
+        if 'sha' not in res_json:
+            print("❌ SHA not found:", res_json)
+            return
+        
+        sha = res_json['sha']
         
         content = base64.b64encode(json.dumps(data).encode()).decode()
         
@@ -280,11 +292,11 @@ def save_data():
             "sha": sha
         }
         
-        requests.put(url, headers=headers, json=payload)
-    except:
-        pass
-
-# ------------------ USER HELP ------------------
+        r = requests.put(url, headers=headers, json=payload)
+        print("✅ SAVE STATUS:", r.status_code, r.text)
+    
+    except Exception as e:
+        print("❌ SAVE ERROR:", e)
 # ------------------ USER HELP ------------------
 
 def get_user(user_id, name):
