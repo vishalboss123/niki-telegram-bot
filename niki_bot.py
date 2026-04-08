@@ -40,7 +40,7 @@ rob_cooldown = {}
 
 
 # =================== BOT TOKEN =======================
-BOT_TOKEN= os.getenv("8614646410:AAEDw9e9dJLxeElsixxCfolh2yrn8pBjxD4")
+BOT_TOKEN= "8614646410:AAEDw9e9dJLxeElsixxCfolh2yrn8pBjxD4"
 BOT_USERNAME= "@iim_Nikibot"
 # =================== DATABASE FILE ===================
 DATABASE_FILE = "database.json"
