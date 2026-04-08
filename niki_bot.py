@@ -1705,60 +1705,62 @@ async def forward_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # =================== MAIN FUNCTION ===================
 
     # =================== MAIN FUNCTION ===================
+# =================== MAIN FUNCTION ===================
 import asyncio
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
+from telegram.ext import (
+    ApplicationBuilder,
+    CommandHandler,
+    CallbackQueryHandler,
+    MessageHandler,
+    ContextTypes,
+    filters,
+)
 
-# 🔥 Load your data (JSON / DB / etc.)
-load_data()   # Make sure this function is defined
-
-# =================== APP SETUP ===================
-app = ApplicationBuilder().token(BOT_TOKEN).build()
-
-# ---------------- Command Handlers ----------------
-app.add_handler(CommandHandler("start", start))
-app.add_handler(CommandHandler("toprich", toprich))
-app.add_handler(CommandHandler("topkill", topkill))
-app.add_handler(CommandHandler("bal", balance))
-app.add_handler(CommandHandler("daily", daily))
-app.add_handler(CommandHandler("claim", claim))
-app.add_handler(CommandHandler("protect", protect))
-app.add_handler(CommandHandler("rob", rob))
-app.add_handler(CommandHandler("kill", kill))
-app.add_handler(CommandHandler("give", give))
-app.add_handler(CommandHandler("bail", bail))
-app.add_handler(CommandHandler("shop", shop))
-app.add_handler(CommandHandler("gift", gift))
-app.add_handler(CommandHandler("addgif", addgif))
-app.add_handler(CommandHandler("economy", economy))
-app.add_handler(CommandHandler("revive", revive))
-app.add_handler(CommandHandler("id", show_id))
-app.add_handler(CommandHandler("check", check))
-app.add_handler(CommandHandler("own", own))
-app.add_handler(CommandHandler("items", items))
-app.add_handler(CommandHandler("help", help))
-app.add_handler(CommandHandler("guess", guess))
-app.add_handler(CommandHandler("dice", dice), group=0)
-app.add_handler(CallbackQueryHandler(button_callback))
-
-# Forward handler
-app.add_handler(CommandHandler("fw", forward_msg))
-
-# Message Handlers
-app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, track_chat))
-app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, auto_niki_reply))
-
-print("🔥 Niki Bot is ready to run...")
-
-# =================== ASYNC MAIN ===================
 async def main():
-    global app  # ✅ Fixes NameError
-    await app.initialize()
-    await app.start()
-    await app.run_polling()  # ✅ Runs the bot
-    # Optional infinite loop if you want background tasks later
-    while True:
-        await asyncio.sleep(10)
+    load_data()   # 🔥 Load your database
+
+    app = ApplicationBuilder().token(BOT_TOKEN).build()
+
+    # ---------------- Command Handlers ----------------
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("toprich", toprich))
+    app.add_handler(CommandHandler("topkill", topkill))
+    app.add_handler(CommandHandler("bal", balance))
+    app.add_handler(CommandHandler("daily", daily))
+    app.add_handler(CommandHandler("claim", claim))
+    app.add_handler(CommandHandler("protect", protect))
+    app.add_handler(CommandHandler("rob", rob))
+    app.add_handler(CommandHandler("kill", kill))
+    app.add_handler(CommandHandler("give", give))
+    app.add_handler(CommandHandler("bail", bail))
+    app.add_handler(CommandHandler("shop", shop))
+    app.add_handler(CommandHandler("gift", gift))
+    app.add_handler(CommandHandler("addgif", addgif))
+    app.add_handler(CommandHandler("economy", economy))
+    app.add_handler(CommandHandler("revive", revive))
+    app.add_handler(CommandHandler("id", show_id))
+    app.add_handler(CommandHandler("check", check))
+    app.add_handler(CommandHandler("own", own))
+    app.add_handler(CommandHandler("items", items))
+    app.add_handler(CommandHandler("help", help))
+    app.add_handler(CommandHandler("guess", guess))
+    app.add_handler(CommandHandler("dice", dice))
+
+    # Callback
+    app.add_handler(CallbackQueryHandler(button_callback))
+
+    # Forward
+    app.add_handler(CommandHandler("fw", forward_msg))
+
+    # Message Handlers
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, track_chat))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, auto_niki_reply))
+
+    print("🔥 Niki Bot is running...")
+
+    # ✅ ONLY THIS (IMPORTANT)
+    await app.run_polling()
+
 
 # =================== ENTRY POINT ===================
 if __name__ == "__main__":
