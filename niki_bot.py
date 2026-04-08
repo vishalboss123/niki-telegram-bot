@@ -33,12 +33,7 @@ import json
 import time
 import random
 import os
-import requests
-import base64
 
-GITHUB_TOKEN = "8614646410:AAEDw9e9dJLxeElsixxCfolh2yrn8pBjxD4"
-REPO = "vishalboss123/niki-telegram-bot"
-FILE_PATH = "database.json"
 # =================== GLOBALS ===================
 kill_cooldown = {}
 rob_cooldown = {}
@@ -248,55 +243,28 @@ kill_cooldown = {}
 temp_rob = {}
 
 OWNER_ID = 6175559434  # Apna Telegram ID
-
-# ------------------ LOAD / SAVE ---------------------------
+#====================load/save===================
 def load_data():
     global data
     try:
-        url = f"https://api.github.com/repos/{REPO}/contents/{FILE_PATH}"
-        headers = {"Authorization": f"token {GITHUB_TOKEN}"}
-        
-        res = requests.get(url, headers=headers)
-        content = res.json()
-        
-        data = json.loads(base64.b64decode(content['content']))
-        print("✅ DATA LOADED:", data)
-    except Exception as e:
-        print("❌ LOAD ERROR:", e)
+        if os.path.exists(DATA_FILE):
+            with open(DATA_FILE, "r") as f:
+                content = f.read().strip()
+
+                # ❌ extra JSON hatao (sirf pehla object lo)
+                if content.count("{") > 1:
+                    content = content[:content.rfind("}")+1]
+
+                data = json.loads(content)
+        else:
+            data = {}
+    except:
         data = {}
-        
+
 def save_data():
     global data
-    try:
-        url = f"https://api.github.com/repos/{REPO}/contents/{FILE_PATH}"
-        headers = {
-            "Authorization": f"token {GITHUB_TOKEN}",
-            "Accept": "application/vnd.github+json"
-        }
-        
-        # latest sha lo
-        res = requests.get(url, headers=headers)
-        res_json = res.json()
-        
-        if 'sha' not in res_json:
-            print("❌ SHA not found:", res_json)
-            return
-        
-        sha = res_json['sha']
-        
-        content = base64.b64encode(json.dumps(data).encode()).decode()
-        
-        payload = {
-            "message": "update data",
-            "content": content,
-            "sha": sha
-        }
-        
-        r = requests.put(url, headers=headers, json=payload)
-        print("✅ SAVE STATUS:", r.status_code, r.text)
-    
-    except Exception as e:
-        print("❌ SAVE ERROR:", e)
+    with open(DATA_FILE, "w") as f:
+        json.dump(data, f, indent=2)
 # ------------------ USER HELP ------------------
 
 def get_user(user_id, name):
