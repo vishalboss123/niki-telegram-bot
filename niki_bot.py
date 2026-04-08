@@ -1764,4 +1764,9 @@ async def main():
 
 # =================== ENTRY POINT ===================
 if __name__ == "__main__":
-    asyncio.run(main())
+    import asyncio
+
+    try:
+        asyncio.run(main())
+    except RuntimeError:
+        pass
