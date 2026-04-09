@@ -1,4 +1,11 @@
+from pymongo import MongoClient
 
+MONGO_URL = "mongodb+srv://vishal:VISHAL123@vishal07.espy0qo.mongodb.net/?appName=Vishal07"
+
+client = MongoClient(MONGO_URL)
+
+db = client["botdb"]       # database name
+backup = db["backup"]      # collection name
 # =================== WEB SERVER (RENDER FIX) ===================
 import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
@@ -244,6 +251,7 @@ temp_rob = {}
 
 OWNER_ID = 6175559434  # Apna Telegram ID
 #====================load/save===================
+
 def load_data():
     global data
     try:
@@ -251,7 +259,6 @@ def load_data():
             with open(DATA_FILE, "r") as f:
                 content = f.read().strip()
 
-                # ❌ extra JSON hatao (sirf pehla object lo)
                 if content.count("{") > 1:
                     content = content[:content.rfind("}")+1]
 
@@ -261,10 +268,21 @@ def load_data():
     except:
         data = {}
 
+def load_from_mongo():
+    mongo_data = backup.find_one({"_id": "main_data"})
+    if mongo_data:
+        return mongo_data
+    return {}
+    
 def save_data():
     global data
     with open(DATA_FILE, "w") as f:
         json.dump(data, f, indent=2)
+# ✅ MongoDB backup
+    if backup_to_mongo(data):
+        print("✅ MongoDB me data save ho gaya")
+    else:
+        print("❌ MongoDB save failed")
 # ------------------ USER HELP ------------------
 
 def get_user(user_id, name):
@@ -1700,12 +1718,25 @@ async def forward_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"✅ Sent: {sent_count}\n❌ Failed: {failed_count}")
 
 # =================== MAIN FUNCTION ===================
+async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    mongo_data = load_from_mongo()
+
+    if mongo_data:
+        await update.message.reply_text("✅ MongoDB connected & data mil gaya")
+    else:
+        await update.message.reply_text("❌ MongoDB se data nahi mila")
 # =================== MAIN FUNCTION ===================
 
     # =================== MAIN FUNCTION ===================
 # =================== MAIN FUNCTION ===================
 def main():
     load_data()
+
+    # ✅ YAHI ADD KARO (load_data ke niche)
+    mongo_data = load_from_mongo()
+    if mongo_data:
+        global data
+        data = mongo_data
 
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
@@ -1733,7 +1764,8 @@ def main():
     app.add_handler(CommandHandler("help", help))
     app.add_handler(CommandHandler("guess", guess))
     app.add_handler(CommandHandler("dice", dice))
-
+    app.add_handler(CommandHandler("mongo", mongo_check))
+    
     # Callback
     app.add_handler(CallbackQueryHandler(button_callback))
 
@@ -1741,7 +1773,7 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, track_chat))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, auto_niki_reply))
 
-    print("🔥 Bot started...")
+    print("🔥 Niki Bot started...")
 
     app.run_polling()
 
