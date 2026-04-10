@@ -3,9 +3,8 @@ from pymongo import MongoClient
 MONGO_URL = "mongodb+srv://vishal:VISHAL123@vishal07.espy0qo.mongodb.net/?appName=Vishal07"
 
 client = MongoClient(MONGO_URL)
-
-db = client["botdb"]       # database name
-backup = db["backup"]      # collection name
+db = client["mydatabase"]
+backup = db["backup"]
 # =================== WEB SERVER (RENDER FIX) ===================
 import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
@@ -269,20 +268,26 @@ def load_data():
         data = {}
 
 def load_from_mongo():
-    mongo_data = backup.find_one({"_id": "main_data"})
-    if mongo_data:
-        return mongo_data
+    result = backup.find_one({"_id": "main_data"})
+    
+    if result and "data" in result:
+        return result["data"]
+    
     return {}
     
 def save_data():
     global data
+    
+    # JSON save (optional)
     with open(DATA_FILE, "w") as f:
         json.dump(data, f, indent=2)
-# ✅ MongoDB backup
-    if backup_to_mongo(data):
-        print("✅ MongoDB me data save ho gaya")
-    else:
-        print("❌ MongoDB save failed")
+    
+    # 🔥 MongoDB save
+    backup.update_one(
+        {"_id": "main_data"},
+        {"$set": {"data": data}},
+        upsert=True
+    )
 # ------------------ USER HELP ------------------
 
 def get_user(user_id, name):
@@ -1730,12 +1735,13 @@ async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # =================== MAIN FUNCTION ===================
 # =================== MAIN FUNCTION ===================
 def main():
+    global data
+
     load_data()
 
-    # ✅ YAHI ADD KARO (load_data ke niche)
+    # 🔥 MongoDB se load
     mongo_data = load_from_mongo()
     if mongo_data:
-        global data
         data = mongo_data
 
     app = ApplicationBuilder().token(BOT_TOKEN).build()
