@@ -59,7 +59,7 @@ DATABASE_FILE = "database.json"
 # =================== START COMMAND ===================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
-    load_data()
+    
     uid = str(user.id)
 
     if uid not in data:
@@ -199,7 +199,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 # =================== TOP RICHEST COMMAND ===================
 async def toprich(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    load_data()
+    
 
     # ✅ sirf real users filter karo
     users_only = {
@@ -220,7 +220,7 @@ async def toprich(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(msg)
 # =================== TOP KILLERS COMMAND ===================
 async def topkill(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    load_data()
+    
 
     users_only = {
         uid: u for uid, u in data.items()
@@ -323,7 +323,7 @@ def is_protected(user_data):
 # ------------------ DAILY COMMAND ------------------
 # ------------------ DAILY COMMAND ------------------
 async def daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    load_data()
+    
     user = get_user(update.effective_user.id, update.effective_user.first_name)
     now = time.time()
 
@@ -353,7 +353,7 @@ async def daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ------------------ BALANCE COMMAND ------------------
 
 async def balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    load_data()
+    
 
     if update.message.reply_to_message:
         target_user = update.message.reply_to_message.from_user
@@ -385,7 +385,7 @@ async def balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 # ------------------ PROTECT COMMAND ------------------
 async def protect(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    load_data()
+    
     user = get_user(update.effective_user.id, update.effective_user.first_name)
     now = time.time()
     cost_map = {"1d":(800,86400), "2d":(1000,172800), "3d":(2000,259200)}
@@ -417,7 +417,7 @@ async def protect(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ------------------ CLAIM GROUP ------------------
 # ------------------ CLAIM GROUP ------------------
 async def claim(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    load_data()
+    
 
     chat = update.effective_chat
     user = update.effective_user
@@ -480,7 +480,7 @@ async def claim(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ------------------ ROB COMMAND ------------------
 async def rob(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    load_data()
+    
     now = time.time()
 
     if not update.message.reply_to_message:
@@ -613,7 +613,7 @@ async def rob(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def kill(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print("KILL START")
 
-    load_data()
+    
 
     if not update.message.reply_to_message:
         await update.message.reply_text("Reply to someone to kill.")
@@ -701,7 +701,7 @@ async def kill(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ------------------ BAIL COMMAND ------------------
 # ------------------ BAIL COMMAND ------------------
 async def bail(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    load_data()
+    
     user = update.effective_user
     user_id = str(user.id)
     now = time.time()
@@ -747,7 +747,7 @@ shop_items = {
     "rose": {"emoji": "🌹", "price": 500},
     "chocolate": {"emoji": "🍫", "price": 800},
     "ring": {"emoji": "💍", "price": 2000},
-    "teddy": {"emoji": "�", "price": 1500},
+    "teddy": {"emoji": "🧸", "price": 1500},
     "pizza": {"emoji": "🍕", "price": 600},
     "surprise_box": {"emoji": "🎁", "price": 2500},
     "puppy": {"emoji": "🐶", "price": 3000},
@@ -817,7 +817,7 @@ async def addgif(update: Update, context: ContextTypes.DEFAULT_TYPE):
     shop_items[gift_name]["gifs"].append(file_id)
 
     # SAVE DATA
-    load_data()
+    #..yahape load data add krna he yadi higa toh
     data["shop_items"] = shop_items
     save_data()
 
@@ -939,7 +939,7 @@ from telegram.ext import ContextTypes
 
 async def revive(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reviver = update.effective_user
-    load_data()
+    #... yahaoe loaddata
     reviver_data = get_user(reviver.id, reviver.first_name)
 
     now = time.time()
@@ -1112,7 +1112,7 @@ async def show_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Check if target is owner
     if target_user.id == OWNER_ID:
         await update.message.reply_text(
-            f"� Abey yar tu mera owner ka id dekhna chahega 🤔 nehi ye thik bat ni 😎\n"
+            f"🤔 Abey yar tu mera owner ka id dekhna chahega 🤔 nehi ye thik bat ni 😎\n"
             f"📝 Owner ka id secret hai, mt dekh 👉 @{OWNER_USERNAME}"
         )
         return
@@ -1141,7 +1141,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 async def check(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    load_data()
+    #loaddata
 
     checker = update.effective_user
     checker_data = get_user(checker.id, checker.first_name)
@@ -1335,7 +1335,7 @@ async def give(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     message = update.message
     giver = message.from_user
-    load_data()
+    #.. loaddata
 
     # Reply check
     if not message.reply_to_message:
@@ -1433,7 +1433,7 @@ async def coin(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     message = update.message
     user = message.from_user
-    load_data()
+    
 
     # ================= RULES =================
     if not context.args:
@@ -1529,7 +1529,7 @@ async def guess(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     message = update.message
     user = message.from_user
-    load_data()
+    
 
     if not context.args:
         await message.reply_text(
@@ -1584,7 +1584,7 @@ async def dice(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     message = update.message
     user = message.from_user
-    load_data()
+    
 
     # ================= RULES =================
     if not context.args:
