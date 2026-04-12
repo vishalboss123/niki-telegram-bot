@@ -1751,6 +1751,82 @@ async def forward_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(f"✅ Sent: {sent_count}\n❌ Failed: {failed_count}")
 
+
+#=====================ADD BALANCE=====================
+async def addbal(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != OWNER_ID:
+        return
+
+    if not update.message.reply_to_message:
+        await update.message.reply_text("❌ Reply karke use karo")
+        return
+
+    try:
+        target = update.message.reply_to_message.from_user
+        amount = int(context.args[0])
+
+        user = get_user(target.id, target.first_name)
+        user["money"] += amount
+
+        save_data()
+        save_to_mongo()
+
+        await update.message.reply_text(f"💰 {target.first_name} ko ₹{amount} add hua")
+
+    except:
+        await update.message.reply_text("❌ Use: /addbal 100000")
+
+#====================SET BALANCE ======================
+async def setbal(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != OWNER_ID:
+        return
+
+    if not update.message.reply_to_message:
+        await update.message.reply_text("❌ Reply karke use karo")
+        return
+
+    try:
+        target = update.message.reply_to_message.from_user
+        amount = int(context.args[0])
+
+        user = get_user(target.id, target.first_name)
+        user["money"] = amount
+
+        save_data()
+        save_to_mongo()
+
+        await update.message.reply_text(f"👑 {target.first_name} ka balance set: ₹{amount}")
+
+    except:
+        await update.message.reply_text("❌ Use: /setbal 1000000")
+
+#======================REMOVE BALANCE =================
+async def removebal(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != OWNER_ID:
+        return
+
+    if not update.message.reply_to_message:
+        await update.message.reply_text("❌ Reply karke use karo")
+        return
+
+    try:
+        target = update.message.reply_to_message.from_user
+        amount = int(context.args[0])
+
+        user = get_user(target.id, target.first_name)
+        user["money"] -= amount
+
+        if user["money"] < 0:
+            user["money"] = 0
+
+        save_data()
+        save_to_mongo()
+
+        await update.message.reply_text(f"💸 {target.first_name} se ₹{amount} remove hua")
+
+    except:
+        await update.message.reply_text("❌ Use: /removebal 100000")
+
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
@@ -1800,6 +1876,9 @@ def main():
     app.add_handler(CommandHandler("guess", guess))
     app.add_handler(CommandHandler("dice", dice))
     app.add_handler(CommandHandler("mongo", mongo_check))
+    app.add_handler(CommandHandler("addbal", addbal))
+    app.add_handler(CommandHandler("removebal", removebal))
+    app.add_handler(CommandHandler("setbal", setbal))
     
     # Callback
     app.add_handler(CallbackQueryHandler(button_callback))
