@@ -333,15 +333,12 @@ async def daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if now - user.get("last_daily", 0) < 86400:
         remain = 86400 - (now - user.get("last_daily", 0))
         
-        # OLD (same rakha)
-        await update.message.reply_text(f"⏳ Daily already claimed. Try after {format_time(remain)}")
         
-        # NEW FIX (add kiya)
-        await context.bot.send_message(
-            chat_id=update.effective_chat.id,
-            text=f"⏳ Daily already claimed. Try after {format_time(remain)}"
-        )
-        return
+        await update.message.reply_text(
+    f"⏳ Daily already claimed. Try after {format_time(remain)}"
+)
+return
+        
 
     # 💰 MONEY
     user["money"] += 1500
@@ -358,11 +355,7 @@ async def daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"Next daily available after 24h"
     )
 
-    # NEW FIX (add kiya)
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id,
-        text="💰 Daily reward: ₹1500\nNext daily available after 24h"
-    )
+    
 # ------------------ BALANCE COMMAND ------------------
 
 # ------------------ BALANCE COMMAND ------------------
@@ -618,18 +611,15 @@ async def rob(update: Update, context: ContextTypes.DEFAULT_TYPE):
     save_data()
     save_to_mongo()
 
-    try:
-        await update.message.reply_text(
-            f"👤 {robber.first_name} robbed ₹{stolen} from {victim.first_name}\n"
-            f"💰 {victim.first_name}'s balance: ₹{victim_data['money']}\n"
-            f"💰 {robber.first_name}'s balance: ₹{robber_data['money']}\n\n"
-        )
-    except Exception as e:
-        print("Send error:", e)
-
-
-# ------------------ KILL COMMAND ------------------
-
+    
+try:
+    await update.message.reply_text(
+        f"👤 {robber.first_name} robbed ₹{stolen} from {victim.first_name}\n"
+        f"💰 {victim.first_name}'s balance: ₹{victim_data['money']}\n"
+        f"💰 {robber.first_name}'s balance: ₹{robber_data['money']}"
+    )
+except Exception as e:
+    print("ROB ERROR:", e)
 # ------------------ KILL COMMAND ------------------
 # ------------------ KILL COMMAND ------------------
 async def kill(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -714,14 +704,15 @@ async def kill(update: Update, context: ContextTypes.DEFAULT_TYPE):
     save_to_mongo()
 
     # ✅ SAME MESSAGE (UNCHANGED)
+    
+try:
     await update.message.reply_text(
         f"☠️ {killer.first_name} killed {victim.first_name}!\n"
         f"💰 Earned: ₹{reward}\n"
         f"⏳ Victim 24hr baad revive hoga!"
     )
-
-    print("KILL END")
-
+except Exception as e:
+    print("KILL ERROR:", e)
 
 # ------------------ BAIL COMMAND ------------------
 # ------------------ BAIL COMMAND ------------------
