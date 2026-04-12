@@ -347,7 +347,7 @@ async def daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         f"💰 Daily reward: ₹1500\n"
         f"Next daily available after 24h"
-    )
+
 
 # ------------------ BALANCE COMMAND ------------------
 
