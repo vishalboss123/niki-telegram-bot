@@ -324,6 +324,7 @@ def is_protected(user_data):
     return user_data.get("protection_until", 0) > now
 # ------------------ DAILY COMMAND ------------------
 # ------------------ DAILY COMMAND ------------------
+
 async def daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     user = get_user(update.effective_user.id, update.effective_user.first_name)
@@ -331,7 +332,15 @@ async def daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if now - user.get("last_daily", 0) < 86400:
         remain = 86400 - (now - user.get("last_daily", 0))
+        
+        # OLD (same rakha)
         await update.message.reply_text(f"⏳ Daily already claimed. Try after {format_time(remain)}")
+        
+        # NEW FIX (add kiya)
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=f"⏳ Daily already claimed. Try after {format_time(remain)}"
+        )
         return
 
     # 💰 MONEY
@@ -347,8 +356,13 @@ async def daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         f"💰 Daily reward: ₹1500\n"
         f"Next daily available after 24h"
+    )
 
-
+    # NEW FIX (add kiya)
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text="💰 Daily reward: ₹1500\nNext daily available after 24h"
+    )
 # ------------------ BALANCE COMMAND ------------------
 
 # ------------------ BALANCE COMMAND ------------------
