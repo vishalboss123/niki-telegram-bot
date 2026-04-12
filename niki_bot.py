@@ -65,6 +65,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if uid not in data:
         data[uid] = {"name": user.first_name, "money": 1000, "kills": 0}
         save_data()
+        save_to_mongo()
 
     welcome_text = (
         f"👋 Hᴇʟʟᴏ {user.first_name}!\n\n"
@@ -306,6 +307,7 @@ def get_user(user_id, name):
             "last_daily": 0
         }
         save_data()
+        save_to_mongo()
 
     return data[uid]   # ✅ correct
 
@@ -339,6 +341,7 @@ async def daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user["last_daily"] = now
     save_data()
+    save_to_mongo()
 
     # 📩 FINAL MESSAGE
     await update.message.reply_text(
@@ -412,6 +415,7 @@ async def protect(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user["money"] -= cost
     user["protection_until"] = now + duration
     save_data()
+    save_to_mongo()
     await update.message.reply_text(f"🛡 Protection enabled for {choice}")
 
 # ------------------ CLAIM GROUP ------------------
@@ -466,6 +470,7 @@ async def claim(update: Update, context: ContextTypes.DEFAULT_TYPE):
     }
 
     save_data()
+    save_to_mongo()
 
     await update.message.reply_text(
         f"💰 {user.first_name} claimed {reward} coins for this group!\n"
@@ -503,6 +508,7 @@ async def rob(update: Update, context: ContextTypes.DEFAULT_TYPE):
             robber_data["money"] -= fine
             jail_users[robber_id] += 120
             save_data()
+            save_to_mongo()
 
             await update.message.reply_text(
                 f"🚨 Jail me hoke chori karega?! 😡⛓\n"
@@ -579,6 +585,7 @@ async def rob(update: Update, context: ContextTypes.DEFAULT_TYPE):
         rob_cooldown[robber_id] = now + 6
 
         save_data()
+        save_to_mongo()
 
         await update.message.reply_text(
             f"🚔 Police ne pakad liya!\n"
@@ -595,6 +602,7 @@ async def rob(update: Update, context: ContextTypes.DEFAULT_TYPE):
     rob_cooldown[robber_id] = now + 6
 
     save_data()
+    save_to_mongo()
 
     try:
         await update.message.reply_text(
@@ -634,6 +642,7 @@ async def kill(update: Update, context: ContextTypes.DEFAULT_TYPE):
             killer_data["dead"] = False
             killer_data["dead_until"] = 0
             save_data()
+            save_to_mongo()
         else:
             await update.message.reply_text("💀 Tum already dead ho! 24hr baad revive hoga 😢")
             return
@@ -643,6 +652,7 @@ async def kill(update: Update, context: ContextTypes.DEFAULT_TYPE):
             victim_data["dead"] = False
             victim_data["dead_until"] = 0
             save_data()
+            save_to_mongo()
         else:
             await update.message.reply_text(
                 "😂 Wow beta! Wo already dead hai ☠️\n"
@@ -687,6 +697,7 @@ async def kill(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # cooldown + save
     kill_cooldown[str(killer.id)] = now + 6
     save_data()
+    save_to_mongo()
 
     # ✅ SAME MESSAGE (UNCHANGED)
     await update.message.reply_text(
@@ -715,6 +726,7 @@ async def bail(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if now >= jail_users[user_id]:
         del jail_users[user_id]
         save_data()
+        save_to_mongo()
         await update.message.reply_text("😎 Tum already free ho!")
         return
 
@@ -732,6 +744,7 @@ async def bail(update: Update, context: ContextTypes.DEFAULT_TYPE):
     del jail_users[user_id]
 
     save_data()
+    save_to_mongo()
 
     await update.message.reply_text("💸 Bail mil gayi! Ab free ho 😈")
 
@@ -820,6 +833,7 @@ async def addgif(update: Update, context: ContextTypes.DEFAULT_TYPE):
     #..yahape load data add krna he yadi higa toh
     data["shop_items"] = shop_items
     save_data()
+    save_to_mongo()
 
     total = len(shop_items[gift_name]["gifs"])
 
@@ -889,6 +903,7 @@ async def gift(update: Update, context: ContextTypes.DEFAULT_TYPE):
     receiver_data["inventory"][gift_name] = receiver_data["inventory"].get(gift_name, 0) + 1
 
     save_data()
+    save_to_mongo()
 
     emoji = shop_items[gift_name]["emoji"]
 
@@ -956,6 +971,7 @@ async def revive(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reviver_data["dead"] = False
             reviver_data["dead_until"] = 0
             save_data()
+            save_to_mongo()
 
             await update.message.reply_text(
                 f"😎 {reviver.first_name} khud revive ho gaya!\n💰 500₹ cut gaya!"
@@ -987,6 +1003,7 @@ async def revive(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
 
         save_data()
+        save_to_mongo()
         return
 
     # ---------------- REPLY USER CASE
@@ -1028,6 +1045,7 @@ async def revive(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
 
         save_data()
+        save_to_mongo()
         return
 
     # ---------------- Target dead (NORMAL REVIVE)
@@ -1041,6 +1059,7 @@ async def revive(update: Update, context: ContextTypes.DEFAULT_TYPE):
         target_data["dead_until"] = 0
 
         save_data()
+        save_to_mongo()
 
         await update.message.reply_text(
             f"{reviver.first_name} ne {target_user.first_name} ko revive kiya! 💖\n"
@@ -1157,6 +1176,7 @@ async def check(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Deduct money
         checker_data["money"] -= cost
         save_data()
+        save_to_mongo()
 
         await update.message.reply_text(
             "😔 Sorry yahape group me chat id ya numeric id se check nahi kiya ja sakta.\n\n"
@@ -1183,6 +1203,7 @@ async def check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Deduct money
     checker_data["money"] -= cost
     save_data()
+    save_to_mongo()
 
     # Calculate protection hours only
     now = time.time()
@@ -1385,6 +1406,7 @@ async def give(update: Update, context: ContextTypes.DEFAULT_TYPE):
     receiver_data["money"] += amount
 
     save_data()
+    save_to_mongo()
 
     msg = (
         f"💌 {giver.first_name} ne {receiver.first_name} ke liye paisa bheja ❤️\n\n"
@@ -1486,6 +1508,7 @@ async def coin(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # cut bet
         user_data["money"] -= 100
         save_data()
+        save_to_mongo()
 
         await message.reply_text(f"🎮 {user.first_name} game start!\n🍀 Best of luck!")
 
@@ -1506,6 +1529,7 @@ async def coin(update: Update, context: ContextTypes.DEFAULT_TYPE):
             win = random.randint(100, 1000)
             user_data["money"] += win
             save_data()
+            save_to_mongo()
 
             await message.reply_text(f"🎉 WIN! ₹{win} mila 😎")
         else:
@@ -1558,6 +1582,7 @@ async def guess(update: Update, context: ContextTypes.DEFAULT_TYPE):
         win = random.randint(100, 500)
         user_data["money"] += win
         save_data()
+        save_to_mongo()
 
         await message.reply_text(
             f"🎉 Sahi pakda!\n\n"
@@ -1568,6 +1593,7 @@ async def guess(update: Update, context: ContextTypes.DEFAULT_TYPE):
         loss = 50
         user_data["money"] -= loss
         save_data()
+        save_to_mongo()
 
         await message.reply_text(
             f"💔 Galat guess\n\n"
@@ -1652,6 +1678,7 @@ async def dice(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
 
         save_data()
+        save_to_mongo()
 
     except Exception as e:
         print("ERROR:", e)
@@ -1682,7 +1709,8 @@ async def track_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
             data["groups"] = []
         if chat_id not in data["groups"]:
             data["groups"].append(chat_id)
-            save_data()  # auto save groups
+            save_data()
+            save_to_mongo()# auto save groups
             print(f"Group saved: {chat_id}")
 
     # === USERS SAVE ===
@@ -1691,7 +1719,8 @@ async def track_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
             data["users"] = []
         if user_id not in data["users"]:
             data["users"].append(user_id)
-            save_data()  # auto save users
+            save_data() 
+            save_to_mongo()# auto save users
             print(f"User saved: {user_id}")
 
 # =================== FORWARD COMMAND /fw ===================
