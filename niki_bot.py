@@ -59,7 +59,15 @@ DATABASE_FILE = "database.json"
 # =================== START COMMAND ===================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
-    
+    chat = update.effective_chat
+
+    # ✅ SAVE USER / GROUP
+    col.update_one(
+        {"chat_id": chat.id},
+        {"$set": {"chat_id": chat.id, "type": chat.type}},
+        upsert=True
+    )
+
     uid = str(user.id)
 
     if uid not in data:
@@ -1828,6 +1836,100 @@ async def removebal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except:
         await update.message.reply_text("❌ Use: /removebal 100000")
 
+#=====================SEND/STATS/BOARD CAST =======================
+from pymongo import MongoClient
+import asyncio
+
+# ================= CONFIG =================
+BOT_TOKEN = "BOT_TOKEN"
+OWNER_ID = 6175559434
+BOT_USERNAME = "iim_Nikibot"
+MONGO_URL = "mongodb+srv://vishal:VISHAL123@vishal07.espy0qo.mongodb.net/?appName=Vishal07"
+
+client = MongoClient(MONGO_URL)
+db = client["niki_bot"]
+col = db["chats"]
+
+# ================= SAVE USERS / GROUPS =================
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat = update.effective_chat
+
+    col.update_one(
+        {"chat_id": chat.id},
+        {"$set": {"chat_id": chat.id, "type": chat.type}},
+        upsert=True
+    )
+
+    await update.message.reply_text("✨ Niki is active here 💖")
+
+# ================= STATS =================
+async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != OWNER_ID:
+        return
+
+    total = col.count_documents({})
+    users = col.count_documents({"type": "private"})
+    groups = col.count_documents({"type": {"$in": ["group", "supergroup"]}})
+
+    await update.message.reply_text(
+        f"📊 Stats:\n👤 Users: {users}\n👥 Groups: {groups}\n📦 Total: {total}"
+    )
+
+# ================= BROADCAST =================
+async def send(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != OWNER_ID:
+        return
+
+    if not update.message.reply_to_message and not context.args:
+        await update.message.reply_text("❌ Reply or use /send text")
+        return
+
+    silent = False
+    if context.args and context.args[0] == "-s":
+        silent = True
+        context.args.pop(0)
+
+    keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton("🌸 Start Me", url=f"https://t.me/{BOT_USERNAME}")]
+    ])
+
+    total = 0
+    failed = 0
+
+    for user in col.find():
+        try:
+            if update.message.reply_to_message:
+                msg = await update.message.reply_to_message.copy(
+                    chat_id=user["chat_id"],
+                    reply_markup=keyboard,
+                    disable_notification=silent
+                )
+            else:
+                text = " ".join(context.args)
+                msg = await context.bot.send_message(
+                    chat_id=user["chat_id"],
+                    text=text,
+                    reply_markup=keyboard,
+                    disable_notification=silent
+                )
+
+            # 👉 Auto pin in groups
+            if user["type"] in ["group", "supergroup"]:
+                try:
+                    await context.bot.pin_chat_message(user["chat_id"], msg.message_id)
+                except:
+                    pass
+
+            total += 1
+            await asyncio.sleep(0.05)  # anti-ban delay
+
+        except:
+            failed += 1
+
+    await update.message.reply_text(
+        f"✅ Done!\n✔ Sent: {total}\n❌ Failed: {failed}"
+    )
+
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
@@ -1881,7 +1983,9 @@ def main():
     app.add_handler(CommandHandler("removebal", removebal))
     app.add_handler(CommandHandler("setbal", setbal))
     app.add_handler(commandHandler("fw"‚ forward))
-    
+    app.add_handler(CommandHandler("send", send))
+    app.add_handler(CommandHandler("stats", stats))
+
     # Callback
     app.add_handler(CallbackQueryHandler(button_callback))
 
