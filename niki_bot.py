@@ -608,14 +608,14 @@ async def rob(update: Update, context: ContextTypes.DEFAULT_TYPE):
     save_to_mongo()
 
     
-try:
-    await update.message.reply_text(
-        f"👤 {robber.first_name} robbed ₹{stolen} from {victim.first_name}\n"
-        f"💰 {victim.first_name}'s balance: ₹{victim_data['money']}\n"
-        f"💰 {robber.first_name}'s balance: ₹{robber_data['money']}"
-    )
-except Exception as e:
-    print("ROB ERROR:", e)
+    try:
+        await update.message.reply_text(
+            f"👤 {robber.first_name} robbed ₹{stolen} from {victim.first_name}\n"
+            f"💰 {victim.first_name}'s balance: ₹{victim_data['money']}\n"
+            f"💰 {robber.first_name}'s balance: ₹{robber_data['money']}"
+        ) 
+    except Exception as e:
+        print("ROB ERROR:", e)
 # ------------------ KILL COMMAND ------------------
 # ------------------ KILL COMMAND ------------------
 async def kill(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -701,14 +701,14 @@ async def kill(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # ✅ SAME MESSAGE (UNCHANGED)
     
-try:
-    await update.message.reply_text(
-        f"☠️ {killer.first_name} killed {victim.first_name}!\n"
-        f"💰 Earned: ₹{reward}\n"
-        f"⏳ Victim 24hr baad revive hoga!"
-    )
-except Exception as e:
-    print("KILL ERROR:", e)
+    try:
+        await update.message.reply_text(
+            f"☠️ {killer.first_name} killed {victim.first_name}!\n"
+            f"💰 Earned: ₹{reward}\n"
+            f"⏳ Victim 24hr baad revive hoga!"
+        )
+    except Exception as e:
+        print("KILL ERROR:", e)
 
 # ------------------ BAIL COMMAND ------------------
 # ------------------ BAIL COMMAND ------------------
