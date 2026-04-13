@@ -344,7 +344,7 @@ async def daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user["last_daily"] = now
 
     save_data()
-    save_to_mongo()
+    
 
     # ✅ FINAL MESSAGE (ONLY ONE)
     await update.message.reply_text(
