@@ -1841,7 +1841,7 @@ from pymongo import MongoClient
 import asyncio
 
 # ================= CONFIG =================
-BOT_TOKEN = "BOT_TOKEN"
+BOT_TOKEN = "8614646410:AAEDw9e9dJLxeElsixxCfolh2yrn8pBjxD4"
 OWNER_ID = 6175559434
 BOT_USERNAME = "iim_Nikibot"
 MONGO_URL = "mongodb+srv://vishal:VISHAL123@vishal07.espy0qo.mongodb.net/?appName=Vishal07"
