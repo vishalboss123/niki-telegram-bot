@@ -1982,7 +1982,6 @@ def main():
     app.add_handler(CommandHandler("addbal", addbal))
     app.add_handler(CommandHandler("removebal", removebal))
     app.add_handler(CommandHandler("setbal", setbal))
-    app.add_handler(commandHandler("fw"‚ forward))
     app.add_handler(CommandHandler("send", send))
     app.add_handler(CommandHandler("stats", stats))
 
