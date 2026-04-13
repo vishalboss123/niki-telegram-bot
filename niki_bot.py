@@ -1880,6 +1880,7 @@ def main():
     app.add_handler(CommandHandler("addbal", addbal))
     app.add_handler(CommandHandler("removebal", removebal))
     app.add_handler(CommandHandler("setbal", setbal))
+    app.add_handler(commandHandler("fw"‚ forward))
     
     # Callback
     app.add_handler(CallbackQueryHandler(button_callback))
