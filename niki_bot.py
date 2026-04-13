@@ -1851,16 +1851,6 @@ db = client["niki_bot"]
 col = db["chats"]
 
 # ================= SAVE USERS / GROUPS =================
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    chat = update.effective_chat
-
-    col.update_one(
-        {"chat_id": chat.id},
-        {"$set": {"chat_id": chat.id, "type": chat.type}},
-        upsert=True
-    )
-
-    await update.message.reply_text("✨ Niki is active here 💖")
 
 # ================= STATS =================
 async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
