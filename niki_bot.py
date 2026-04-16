@@ -1919,6 +1919,195 @@ async def send(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         f"✅ Done!\n✔ Sent: {total}\n❌ Failed: {failed}"
     )
+#=============================duelcommand======================
+from telegram import *
+from telegram.ext import *
+import asyncio
+
+BOT_TOKEN = "8614646410:AAEDw9e9dJLxeElsixxCfolh2yrn8pBjxD4"
+
+duels = {}
+
+# ================= START =================
+
+# ================= DUEL =================
+async def duel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user1 = update.effective_user
+
+    if not update.message.reply_to_message:
+        await update.message.reply_text("❗ Reply karke challenge karo")
+        return
+
+    user2 = update.message.reply_to_message.from_user
+
+    duels[user1.id] = {
+        "p1": user1.id,
+        "p2": user2.id,
+        "chat": update.effective_chat.id,
+        "p1_done": False,
+        "p2_done": False
+    }
+
+    await update.message.reply_text(
+        f"⚔️ {user1.first_name} ne {user2.first_name} ko challenge kiya!\n👉 /accept karo 😈"
+    )
+
+# ================= ACCEPT =================
+async def accept(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user2 = update.effective_user
+
+    for d in duels.values():
+        if d["p2"] == user2.id:
+
+            await context.bot.send_message(
+                d["chat"],
+                f"🔥 Duel Accepted!\n⏳ Player1 apni move kar raha hai...\n💤 Thoda wait karo 😏"
+            )
+
+            await send_number_choice(context, d["p1"])
+            return
+
+# ================= NUMBER =================
+async def send_number_choice(context, uid):
+    kb = [
+        [
+            InlineKeyboardButton(f"🎯 {i}", callback_data=f"num_{uid}_{i}")
+            for i in range(1,4)
+        ],
+        [
+            InlineKeyboardButton(f"🎯 {i}", callback_data=f"num_{uid}_{i}")
+            for i in range(4,7)
+        ]
+    ]
+
+    await context.bot.send_message(
+        uid,
+        "🎲 𝗖𝗛𝗢𝗢𝗦𝗘 𝗬𝗢𝗨𝗥 𝗟𝗨𝗖𝗞𝗬 𝗡𝗨𝗠𝗕𝗘𝗥 😈\n(Secret rahega 🤫)",
+        reply_markup=InlineKeyboardMarkup(kb)
+    )
+
+# ================= BET =================
+async def send_bet_choice(context, uid):
+    bets = [500,700,1000,2000,5000,10000]
+
+    kb = [
+        [InlineKeyboardButton(f"💰 𝐁𝐄𝐓-{b}", callback_data=f"bet_{uid}_{b}")]
+        for b in bets
+    ]
+
+    await context.bot.send_message(
+        uid,
+        "💸 𝗖𝗛𝗢𝗢𝗦𝗘 𝗬𝗢𝗨𝗥 𝗕𝗘𝗧 💰\n⚠️ Max: 10000\nCustom me unlimited 😏",
+        reply_markup=InlineKeyboardMarkup(kb)
+    )
+
+# ================= BUTTON =================
+async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    data = query.data.split("_")
+
+    if data[0] == "num":
+        uid = int(data[1])
+        num = int(data[2])
+
+        for d in duels.values():
+
+            # Player1
+            if d["p1"] == uid and not d["p1_done"]:
+                d["p1_num"] = num
+                d["p1_done"] = True
+
+                await query.edit_message_text("✅ Number Locked 🔒")
+
+                await context.bot.send_message(
+                    d["chat"],
+                    "🎯 Player1 ne apni choice lock kar li!\n💰 Bet choose kar raha hai..."
+                )
+
+                await send_bet_choice(context, uid)
+                return
+
+            # Player2
+            elif d["p2"] == uid and not d["p2_done"]:
+                d["p2_num"] = num
+                d["p2_done"] = True
+
+                await query.edit_message_text("✅ Number Locked 🔒")
+
+                await context.bot.send_message(
+                    d["chat"],
+                    "🎯 Player2 ready ho gaya!\n💰 Bet lock ho raha hai..."
+                )
+
+                await send_bet_choice(context, uid)
+                return
+
+    elif data[0] == "bet":
+        uid = int(data[1])
+        bet = int(data[2])
+
+        for d in duels.values():
+
+            if d["p1"] == uid:
+                d["bet"] = bet
+                await query.edit_message_text(f"💰 Bet Locked: {bet}")
+
+                await context.bot.send_message(
+                    d["chat"],
+                    "💰 Player1 ne bet choose kar liya!\n⚡ Ab Player2 ki baari 😈"
+                )
+
+                await send_number_choice(context, d["p2"])
+                return
+
+            elif d["p2"] == uid:
+                d["bet"] = bet
+                await query.edit_message_text(f"💰 Bet Locked: {bet}")
+
+                await context.bot.send_message(
+                    d["chat"],
+                    "💰 Player2 ne bet lock kar diya!\n🔥 Duel Start hone wala hai..."
+                )
+
+                await start_duel(context, d)
+                return
+
+# ================= DUEL START =================
+async def start_duel(context, d):
+    chat = d["chat"]
+
+    await context.bot.send_message(
+        chat,
+        "⚔️ FINAL ROUND...\n🎲 Rolling dice... hold your breath 😈"
+    )
+
+    await asyncio.sleep(2)
+
+    # 🎲 Animated Dice
+    msg1 = await context.bot.send_dice(chat)
+    await asyncio.sleep(3)
+    msg2 = await context.bot.send_dice(chat)
+
+    r1 = msg1.dice.value
+    r2 = msg2.dice.value
+
+    if r1 > r2:
+        winner = "👑 Player1"
+    elif r2 > r1:
+        winner = "👑 Player2"
+    else:
+        winner = "🤝 Draw"
+
+    await context.bot.send_message(
+        chat,
+        f"🎲 𝗥𝗘𝗦𝗨𝗟𝗧 🎲\n\n"
+        f"Player1: {r1}\n"
+        f"Player2: {r2}\n\n"
+        f"{winner}\n"
+        f"💰 Bet: {d['bet']}"
+    )
 
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1974,7 +2163,10 @@ def main():
     app.add_handler(CommandHandler("setbal", setbal))
     app.add_handler(CommandHandler("send", send))
     app.add_handler(CommandHandler("stats", stats))
-
+    app.add_handler(CommandHandler("duel", duel))
+    app.add_handler(CommandHandler("accept", accept))
+    app.add_handler(CallbackQueryHandler(button)) 
+    
     # Callback
     app.add_handler(CallbackQueryHandler(button_callback))
 
