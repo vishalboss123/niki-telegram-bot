@@ -1931,12 +1931,6 @@ import random
 BOT_TOKEN = "8614646410:AAEDw9e9dJLxeElsixxCfolh2yrn8pBjxD4"
 
 duels = {}
-users = {}
-
-def get_user(uid, name):
-    if uid not in users:
-        users[uid] = {"name": name, "money": 10000}
-    return users[uid]
 
 
 # ================= DUEL =================
@@ -2038,77 +2032,57 @@ async def send_bet_choice(context, uid):
     )
 
 # ================= BUTTON =================
-async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
+# ================= BUTTON =================
+elif data[0] == "bet":
+    uid = int(data[1])
+    bet = int(data[2])
 
-    data = query.data.split("_")
+    for d in duels.values():
 
-    if data[0] == "num":
-        uid = int(data[1])
-        num = int(data[2])
+        if d["p1"] == uid:
+            d["bet"] = bet
 
-        for d in duels.values():
+            await query.edit_message_text(f"💰 Bᴇᴛ Lᴏᴄᴋᴇᴅ: {bet}")
 
-            if d["p1"] == uid and not d["p1_done"]:
-                d["p1_num"] = num
-                d["p1_done"] = True
-                await query.edit_message_text("✅ Nᴜᴍʙᴇʀ Lᴏᴄᴋᴇᴅ 🔒")
+            await context.bot.send_message(
+                d["chat"],
+                f"💰 {d['p1_name']} ɴᴇ {bet} ʙᴇᴛ ʟᴀɢᴀʏᴀ!"
+            )
 
-                await context.bot.send_message(d["chat"], f"🎯 {d['p1_name']} ready!")
-                await send_bet_choice(context, uid)
-                return
+            await send_number_choice(context, d["p2"])
+            return
 
-            elif d["p2"] == uid and not d["p2_done"]:
-                d["p2_num"] = num
-                d["p2_done"] = True
-                await query.edit_message_text("✅ Nᴜᴍʙᴇʀ Lᴏᴄᴋᴇᴅ 🔒")
+        elif d["p2"] == uid:
 
-                await context.bot.send_message(d["chat"], f"🎯 {d['p2_name']} ready!")
-                await send_bet_choice(context, uid)
-                return
+            # ✅ FIXED: REAL DATA USE
+            u1 = data[str(d["p1"])]
+            u2 = data[str(d["p2"])]
 
-    elif data[0] == "bet":
-        uid = int(data[1])
-        bet = int(data[2])
-
-        for d in duels.values():
-
-            if d["p1"] == uid:
-                d["bet"] = bet
-                await query.edit_message_text(f"💰 Bᴇᴛ Lᴏᴄᴋᴇᴅ: {bet}")
-
+            if u2["money"] < d["bet"]:
                 await context.bot.send_message(
                     d["chat"],
-                    f"💰 {d['p1_name']} ɴᴇ {bet} ʙᴇᴛ ʟᴀɢᴀʏᴀ!"
+                    f"❌ Pᴀɪꜱᴀ ᴋᴀᴍ ʜᴀɪ!\n{d['p1_name']} ɴᴇ {d['bet']} ʙᴇᴛ ʟᴀɢᴀʏᴀ ʜᴀɪ"
                 )
-
-                await send_number_choice(context, d["p2"])
                 return
 
-            elif d["p2"] == uid:
-                u1 = get_user(d["p1"], d["p1_name"])
-                u2 = get_user(d["p2"], d["p2_name"])
+            # ✅ CUT REAL MONEY
+            u1["money"] -= d["bet"]
+            u2["money"] -= d["bet"]
 
-                if u2["money"] < d["bet"]:
-                    await context.bot.send_message(
-                        d["chat"],
-                        f"❌ Pᴀɪꜱᴀ ᴋᴀᴍ ʜᴀɪ!\n{d['p1_name']} ɴᴇ {d['bet']} ʙᴇᴛ ʟᴀɢᴀʏᴀ ʜᴀɪ"
-                    )
-                    return
+            save_data()
+            save_to_mongo()
 
-                u1["money"] -= d["bet"]
-                u2["money"] -= d["bet"]
+            await query.edit_message_text(f"💰 Bᴇᴛ Lᴏᴄᴋᴇᴅ: {d['bet']}")
 
-                await query.edit_message_text(f"💰 Bᴇᴛ Lᴏᴄᴋᴇᴅ: {d['bet']}")
+            await context.bot.send_message(
+                d["chat"],
+                "🔥 Dᴜᴇʟ ꜱᴛᴀʀᴛ ʜᴏɴᴇ ᴡᴀʟᴀ ʜᴀɪ..."
+            )
 
-                await context.bot.send_message(
-                    d["chat"],
-                    "🔥 Dᴜᴇʟ ꜱᴛᴀʀᴛ ʜᴏɴᴇ ᴡᴀʟᴀ ʜᴀɪ..."
-                )
+            await start_duel(context, d)
+            return
 
-                await start_duel(context, d)
-                return
+# ================= DUEL =================
 
 # ================= DUEL =================
 async def start_duel(context, d):
@@ -2125,7 +2099,7 @@ async def start_duel(context, d):
     r1 = msg1.dice.value
     r2 = msg2.dice.value
 
-    # ✅ BOOST LOGIC
+    # BOOST LOGIC SAME
     boost1 = 2 if r1 == d["p1_num"] else (1 if abs(r1 - d["p1_num"]) == 1 else 0)
     boost2 = 2 if r2 == d["p2_num"] else (1 if abs(r2 - d["p2_num"]) == 1 else 0)
 
@@ -2134,8 +2108,9 @@ async def start_duel(context, d):
 
     total = d["bet"] * 2
 
-    u1 = get_user(d["p1"], d["p1_name"])
-    u2 = get_user(d["p2"], d["p2_name"])
+    # ✅ FIXED: REAL DATA
+    u1 = data[str(d["p1"])]
+    u2 = data[str(d["p2"])]
 
     if final1 > final2:
         u1["money"] += total
@@ -2148,6 +2123,10 @@ async def start_duel(context, d):
         u2["money"] += d["bet"]
         winner = "Draw"
 
+    # ✅ SAVE AFTER RESULT
+    save_data()
+    save_to_mongo()
+
     await context.bot.send_message(
         chat,
         f"🎲 𝗥ᴇꜱᴜʟᴛ\n\n"
@@ -2156,8 +2135,6 @@ async def start_duel(context, d):
         f"🏆 Wɪɴɴᴇʀ: {winner}\n"
         f"💰 Tᴏᴛᴀʟ: {total}"
     )
-
-
 
 
 # =================== MAIN FUNCTION ===================
