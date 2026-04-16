@@ -1907,7 +1907,7 @@ async def send(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if user["type"] in ["group", "supergroup"]:
                 try:
                     await context.bot.pin_chat_message(user["chat_id"], msg.message_id)
-                except:
+          random୧except:
                     pass
 
             total += 1
@@ -1921,7 +1921,7 @@ async def send(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 #=============================duelcommand======================
 
-# ================= START =================
+# ================================ START =================
 
 from telegram import *
 from telegram.ext import *
@@ -1933,147 +1933,128 @@ BOT_TOKEN = "8614646410:AAEDw9e9dJLxeElsixxCfolh2yrn8pBjxD4"
 duels = {}
 
 
+
 # ================= DUEL =================
 async def duel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user1 = update.effective_user
-
-    if not update.message.reply_to_message:
-        await update.message.reply_text(
-            "🎮 𝗗ᴜᴇʟ 𝗚ᴀᴍᴇ 𝗚ᴜɪᴅᴇ\n\n"
-            "⚔️ Kᴀɪꜱᴇ ᴋʜᴇʟᴛᴇ ʜᴀɪ:\n\n"
-            "1️⃣ /duel ᴋᴏɪ ᴜꜱᴇʀ ᴘᴇ ʀᴇᴘʟʏ ᴋᴀʀᴏ\n"
-            "2️⃣ Oᴘᴘᴏɴᴇɴᴛ /accept ᴋᴀʀᴇ\n"
-            "3️⃣ Dᴏɴᴏ ᴘʟᴀʏᴇʀ ʟᴜᴄᴋʏ ɴᴜᴍʙᴇʀ ᴄʜᴏᴏꜱᴇ\n"
-            "4️⃣ Pʟᴀʏᴇʀ1 ʙᴇᴛ ꜱᴇᴛ ᴋᴀʀᴛᴀ ʜᴀɪ 💰\n"
-            "5️⃣ Pʟᴀʏᴇʀ2 ᴜꜱɪ ʙᴇᴛ ᴀᴄᴄᴇᴘᴛ ᴋᴀʀᴛᴀ ʜᴀɪ\n\n"
-            "🎲 Fɪɴᴀʟ:\n"
-            "Jɪꜱᴋᴀ (Dɪᴄᴇ + Lᴜᴄᴋ) ʙᴀᴅᴀ → Wɪɴɴᴇʀ 🏆\n\n"
-            "💰 Wɪɴɴᴇʀ ꜱᴀʀᴀ ᴍᴏɴᴇʏ ʟᴇ ᴊᴀᴛᴀ ʜᴀɪ 😈\n\n"
-            "🔥 Aʙ ʀᴇᴘʟʏ ᴋᴀʀᴏ ᴀᴜʀ /duel ᴅᴀʟᴏ!"
-        )
-        return
+    if not update.message.reply_to_message:  
+    await update.message.reply_text(  
+        "🎮 𝗗ᴜᴇʟ 𝗚ᴀᴍᴇ 𝗚ᴜɪᴅᴇ\n\n"  
+        "⚔️ Kᴀɪꜱᴇ ᴋʜᴇʟᴛᴇ ʜᴀɪ:\n\n"  
+        "1️⃣ /duel ᴋᴏɪ ᴜꜱᴇʀ ᴘᴇ ʀᴇᴘʟʏ ᴋᴀʀᴏ\n"  
+        "2️⃣ Oᴘᴘᴏɴᴇɴᴛ /accept ᴋᴀʀᴇ\n"  
+        "3️⃣ Dᴏɴᴏ ᴘʟᴀʏᴇʀ ʟᴜᴄᴋʏ ɴᴜᴍʙᴇʀ ᴄʜᴏᴏꜱᴇ\n"  
+        "4️⃣ Pʟᴀʏᴇʀ1 ʙᴇᴛ ꜱᴇᴛ ᴋᴀʀᴛᴀ ʜᴀɪ 💰\n"  
+        "5️⃣ Pʟᴀʏᴇʀ2 ᴜꜱɪ ʙᴇᴛ ᴀᴄᴄᴇᴘᴛ ᴋᴀʀᴛᴀ ʜᴀɪ\n\n"  
+        "🎲 Fɪɴᴀʟ:\n"  
+        "Jɪꜱᴋᴀ (Dɪᴄᴇ + Lᴜᴄᴋ) ʙᴀᴅᴀ → Wɪɴɴᴇʀ 🏆\n\n"  
+        "💰 Wɪɴɴᴇʀ ꜱᴀʀᴀ ᴍᴏɴᴇʏ ʟᴇ ᴊᴀᴛᴀ ʜᴀɪ 😈\n\n"  
+        "🔥 Aʙ ʀᴇᴘʟʏ ᴋᴀʀᴏ ᴀᴜʀ /duel ᴅᴀʟᴏ!"  
+    )  
+    return  
 
     user2 = update.message.reply_to_message.from_user
 
     duels[user1.id] = {
         "p1": user1.id,
-        "p2": user2.id,
         "p1_name": user1.first_name,
+        "p2": user2.id,
         "p2_name": user2.first_name,
         "chat": update.effective_chat.id,
         "p1_done": False,
-        "p2_done": False
+        "p2_done": False,
+        "bet": None
     }
 
-    keyboard = InlineKeyboardMarkup([
+    kb = InlineKeyboardMarkup([
         [InlineKeyboardButton("⚔️ Accept Duel", callback_data=f"accept_{user2.id}")]
     ])
 
     await update.message.reply_text(
         f"⚔️ {user1.first_name} ɴᴇ {user2.first_name} ᴋᴏ ᴄʜᴀʟʟᴇɴɢᴇ ᴋɪʏᴀ!",
-        reply_markup=keyboard
+        reply_markup=kb
     )
 
-# ================= ACCEPT BUTTON =================
+
+# ================= ACCEPT =================
 async def accept_btn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
     uid = int(query.data.split("_")[1])
 
-    if query.from_user.id != uid:
-        await query.answer("❌ Ye tumhara duel nahi hai", show_alert=True)
-        return
-
     for d in duels.values():
         if d["p2"] == uid:
             await query.edit_message_text(
-                f"🔥 Dᴜᴇʟ Aᴄᴄᴇᴘᴛᴇᴅ!\n⏳ {d['p1_name']} ᴀᴘɴɪ ᴍᴏᴠᴇ ᴋᴀʀ ʀᴀʜᴀ ʜᴀɪ..."
+                f"🔥 Dᴜᴇʟ Aᴄᴄᴇᴘᴛᴇᴅ!\n⏳ {d['p1_name']} ᴍᴏᴠᴇ..."
             )
+
             await send_number_choice(context, d["p1"])
             return
 
-# ================= ACCEPT COMMAND =================
-async def accept(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user2 = update.effective_user
-
-    for d in duels.values():
-        if d["p2"] == user2.id:
-            await context.bot.send_message(
-                d["chat"],
-                f"🔥 Dᴜᴇʟ Aᴄᴄᴇᴘᴛᴇᴅ!\n⏳ {d['p1_name']} ᴀᴘɴɪ ᴍᴏᴠᴇ ᴋᴀʀ ʀᴀʜᴀ ʜᴀɪ..."
-            )
-            await send_number_choice(context, d["p1"])
-            return
 
 # ================= NUMBER =================
 async def send_number_choice(context, uid):
     kb = [
-        [InlineKeyboardButton(f"🎯 {i}", callback_data=f"num_{uid}_{i}") for i in range(1,4)],
-        [InlineKeyboardButton(f"🎯 {i}", callback_data=f"num_{uid}_{i}") for i in range(4,7)]
+        [InlineKeyboardButton(str(i), callback_data=f"num_{uid}_{i}") for i in range(1, 4)],
+        [InlineKeyboardButton(str(i), callback_data=f"num_{uid}_{i}") for i in range(4, 7)]
     ]
 
     await context.bot.send_message(
         uid,
-        "🎲 𝗖ʜᴏᴏꜱᴇ ʏᴏᴜʀ ʟᴜᴄᴋʏ ɴᴜᴍʙᴇʀ 😈\n(ꜱᴇᴄʀᴇᴛ 🤫)",
-        reply_markup=InlineKeyboardMarkup(kb)
+        "🎲 𝗖ʜᴏᴏꜱᴇ ʏᴏᴜʀ ʟᴜᴄᴋʏ ɴᴜᴍʙᴇʀ 😈"
     )
+
 
 # ================= BET =================
 async def send_bet_choice(context, uid):
-    bets = [500,700,1000,2000,5000,10000]
+    bets = [500, 700, 1000, 2000, 5000, 10000]
 
-    kb = [[InlineKeyboardButton(f"💰 𝐁𝐄𝐓-{b}", callback_data=f"bet_{uid}_{b}")] for b in bets]
+    kb = [[InlineKeyboardButton(f"💰 {b}", callback_data=f"bet_{uid}_{b}")] for b in bets]
 
     await context.bot.send_message(
         uid,
-        "💸 𝗖ʜᴏᴏꜱᴇ ʏᴏᴜʀ ʙᴇᴛ 💰",
-        reply_markup=InlineKeyboardMarkup(kb)
+        "💸 𝗖ʜᴏᴏꜱᴇ ʏᴏᴜʀ ʙᴇᴛ 💰"
     )
 
-# ================= BUTTON =================
+
 # ================= BUTTON =================
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-    data_cb = query.data.split("_")
+    data = query.data.split("_")
 
-    # ================= NUMBER =================
-    if data_cb[0] == "num":
-        uid = int(data_cb[1])
-        num = int(data_cb[2])
+    for d in duels.values():
 
-        for d in duels.values():
+        # ================= NUMBER =================
+        if data[0] == "num":
+
+            uid = int(data[1])
+            num = int(data[2])
 
             if d["p1"] == uid and not d["p1_done"]:
                 d["p1_num"] = num
                 d["p1_done"] = True
 
-                await query.edit_message_text("✅ Nᴜᴍʙᴇʀ Lᴏᴄᴋᴇᴅ 🔒")
-
-                await context.bot.send_message(
-                    uid,
-                    f"🎯 Yᴏᴜʀ ʟᴜᴄᴋʏ ɴᴜᴍʙᴇʀ: {num}\n✨ Yᴇ ᴛᴜᴍʜᴀʀɪ ᴋɪꜱᴍᴀᴛ ʙᴀᴅᴀʟ ꜱᴀᴋᴛᴀ ʜᴀɪ 😈"
+                await query.edit_message_text(
+                    f"✅ {d['p1_name']} Nᴜᴍʙᴇʀ Lᴏᴄᴋᴇᴅ 🔒"
                 )
 
                 await context.bot.send_message(
                     d["chat"],
-                    f"🎯 {d['p1_name']} ɴᴇ ɴᴜᴍʙᴇʀ ᴄʜᴏᴏꜱᴇ ᴋᴀʀ ʟɪʏᴀ!"
+                    f"🎯 {d['p1_name']} ɴᴇ ɴᴜᴍʙᴇʀ ᴄʜᴏᴏꜱᴇ ᴋɪʏᴀ!"
                 )
 
                 await send_bet_choice(context, uid)
                 return
 
-            elif d["p2"] == uid and not d["p2_done"]:
+            if d["p2"] == uid and not d["p2_done"]:
                 d["p2_num"] = num
                 d["p2_done"] = True
 
-                await query.edit_message_text("✅ Nᴜᴍʙᴇʀ Lᴏᴄᴋᴇᴅ 🔒")
-
-                await context.bot.send_message(
-                    uid,
-                    f"🎯 Yᴏᴜʀ ʟᴜᴄᴋʏ ɴᴜᴍʙᴇʀ: {num}\n✨ Bʜᴀɢᴡᴀɴ ᴛᴜᴍʜᴀʀᴇ ꜱᴀᴀᴛʜ ʜᴀɪ 😈"
+                await query.edit_message_text(
+                    f"✅ {d['p2_name']} Nᴜᴍʙᴇʀ Lᴏᴄᴋᴇᴅ 🔒"
                 )
 
                 await context.bot.send_message(
@@ -2084,17 +2065,19 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await send_bet_choice(context, uid)
                 return
 
-    # ================= BET =================
-    if data_cb[0] == "bet":
-        uid = int(data_cb[1])
-        bet = int(data_cb[2])
 
-        for d in duels.values():
+        # ================= BET =================
+        if data[0] == "bet":
+
+            uid = int(data[1])
+            bet = int(data[2])
 
             if d["p1"] == uid:
                 d["bet"] = bet
 
-                await query.edit_message_text(f"💰 Bᴇᴛ Lᴏᴄᴋᴇᴅ: {bet}")
+                await query.edit_message_text(
+                    f"💰 {d['p1_name']} ɴᴇ ʙᴇᴛ ʟᴏᴄᴋ ᴋɪʏᴀ: {bet}"
+                )
 
                 await context.bot.send_message(
                     d["chat"],
@@ -2104,39 +2087,37 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await send_number_choice(context, d["p2"])
                 return
 
-            elif d["p2"] == uid:
+            if d["p2"] == uid:
 
-                # ✅ REAL DATA USE
-                u1 = data[str(d["p1"])]
-                u2 = data[str(d["p2"])]
+                if not d.get("bet"):
+                    await query.answer("Wait for P1 bet", show_alert=True)
+                    return
+
+                u1 = data_store[str(d["p1"])]
+                u2 = data_store[str(d["p2"])]
 
                 if u2["money"] < d["bet"]:
                     await context.bot.send_message(
                         d["chat"],
-                        f"❌ Pᴀɪꜱᴀ ᴋᴀᴍ ʜᴀɪ!\n{d['p1_name']} ɴᴇ {d['bet']} ʙᴇᴛ ʟᴀɢᴀʏᴀ ʜᴀɪ"
+                        f"❌ {d['p2_name']} ke paas paise kam hai"
                     )
                     return
 
-                # ✅ CUT MONEY
                 u1["money"] -= d["bet"]
                 u2["money"] -= d["bet"]
 
                 save_data()
                 save_to_mongo()
 
-                await query.edit_message_text(f"💰 Bᴇᴛ Lᴏᴄᴋᴇᴅ: {d['bet']}")
-
-                await context.bot.send_message(
-                    d["chat"],
-                    "🔥 Dᴜᴇʟ ꜱᴛᴀʀᴛ ʜᴏɴᴇ ᴡᴀʟᴀ ʜᴀɪ..."
+                await query.edit_message_text(
+                    f"💰 {d['p2_name']} ɴᴇ ʙᴇᴛ ᴄᴏɴꜰɪʀᴍ ᴋɪʏᴀ: {d['bet']}"
                 )
 
                 await start_duel(context, d)
                 return
-                
-# ================= DUEL =================
 
-# ================= DUEL =================
+
+# ================= DUEL ENGINE =================
 async def start_duel(context, d):
     chat = d["chat"]
 
@@ -2151,43 +2132,44 @@ async def start_duel(context, d):
     r1 = msg1.dice.value
     r2 = msg2.dice.value
 
-    # BOOST LOGIC SAME
-    boost1 = 2 if r1 == d["p1_num"] else (1 if abs(r1 - d["p1_num"]) == 1 else 0)
-    boost2 = 2 if r2 == d["p2_num"] else (1 if abs(r2 - d["p2_num"]) == 1 else 0)
+    boost1 = 2 if r1 == d.get("p1_num") else (1 if abs(r1 - d.get("p1_num", 0)) == 1 else 0)
+    boost2 = 2 if r2 == d.get("p2_num") else (1 if abs(r2 - d.get("p2_num", 0)) == 1 else 0)
 
     final1 = r1 + boost1
     final2 = r2 + boost2
 
     total = d["bet"] * 2
 
-    # ✅ FIXED: REAL DATA
-    u1 = data[str(d["p1"])]
-    u2 = data[str(d["p2"])]
+    u1 = data_store[str(d["p1"])]
+    u2 = data_store[str(d["p2"])]
 
     if final1 > final2:
         u1["money"] += total
         winner = d["p1_name"]
+
     elif final2 > final1:
         u2["money"] += total
         winner = d["p2_name"]
+
     else:
         u1["money"] += d["bet"]
         u2["money"] += d["bet"]
         winner = "Draw"
 
-    # ✅ SAVE AFTER RESULT
     save_data()
     save_to_mongo()
 
     await context.bot.send_message(
         chat,
         f"🎲 𝗥ᴇꜱᴜʟᴛ\n\n"
-        f"{d['p1_name']}: {r1} (+{boost1})\n"
-        f"{d['p2_name']}: {r2} (+{boost2})\n\n"
-        f"🏆 Wɪɴɴᴇʀ: {winner}\n"
+        f"👤 {d['p1_name']}: {r1}\n"
+        f"👤 {d['p2_name']}: {r2}\n\n"
+        f"🏆 Wɪɴɴᴇʀ: 👑 {winner}\n"
         f"💰 Tᴏᴛᴀʟ: {total}"
     )
 
+    
+    
 
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
