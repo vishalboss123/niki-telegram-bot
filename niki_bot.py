@@ -2033,55 +2033,107 @@ async def send_bet_choice(context, uid):
 
 # ================= BUTTON =================
 # ================= BUTTON =================
-elif data[0] == "bet":
-    uid = int(data[1])
-    bet = int(data[2])
+async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
 
-    for d in duels.values():
+    data_cb = query.data.split("_")
 
-        if d["p1"] == uid:
-            d["bet"] = bet
+    # ================= NUMBER =================
+    if data_cb[0] == "num":
+        uid = int(data_cb[1])
+        num = int(data_cb[2])
 
-            await query.edit_message_text(f"💰 Bᴇᴛ Lᴏᴄᴋᴇᴅ: {bet}")
+        for d in duels.values():
 
-            await context.bot.send_message(
-                d["chat"],
-                f"💰 {d['p1_name']} ɴᴇ {bet} ʙᴇᴛ ʟᴀɢᴀʏᴀ!"
-            )
+            if d["p1"] == uid and not d["p1_done"]:
+                d["p1_num"] = num
+                d["p1_done"] = True
 
-            await send_number_choice(context, d["p2"])
-            return
+                await query.edit_message_text("✅ Nᴜᴍʙᴇʀ Lᴏᴄᴋᴇᴅ 🔒")
 
-        elif d["p2"] == uid:
+                await context.bot.send_message(
+                    uid,
+                    f"🎯 Yᴏᴜʀ ʟᴜᴄᴋʏ ɴᴜᴍʙᴇʀ: {num}\n✨ Yᴇ ᴛᴜᴍʜᴀʀɪ ᴋɪꜱᴍᴀᴛ ʙᴀᴅᴀʟ ꜱᴀᴋᴛᴀ ʜᴀɪ 😈"
+                )
 
-            # ✅ FIXED: REAL DATA USE
-            u1 = data[str(d["p1"])]
-            u2 = data[str(d["p2"])]
-
-            if u2["money"] < d["bet"]:
                 await context.bot.send_message(
                     d["chat"],
-                    f"❌ Pᴀɪꜱᴀ ᴋᴀᴍ ʜᴀɪ!\n{d['p1_name']} ɴᴇ {d['bet']} ʙᴇᴛ ʟᴀɢᴀʏᴀ ʜᴀɪ"
+                    f"🎯 {d['p1_name']} ɴᴇ ɴᴜᴍʙᴇʀ ᴄʜᴏᴏꜱᴇ ᴋᴀʀ ʟɪʏᴀ!"
                 )
+
+                await send_bet_choice(context, uid)
                 return
 
-            # ✅ CUT REAL MONEY
-            u1["money"] -= d["bet"]
-            u2["money"] -= d["bet"]
+            elif d["p2"] == uid and not d["p2_done"]:
+                d["p2_num"] = num
+                d["p2_done"] = True
 
-            save_data()
-            save_to_mongo()
+                await query.edit_message_text("✅ Nᴜᴍʙᴇʀ Lᴏᴄᴋᴇᴅ 🔒")
 
-            await query.edit_message_text(f"💰 Bᴇᴛ Lᴏᴄᴋᴇᴅ: {d['bet']}")
+                await context.bot.send_message(
+                    uid,
+                    f"🎯 Yᴏᴜʀ ʟᴜᴄᴋʏ ɴᴜᴍʙᴇʀ: {num}\n✨ Bʜᴀɢᴡᴀɴ ᴛᴜᴍʜᴀʀᴇ ꜱᴀᴀᴛʜ ʜᴀɪ 😈"
+                )
 
-            await context.bot.send_message(
-                d["chat"],
-                "🔥 Dᴜᴇʟ ꜱᴛᴀʀᴛ ʜᴏɴᴇ ᴡᴀʟᴀ ʜᴀɪ..."
-            )
+                await context.bot.send_message(
+                    d["chat"],
+                    f"🎯 {d['p2_name']} ʀᴇᴀᴅʏ!"
+                )
 
-            await start_duel(context, d)
-            return
+                await send_bet_choice(context, uid)
+                return
 
+    # ================= BET =================
+    if data_cb[0] == "bet":
+        uid = int(data_cb[1])
+        bet = int(data_cb[2])
+
+        for d in duels.values():
+
+            if d["p1"] == uid:
+                d["bet"] = bet
+
+                await query.edit_message_text(f"💰 Bᴇᴛ Lᴏᴄᴋᴇᴅ: {bet}")
+
+                await context.bot.send_message(
+                    d["chat"],
+                    f"💰 {d['p1_name']} ɴᴇ {bet} ʙᴇᴛ ʟᴀɢᴀʏᴀ!"
+                )
+
+                await send_number_choice(context, d["p2"])
+                return
+
+            elif d["p2"] == uid:
+
+                # ✅ REAL DATA USE
+                u1 = data[str(d["p1"])]
+                u2 = data[str(d["p2"])]
+
+                if u2["money"] < d["bet"]:
+                    await context.bot.send_message(
+                        d["chat"],
+                        f"❌ Pᴀɪꜱᴀ ᴋᴀᴍ ʜᴀɪ!\n{d['p1_name']} ɴᴇ {d['bet']} ʙᴇᴛ ʟᴀɢᴀʏᴀ ʜᴀɪ"
+                    )
+                    return
+
+                # ✅ CUT MONEY
+                u1["money"] -= d["bet"]
+                u2["money"] -= d["bet"]
+
+                save_data()
+                save_to_mongo()
+
+                await query.edit_message_text(f"💰 Bᴇᴛ Lᴏᴄᴋᴇᴅ: {d['bet']}")
+
+                await context.bot.send_message(
+                    d["chat"],
+                    "🔥 Dᴜᴇʟ ꜱᴛᴀʀᴛ ʜᴏɴᴇ ᴡᴀʟᴀ ʜᴀɪ..."
+                )
+
+                await start_duel(context, d)
+                return
+                
 # ================= DUEL =================
 
 # ================= DUEL =================
