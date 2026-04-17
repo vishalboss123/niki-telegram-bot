@@ -1906,8 +1906,11 @@ async def send(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # 👉 Auto pin in groups
             if user["type"] in ["group", "supergroup"]:
                 try:
-                    await context.bot.pin_chat_message(user["chat_id"], msg.message_id)
-          randomexcept:
+                    await context.bot.pin_chat_message(
+                        user["chat_id"],
+                        msg.message_id
+                    )
+                except:
                     pass
 
             total += 1
