@@ -2348,6 +2348,52 @@ async def tickle(update, context):
     await send_action(update, context, "tickle",
     "🤣 {u1} 𝐍𝐞 {u2} 𝐊𝐨 𝐓𝐢𝐜𝐤𝐥𝐞 𝐤𝐢𝐲𝐚 😂")
 
+
+
+# ================= SPECIAL USERS =================
+SPECIAL_USERS = [
+    "YT_BISHALL",
+    "ll_Sassy_Queen_ll",
+    "USERNAME_3_HERE"   # <-- yaha apna 3rd username dal dena (without @)
+]
+
+# ================= LOVE COMMAND =================
+async def love(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.message.reply_to_message:
+        await update.message.reply_text("❌ Reply karke /love use karo!")
+        return
+
+    user1 = update.effective_user
+    user2 = update.message.reply_to_message.from_user
+
+    # Username (without @)
+    username1 = user1.username if user1.username else str(user1.id)
+    username2 = user2.username if user2.username else str(user2.id)
+
+    # Check if both are in special list
+    if username1 in SPECIAL_USERS and username2 in SPECIAL_USERS:
+        love_percent = 100
+    else:
+        love_percent = random.randint(1, 100)
+
+    # Clickable name (tg://user?id=)
+    name1 = f"<a href='tg://user?id={user1.id}'>{user1.first_name}</a>"
+    name2 = f"<a href='tg://user?id={user2.id}'>{user2.first_name}</a>"
+
+    # Stylish format (tumhara wala)
+    text = f"""
+❤️ Lᴏᴠᴇ Mᴇᴛᴇʀ Rᴇᴘᴏʀᴛ ❤️
+
+{name1} ❤️ {name2}
+
+Lᴏᴠᴇ Cᴏᴍᴘᴀᴛɪʙɪʟɪᴛʏ: {love_percent}% ❤️
+"""
+
+    await update.message.reply_text(text, parse_mode="HTML")
+
+
+
+
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
@@ -2417,7 +2463,8 @@ def main():
     app.add_handler(CommandHandler("cuddle", cuddle))
     app.add_handler(CommandHandler("poke", poke))
     app.add_handler(CommandHandler("tickle", tickle))
-
+    app.add_handler(CommandHandler("love", love))
+    
     # Callback
     app.add_handler(CallbackQueryHandler(button_callback))
 
