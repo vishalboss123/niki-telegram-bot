@@ -2237,7 +2237,10 @@ async def start_duel(context, d):
 
 
 # ================= DB =================
-
+# ================= DB =================
+MONGO_URL = "mongodb+srv://vishal:VISHAL123@vishal07.espy0qo.mongodb.net/?appName=Vishal07"
+client = MongoClient(MONGO_URL)
+db = client["botdb"]
 gif_collection = db["gifs"]
 
 # ================= LOAD GIF =================
