@@ -1936,7 +1936,6 @@ BOT_TOKEN = "8614646410:AAEDw9e9dJLxeElsixxCfolh2yrn8pBjxD4"
 duels = {}
 
 
-
 # ================= DUEL =================
 async def duel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user1 = update.effective_user
@@ -1951,7 +1950,7 @@ async def duel(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "4️⃣ Pʟᴀʏᴇʀ1 ʙᴇᴛ ꜱᴇᴛ ᴋᴀʀᴛᴀ ʜᴀɪ 💰\n"
             "5️⃣ Pʟᴀʏᴇʀ2 ᴜꜱɪ ʙᴇᴛ ᴀᴄᴄᴇᴘᴛ ᴋᴀʀᴛᴀ ʜᴀɪ\n\n"
             "🎲 Fɪɴᴀʟ:\n"
-            "Jɪꜱᴋᴀ (Dɪᴄᴇ + Lᴜᴄᴋ) ʙᴀᴅᴀ → Wɪɴɴᴇʀ 🏆\n\n"
+            "Jɪꜱᴋᴀ Dɪᴄᴇ ʙᴀᴅᴀ → Wɪɴɴᴇʀ 🏆\n\n"
             "💰 Wɪɴɴᴇʀ ꜱᴀʀᴀ ᴍᴏɴᴇʏ ʟᴇ ᴊᴀᴛᴀ ʜᴀɪ 😈\n\n"
             "🔥 Aʙ ʀᴇᴘʟʏ ᴋᴀʀᴏ ᴀᴜʀ /duel ᴅᴀʟᴏ!"
         )
@@ -1999,14 +1998,15 @@ async def accept_btn(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ================= NUMBER =================
 async def send_number_choice(context, uid):
-    kb = [
+    kb = InlineKeyboardMarkup([
         [InlineKeyboardButton(str(i), callback_data=f"num_{uid}_{i}") for i in range(1, 4)],
         [InlineKeyboardButton(str(i), callback_data=f"num_{uid}_{i}") for i in range(4, 7)]
-    ]
+    ])
 
     await context.bot.send_message(
         uid,
-        "🎲 𝗖ʜᴏᴏꜱᴇ ʏᴏᴜʀ ʟᴜᴄᴋʏ ɴᴜᴍʙᴇʀ 😈"
+        "🎲 𝗖ʜᴏᴏꜱᴇ ʏᴏᴜʀ ʟᴜᴄᴋʏ ɴᴜᴍʙᴇʀ 😈",
+        reply_markup=kb
     )
 
 
@@ -2014,11 +2014,15 @@ async def send_number_choice(context, uid):
 async def send_bet_choice(context, uid):
     bets = [500, 700, 1000, 2000, 5000, 10000]
 
-    kb = [[InlineKeyboardButton(f"💰 {b}", callback_data=f"bet_{uid}_{b}")] for b in bets]
+    kb = InlineKeyboardMarkup([
+        [InlineKeyboardButton(f"💰 {b}", callback_data=f"bet_{uid}_{b}")]
+        for b in bets
+    ])
 
     await context.bot.send_message(
         uid,
-        "💸 𝗖ʜᴏᴏꜱᴇ ʏᴏᴜʀ ʙᴇᴛ 💰"
+        "💸 𝗖ʜᴏᴏꜱᴇ ʏᴏᴜʀ ʙᴇᴛ 💰",
+        reply_markup=kb
     )
 
 
@@ -2066,7 +2070,11 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     f"🎯 {d['p2_name']} ʀᴇᴀᴅʏ!"
                 )
 
-                await send_bet_choice(context, uid)
+                await context.bot.send_message(
+                    d["chat"],
+                    f"🔥 {d['p1_name']} vs {d['p2_name']} ʀᴇᴀᴅʏ! Gᴀᴍᴇ ꜱᴛᴀʀᴛ ꜱᴏᴏɴ..."
+                )
+
                 return
 
 
@@ -2117,6 +2125,11 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     f"💰 {d['p2_name']} ɴᴇ ʙᴇᴛ ᴄᴏɴꜰɪʀᴍ ᴋɪʏᴀ: {d['bet']}"
                 )
 
+                await context.bot.send_message(
+                    d["chat"],
+                    f"🔥 {d['p1_name']} vs {d['p2_name']} ᴅᴜᴇʟ ꜱᴛᴀʀᴛ!"
+                )
+
                 await start_duel(context, d)
                 return
 
@@ -2136,22 +2149,16 @@ async def start_duel(context, d):
     r1 = msg1.dice.value
     r2 = msg2.dice.value
 
-    boost1 = 2 if r1 == d.get("p1_num") else (1 if abs(r1 - d.get("p1_num", 0)) == 1 else 0)
-    boost2 = 2 if r2 == d.get("p2_num") else (1 if abs(r2 - d.get("p2_num", 0)) == 1 else 0)
-
-    final1 = r1 + boost1
-    final2 = r2 + boost2
-
     total = d["bet"] * 2
 
     u1 = data_store[str(d["p1"])]
     u2 = data_store[str(d["p2"])]
 
-    if final1 > final2:
+    if r1 > r2:
         u1["money"] += total
         winner = d["p1_name"]
 
-    elif final2 > final1:
+    elif r2 > r1:
         u2["money"] += total
         winner = d["p2_name"]
 
@@ -2170,7 +2177,8 @@ async def start_duel(context, d):
         f"👤 {d['p2_name']}: {r2}\n\n"
         f"🏆 Wɪɴɴᴇʀ: 👑 {winner}\n"
         f"💰 Tᴏᴛᴀʟ: {total}"
-    )
+            )
+
 
     
     
