@@ -2354,7 +2354,7 @@ async def tickle(update, context):
 SPECIAL_USERS = [
     "YT_BISHALL",
     "ll_Sassy_Queen_ll",
-    "HTML_cutie"   # <-- yaha apna 3rd username dal dena (without @)
+    "ll_Vishal_Heart_ll"   # <-- yaha apna 3rd username dal dena (without @)
 ]
 
 # ================= LOVE COMMAND =================
