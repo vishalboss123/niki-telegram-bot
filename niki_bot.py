@@ -2238,7 +2238,6 @@ def main():
     app.add_handler(CommandHandler("send", send))
     app.add_handler(CommandHandler("stats", stats))
     app.add_handler(CommandHandler("duel", duel))
-    app.add_handler(CommandHandler("accept", accept))
     app.add_handler(CallbackQueryHandler(accept_btn, pattern="^accept_"))
     app.add_handler(CallbackQueryHandler(button)) 
     
