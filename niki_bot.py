@@ -2232,6 +2232,118 @@ async def start_duel(context, d):
         f"💰 Tᴏᴛᴀʟ: {total}"
     )    
     
+#=========================ROMANTIC===============================
+
+
+
+# ================= DB =================
+
+gif_collection = db["gifs"]
+
+# ================= LOAD GIF =================
+def get_gifs(command):
+    data = gif_collection.find_one({"cmd": command})
+    if data:
+        return data.get("gifs", [])
+    return []
+
+# ================= SAVE GIF =================
+def save_gif(cmd, gif):
+    gif_collection.update_one(
+        {"cmd": cmd},
+        {"$addToSet": {"gifs": gif}},  # duplicate avoid karega 🔥
+        upsert=True
+    )
+
+# ================= /savegif COMMAND =================
+async def savegif(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.message.reply_to_message:
+        await update.message.reply_text("❌ GIF pe reply karke use karo")
+        return
+
+    if len(context.args) == 0:
+        await update.message.reply_text("❌ Use: /savegif kiss")
+        return
+
+    cmd = context.args[0].lower()
+    msg = update.message.reply_to_message
+
+    gif = None
+
+    # GIF / Animation detect
+    if msg.animation:
+        gif = msg.animation.file_id
+    elif msg.document and msg.document.mime_type == "video/mp4":
+        gif = msg.document.file_id
+
+    if not gif:
+        await update.message.reply_text("❌ Ye GIF nahi hai")
+        return
+
+    save_gif(cmd, gif)
+    await update.message.reply_text(f"✅ GIF saved in /{cmd}")
+
+# ================= COMMON FUNCTION =================
+async def send_action(update: Update, context: ContextTypes.DEFAULT_TYPE, cmd, text_template):
+    if not update.message.reply_to_message:
+        await update.message.reply_text("❌ Reply karke use karo")
+        return
+
+    user1 = update.message.from_user.first_name
+    user2 = update.message.reply_to_message.from_user.first_name
+
+    gifs = get_gifs(cmd)
+    if not gifs:
+        await update.message.reply_text("❌ GIF nahi mila")
+        return
+
+    gif = random.choice(gifs)
+
+    msg = text_template.format(u1=user1, u2=user2)
+
+    await update.message.reply_animation(animation=gif, caption=msg)
+
+# ================= COMMANDS =================
+
+async def kiss(update, context):
+    await send_action(update, context, "kiss",
+    "😘 {u1} 𝐍𝐞 {u2} 𝐊𝐨 𝐊𝐢𝐬𝐬 𝐝𝐢𝐲𝐚 💋")
+
+async def hug(update, context):
+    await send_action(update, context, "hug",
+    "🤗 {u1} 𝐍𝐞 {u2} 𝐊𝐨 𝐇𝐮𝐠 𝐤𝐢𝐲𝐚 ❤️")
+
+async def slap(update, context):
+    await send_action(update, context, "slap",
+    "😂 {u1} 𝐍𝐞 {u2} 𝐊𝐨 𝐒𝐥𝐚𝐩 𝐦𝐚𝐫𝐚 👋")
+
+async def kick(update, context):
+    await send_action(update, context, "kick",
+    "😆 {u1} 𝐍𝐞 {u2} 𝐊𝐨 𝐊𝐢𝐜𝐤 𝐦𝐚𝐫𝐚 🦵")
+
+async def pat(update, context):
+    await send_action(update, context, "pat",
+    "🥰 {u1} 𝐍𝐞 {u2} 𝐊𝐨 𝐏𝐚𝐭 𝐤𝐢𝐲𝐚 🫳")
+
+async def punch(update, context):
+    await send_action(update, context, "punch",
+    "👊 {u1} 𝐍𝐞 {u2} 𝐊𝐨 𝐏𝐮𝐧𝐜𝐡 𝐦𝐚𝐫𝐚 💥")
+
+async def bite(update, context):
+    await send_action(update, context, "bite",
+    "😋 {u1} 𝐍𝐞 {u2} 𝐊𝐨 𝐁𝐢𝐭𝐞 𝐤𝐢𝐲𝐚 🦷")
+
+async def cuddle(update, context):
+    await send_action(update, context, "cuddle",
+    "💞 {u1} 𝐍𝐞 {u2} 𝐊𝐨 𝐂𝐮𝐝𝐝𝐥𝐞 𝐤𝐢𝐲𝐚 🤍")
+
+async def poke(update, context):
+    await send_action(update, context, "poke",
+    "👉 {u1} 𝐍𝐞 {u2} 𝐊𝐨 𝐏𝐨𝐤𝐞 𝐤𝐢𝐲𝐚 😜")
+
+async def tickle(update, context):
+    await send_action(update, context, "tickle",
+    "🤣 {u1} 𝐍𝐞 {u2} 𝐊𝐨 𝐓𝐢𝐜𝐤𝐥𝐞 𝐤𝐢𝐲𝐚 😂")
 
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -2291,7 +2403,18 @@ def main():
     app.add_handler(CallbackQueryHandler(accept_btn, pattern="^accept_"))
     app.add_handler(CallbackQueryHandler(cancel_btn, pattern="^cancel_"))
     app.add_handler(CallbackQueryHandler(button)) 
-    
+    app.add_handler(CommandHandler("savegif", savegif))  # 🔥 NEW
+    app.add_handler(CommandHandler("kiss", kiss))
+    app.add_handler(CommandHandler("hug", hug))
+    app.add_handler(CommandHandler("slap", slap))
+    app.add_handler(CommandHandler("kick", kick))
+    app.add_handler(CommandHandler("pat", pat))
+    app.add_handler(CommandHandler("punch", punch))
+    app.add_handler(CommandHandler("bite", bite))
+    app.add_handler(CommandHandler("cuddle", cuddle))
+    app.add_handler(CommandHandler("poke", poke))
+    app.add_handler(CommandHandler("tickle", tickle))
+
     # Callback
     app.add_handler(CallbackQueryHandler(button_callback))
 
