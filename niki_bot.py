@@ -1934,6 +1934,10 @@ import random
 BOT_TOKEN = "8614646410:AAEDw9e9dJLxeElsixxCfolh2yrn8pBjxD4"
 
 duels = {}
+duel_tasks = {}
+
+# ================= DUEL =================
+
 
 
 # ================= DUEL =================
@@ -1970,7 +1974,10 @@ async def duel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     }
 
     kb = InlineKeyboardMarkup([
-        [InlineKeyboardButton("⚔️ Accept Duel", callback_data=f"accept_{user2.id}")]
+        [
+            InlineKeyboardButton("⚔️ Accept Duel", callback_data=f"accept_{user2.id}"),
+            InlineKeyboardButton("❌ Cancel", callback_data=f"cancel_{user2.id}")
+        ]
     ])
 
     await update.message.reply_text(
@@ -1978,22 +1985,69 @@ async def duel(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=kb
     )
 
+    async def timeout():
+        await asyncio.sleep(15)
+
+        if user1.id in duels:
+            await context.bot.send_message(
+                update.effective_chat.id,
+                f"⏳ {user2.first_name} accept karo duel!"
+            )
+
+        await asyncio.sleep(15)
+
+        if user1.id in duels:
+            del duels[user1.id]
+            await context.bot.send_message(
+                update.effective_chat.id,
+                "❌ Duel cancel ho gaya (no response)"
+            )
+
+    duel_tasks[user1.id] = asyncio.create_task(timeout())
+
 
 # ================= ACCEPT =================
 async def accept_btn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-    uid = int(query.data.split("_")[1])
+    uid = query.from_user.id
 
-    for d in duels.values():
+    for key, d in duels.items():
         if d["p2"] == uid:
+
+            if key in duel_tasks:
+                duel_tasks[key].cancel()
+
             await query.edit_message_text(
                 f"🔥 Dᴜᴇʟ Aᴄᴄᴇᴘᴛᴇᴅ!\n⏳ {d['p1_name']} ᴍᴏᴠᴇ..."
             )
 
             await send_number_choice(context, d["p1"])
             return
+
+    await query.answer("Tum is duel ke player nahi ho!", show_alert=True)
+
+
+# ================= CANCEL =================
+async def cancel_btn(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    uid = query.from_user.id
+
+    for key, d in duels.items():
+        if d["p2"] == uid:
+
+            if key in duel_tasks:
+                duel_tasks[key].cancel()
+
+            del duels[key]
+
+            await query.edit_message_text("❌ Duel cancel ho gaya")
+            return
+
+    await query.answer("Tum cancel nahi kar sakte!", show_alert=True)
 
 
 # ================= NUMBER =================
@@ -2035,7 +2089,6 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     for d in duels.values():
 
-        # ================= NUMBER =================
         if data[0] == "num":
 
             uid = int(data[1])
@@ -2054,7 +2107,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     f"🎯 {d['p1_name']} ɴᴇ ɴᴜᴍʙᴇʀ ᴄʜᴏᴏꜱᴇ ᴋɪʏᴀ!"
                 )
 
-                await send_bet_choice(context, uid)
+                await send_number_choice(context, d["p2"])
                 return
 
             if d["p2"] == uid and not d["p2_done"]:
@@ -2075,10 +2128,10 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     f"🔥 {d['p1_name']} vs {d['p2_name']} ʀᴇᴀᴅʏ! Gᴀᴍᴇ ꜱᴛᴀʀᴛ ꜱᴏᴏɴ..."
                 )
 
+                await send_bet_choice(context, d["p1"])
                 return
 
 
-        # ================= BET =================
         if data[0] == "bet":
 
             uid = int(data[1])
@@ -2096,7 +2149,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     f"💰 {d['p1_name']} ɴᴇ {bet} ʙᴇᴛ ʟᴀɢᴀʏᴀ!"
                 )
 
-                await send_number_choice(context, d["p2"])
+                await send_bet_choice(context, d["p2"])
                 return
 
             if d["p2"] == uid:
@@ -2177,10 +2230,7 @@ async def start_duel(context, d):
         f"👤 {d['p2_name']}: {r2}\n\n"
         f"🏆 Wɪɴɴᴇʀ: 👑 {winner}\n"
         f"💰 Tᴏᴛᴀʟ: {total}"
-            )
-
-
-    
+    )    
     
 
 # =================== MAIN FUNCTION ===================
@@ -2239,6 +2289,7 @@ def main():
     app.add_handler(CommandHandler("stats", stats))
     app.add_handler(CommandHandler("duel", duel))
     app.add_handler(CallbackQueryHandler(accept_btn, pattern="^accept_"))
+    app.add_handler(CallbackQueryHandler(cancel_btn, pattern="^cancel_"))
     app.add_handler(CallbackQueryHandler(button)) 
     
     # Callback
