@@ -2391,118 +2391,203 @@ Lᴏᴠᴇ Cᴏᴍᴘᴀᴛɪʙɪʟɪᴛʏ: {love_percent}% ❤️
 
     await update.message.reply_text(text, parse_mode="HTML")
 
+
+
+# ================= MONGO =================
+MONGO_URL = "mongodb+srv://vishal:VISHAL123@vishal07.espy0qo.mongodb.net/?appName=Vishal07"
+client = MongoClient(MONGO_URL)
+db = client["couple_db"]
+col = db["groups"]
+
 # ================= CONFIG =================
-SPECIAL_USERS = [
-    "YT_BISHALL",
-    "ll_Sassy_Queen_ll",
-    "ll_Vishal_Heart_ll"  # <-- yaha apna 3rd username dalna
+VIP = "YT_BISHALL"
+QUEEN = "ll_Sassy_Queen_ll"
+USER3 = "ll_Vishal_Heart_ll"
+
+SPECIAL_USERS = [VIP, QUEEN, USER3]
+COOLDOWN = 300
+
+
+# ================= SHAYARI =================
+SHAYARI_LIST = [
+    "Teri muskaan me kuch baat hai 💖",
+    "Nazron se shuru hui kahani 💞",
+    "Tum dono ek dusre ke liye bane ho 💕",
+    "Mohabbat ki hawa chal rahi hai 💘",
+    "Tere bina adhura tha sab 💓",
+    "Do dil jab milte hain 💖",
+    "Kuch toh jaadu hai tum dono ke beech ✨",
+    "Dil se dil ka connection 💞",
+    "Jodi ho toh tum dono jaisi 💕",
+    "Rab ne banayi hogi tumhari jodi 💘"
 ]
 
-COOLDOWN = 300  # 5 minutes
+# ================= DB =================
+def get_data(chat_id):
+    data = col.find_one({"_id": chat_id})
+    if not data:
+        data = {
+            "_id": chat_id,
+            "count": 0,
+            "last_used": 0,
+            "photo": None,
+            "toggle": 0,
+            "shayari_index": 0,
+            "history": [],
+            "leaderboard": {}  # pair count
+        }
+        col.insert_one(data)
+    return data
 
-# ================= STORAGE =================
-group_data = {}  
-# {chat_id: {"count": int, "last_used": time, "photo": file_id}}
+def update_data(chat_id, data):
+    col.update_one({"_id": chat_id}, {"$set": data})
 
-# ================= SET COUPLE PIC =================
+# ================= SET PHOTO =================
 async def setcouplepic(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message.reply_to_message or not update.message.reply_to_message.photo:
-        await update.message.reply_text("❌ Photo pe reply karke /setcouplepic use karo!")
+        await update.message.reply_text("❌ Photo pe reply karo!")
         return
 
     chat_id = update.effective_chat.id
     photo = update.message.reply_to_message.photo[-1].file_id
 
-    if chat_id not in group_data:
-        group_data[chat_id] = {"count": 0, "last_used": 0, "photo": None}
+    data = get_data(chat_id)
+    data["photo"] = photo
+    update_data(chat_id, data)
 
-    group_data[chat_id]["photo"] = photo
+    await update.message.reply_text("✅ Couple photo saved 💖")
 
-    await update.message.reply_text("✅ Couple photo set ho gaya!")
-
-# ================= COUPLE COMMAND =================
+# ================= COUPLE =================
 async def couple(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
+    user = update.effective_user
+    username = user.username if user.username else ""
 
-    if chat_id not in group_data:
-        group_data[chat_id] = {"count": 0, "last_used": 0, "photo": None}
-
-    data = group_data[chat_id]
+    data = get_data(chat_id)
 
     # ===== COOLDOWN =====
-    if time.time() - data["last_used"] < COOLDOWN:
-        await update.message.reply_text(
-            "⏳ A CᴏᴜᴘʟE Hᴀꜱ Bᴇᴇɴ Dᴇᴄʟᴀʀᴇᴅ Rᴇᴄᴇɴᴛʟʏ.\n⏰ Tʀʏ Aꜰᴛᴇʀ 5 Mɪɴꜱ"
-        )
-        return
+    if username not in SPECIAL_USERS:
+        if time.time() - data["last_used"] < COOLDOWN:
+            await update.message.reply_text(
+                "⏳ A CᴏᴜᴘʟE Hᴀꜱ Bᴇᴇɴ Dᴇᴄʟᴀʀᴇᴅ Rᴇᴄᴇɴᴛʟʏ.\n⏰ Tʀʏ Aꜰᴛᴇʀ 5 Mɪɴꜱ"
+            )
+            return
 
     data["last_used"] = time.time()
 
-    # ===== GET GROUP MEMBERS (approx via admins + active users) =====
+    # ===== SPECIAL USERS =====
+    special_members = {}
+    for uname in SPECIAL_USERS:
+        try:
+            member = await context.bot.get_chat_member(chat_id, uname)
+            special_members[uname] = member.user
+        except:
+            pass
+
+    # ===== RANDOM USERS =====
     members = []
     try:
         admins = await context.bot.get_chat_administrators(chat_id)
         for admin in admins:
-            members.append(admin.user)
+            if admin.user.username not in SPECIAL_USERS:
+                members.append(admin.user)
     except:
         pass
 
-    # add sender also
-    members.append(update.effective_user)
-
-    # remove duplicates
+    members.append(user)
     members = list({m.id: m for m in members}.values())
-
-    # ===== GET SPECIAL USERS FROM GROUP =====
-    special_members = []
-    for uname in SPECIAL_USERS:
-        try:
-            member = await context.bot.get_chat_member(chat_id, uname)
-            special_members.append(member.user)
-        except:
-            pass
+    members = [m for m in members if (m.username not in SPECIAL_USERS)]
 
     # ===== LOGIC =====
-    data["count"] += 1
+    if username in SPECIAL_USERS and len(special_members) >= 2:
+        user1, user2 = random.sample(list(special_members.values()), 2)
 
-    if data["count"] == 4 and len(special_members) >= 2:
-        # 4th time → ONLY special users
-        user1, user2 = random.sample(special_members, 2)
-        data["count"] = 0  # reset cycle
     else:
-        # 1st 3 times → ANY random members
-        if len(members) >= 2:
-            user1, user2 = random.sample(members, 2)
-        else:
-            await update.message.reply_text("❌ Not enough members!")
-            return
+        data["count"] += 1
 
-    # ===== CLICKABLE NAMES =====
+        if data["count"] == 4:
+            if data["toggle"] == 0:
+                user1 = special_members.get(VIP)
+                user2 = special_members.get(QUEEN)
+                data["toggle"] = 1
+            else:
+                user1 = special_members.get(VIP)
+                user2 = special_members.get(USER3)
+                data["toggle"] = 0
+
+            data["count"] = 0
+        else:
+            if len(members) < 2:
+                await update.message.reply_text("❌ Not enough users!")
+                return
+            user1, user2 = random.sample(members, 2)
+
+    # ===== SHAYARI =====
+    shayari = SHAYARI_LIST[data["shayari_index"]]
+    data["shayari_index"] = (data["shayari_index"] + 1) % len(SHAYARI_LIST)
+
+    # ===== HISTORY =====
+    data["history"].append((user1.id, user2.id, user1.first_name, user2.first_name))
+    data["history"] = data["history"][-10:]
+
+    # ===== LEADERBOARD =====
+    pair_key = f"{min(user1.id, user2.id)}_{max(user1.id, user2.id)}"
+    data["leaderboard"][pair_key] = data["leaderboard"].get(pair_key, 0) + 1
+
+    update_data(chat_id, data)
+
+    # ===== CLICKABLE =====
     name1 = f"<a href='tg://user?id={user1.id}'>{user1.first_name}</a>"
     name2 = f"<a href='tg://user?id={user2.id}'>{user2.first_name}</a>"
 
-    # ===== STYLE TEXT =====
     caption = f"""
-❤️ Tᴏᴅᴀʏs Cᴜᴛᴇ Cᴏᴜᴘʟᴇ ❤️
+💞 Tᴏᴅᴀʏ's Sᴘᴇᴄɪᴀʟ Cᴏᴜᴘʟᴇ 💞
 
-{name1} 💞 {name2}
+{name1} ❤️ {name2}
 
-Lᴏᴠᴇ Iꜱ Iɴ Tʜᴇ Aɪʀ Bᴜᴛ Iᴛ Hɪɢʜ Lᴇᴠᴇʟ Fɪʀᴇ 🥰💝❤️
-~ Fʀᴏᴍ Nɪᴋɪ Wɪᴛʜ Lᴏᴠᴇ 💋
+✨ "{shayari}"
+
+💖 Niki says: Tum dono ki jodi hamesha bani rahe 💕
 """
 
-    # ===== SEND PHOTO OR TEXT =====
-    if data["photo"]:
-        await update.message.reply_photo(
-            photo=data["photo"],
-            caption=caption,
-            parse_mode="HTML"
-        )
+    if data.get("photo"):
+        await update.message.reply_photo(photo=data["photo"], caption=caption, parse_mode="HTML")
     else:
-        await update.message.reply_text(
-            caption,
-            parse_mode="HTML"
-        )
+        await update.message.reply_text(caption, parse_mode="HTML")
+
+# ================= HISTORY =================
+async def couplehistory(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    data = get_data(update.effective_chat.id)
+
+    if not data["history"]:
+        await update.message.reply_text("❌ No history")
+        return
+
+    text = "💖 Couple History 💖\n\n"
+    for u1, u2, n1, n2 in reversed(data["history"]):
+        text += f"<a href='tg://user?id={u1}'>{n1}</a> ❤️ <a href='tg://user?id={u2}'>{n2}</a>\n"
+
+    await update.message.reply_text(text, parse_mode="HTML")
+
+# ================= LEADERBOARD =================
+async def coupleleaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    data = get_data(update.effective_chat.id)
+
+    if not data["leaderboard"]:
+        await update.message.reply_text("❌ No data yet")
+        return
+
+    sorted_pairs = sorted(data["leaderboard"].items(), key=lambda x: x[1], reverse=True)[:10]
+
+    text = "🏆 Top Couples 💖\n\n"
+
+    for i, (pair, count) in enumerate(sorted_pairs, start=1):
+        u1, u2 = pair.split("_")
+        text += f"{i}. <a href='tg://user?id={u1}'>User</a> ❤️ <a href='tg://user?id={u2}'>User</a> ➤ {count} times\n"
+
+    await update.message.reply_text(text, parse_mode="HTML")
+
+
 
 
 # =================== MAIN FUNCTION ===================
@@ -2577,7 +2662,8 @@ def main():
     app.add_handler(CommandHandler("love", love))
     app.add_handler(CommandHandler("couple", couple))
     app.add_handler(CommandHandler("setcouplepic", setcouplepic))
-
+    app.add_handler(CommandHandler("couplehistory", couplehistory))
+    app.add_handler(CommandHandler("coupleleaderboard", coupleleaderboard))
 
     # Callback
     app.add_handler(CallbackQueryHandler(button_callback))
