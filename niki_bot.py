@@ -1,11 +1,14 @@
+# ================= MONGO SETUP (FINAL CLEAN) =================
 from pymongo import MongoClient
 
 MONGO_URL = "mongodb+srv://vishal:VISHAL123@vishal07.espy0qo.mongodb.net/?appName=Vishal07"
 
 client = MongoClient(MONGO_URL)
 
+# ========= 1️⃣ MAIN DATA (BALANCE, BACKUP) =========
 db_main = client["mydatabase"]
-backup_col = db_main["backup"]   # balance + main data
+backup = db_main["backup"]   # ⚡ IMPORTANT (error fix)
+
 
 # =================== WEB SERVER (RENDER FIX) ===================
 import threading
