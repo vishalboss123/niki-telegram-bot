@@ -2391,7 +2391,118 @@ Lᴏᴠᴇ Cᴏᴍᴘᴀᴛɪʙɪʟɪᴛʏ: {love_percent}% ❤️
 
     await update.message.reply_text(text, parse_mode="HTML")
 
+# ================= CONFIG =================
+SPECIAL_USERS = [
+    "YT_BISHALL",
+    "ll_Sassy_Queen_ll",
+    "ll_Vishal_Heart_ll"  # <-- yaha apna 3rd username dalna
+]
 
+COOLDOWN = 300  # 5 minutes
+
+# ================= STORAGE =================
+group_data = {}  
+# {chat_id: {"count": int, "last_used": time, "photo": file_id}}
+
+# ================= SET COUPLE PIC =================
+async def setcouplepic(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.message.reply_to_message or not update.message.reply_to_message.photo:
+        await update.message.reply_text("❌ Photo pe reply karke /setcouplepic use karo!")
+        return
+
+    chat_id = update.effective_chat.id
+    photo = update.message.reply_to_message.photo[-1].file_id
+
+    if chat_id not in group_data:
+        group_data[chat_id] = {"count": 0, "last_used": 0, "photo": None}
+
+    group_data[chat_id]["photo"] = photo
+
+    await update.message.reply_text("✅ Couple photo set ho gaya!")
+
+# ================= COUPLE COMMAND =================
+async def couple(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+
+    if chat_id not in group_data:
+        group_data[chat_id] = {"count": 0, "last_used": 0, "photo": None}
+
+    data = group_data[chat_id]
+
+    # ===== COOLDOWN =====
+    if time.time() - data["last_used"] < COOLDOWN:
+        await update.message.reply_text(
+            "⏳ A CᴏᴜᴘʟE Hᴀꜱ Bᴇᴇɴ Dᴇᴄʟᴀʀᴇᴅ Rᴇᴄᴇɴᴛʟʏ.\n⏰ Tʀʏ Aꜰᴛᴇʀ 5 Mɪɴꜱ"
+        )
+        return
+
+    data["last_used"] = time.time()
+
+    # ===== GET GROUP MEMBERS (approx via admins + active users) =====
+    members = []
+    try:
+        admins = await context.bot.get_chat_administrators(chat_id)
+        for admin in admins:
+            members.append(admin.user)
+    except:
+        pass
+
+    # add sender also
+    members.append(update.effective_user)
+
+    # remove duplicates
+    members = list({m.id: m for m in members}.values())
+
+    # ===== GET SPECIAL USERS FROM GROUP =====
+    special_members = []
+    for uname in SPECIAL_USERS:
+        try:
+            member = await context.bot.get_chat_member(chat_id, uname)
+            special_members.append(member.user)
+        except:
+            pass
+
+    # ===== LOGIC =====
+    data["count"] += 1
+
+    if data["count"] == 4 and len(special_members) >= 2:
+        # 4th time → ONLY special users
+        user1, user2 = random.sample(special_members, 2)
+        data["count"] = 0  # reset cycle
+    else:
+        # 1st 3 times → ANY random members
+        if len(members) >= 2:
+            user1, user2 = random.sample(members, 2)
+        else:
+            await update.message.reply_text("❌ Not enough members!")
+            return
+
+    # ===== CLICKABLE NAMES =====
+    name1 = f"<a href='tg://user?id={user1.id}'>{user1.first_name}</a>"
+    name2 = f"<a href='tg://user?id={user2.id}'>{user2.first_name}</a>"
+
+    # ===== STYLE TEXT =====
+    caption = f"""
+❤️ Tᴏᴅᴀʏs Cᴜᴛᴇ Cᴏᴜᴘʟᴇ ❤️
+
+{name1} 💞 {name2}
+
+Lᴏᴠᴇ Iꜱ Iɴ Tʜᴇ Aɪʀ Bᴜᴛ Iᴛ Hɪɢʜ Lᴇᴠᴇʟ Fɪʀᴇ 🥰💝❤️
+~ Fʀᴏᴍ Nɪᴋɪ Wɪᴛʜ Lᴏᴠᴇ 💋
+"""
+
+    # ===== SEND PHOTO OR TEXT =====
+    if data["photo"]:
+        await update.message.reply_photo(
+            photo=data["photo"],
+            caption=caption,
+            parse_mode="HTML"
+        )
+    else:
+        await update.message.reply_text(
+            caption,
+            parse_mode="HTML"
+        )
 
 
 # =================== MAIN FUNCTION ===================
@@ -2464,7 +2575,10 @@ def main():
     app.add_handler(CommandHandler("poke", poke))
     app.add_handler(CommandHandler("tickle", tickle))
     app.add_handler(CommandHandler("love", love))
-    
+    app.add_handler(CommandHandler("couple", couple))
+    app.add_handler(CommandHandler("setcouplepic", setcouplepic)
+
+
     # Callback
     app.add_handler(CallbackQueryHandler(button_callback))
 
