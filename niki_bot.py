@@ -2576,7 +2576,7 @@ def main():
     app.add_handler(CommandHandler("tickle", tickle))
     app.add_handler(CommandHandler("love", love))
     app.add_handler(CommandHandler("couple", couple))
-    app.add_handler(CommandHandler("setcouplepic", setcouplepic)
+    app.add_handler(CommandHandler("setcouplepic", setcouplepic))
 
 
     # Callback
