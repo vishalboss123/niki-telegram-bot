@@ -176,41 +176,41 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             help_text,
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
-
-
     elif query.data == "back_to_start":
-        user = query.from_user  # ✅ ye add karo
+        user = query.from_user
 
-    welcome_text = (
-        f"👋 Hᴇʟʟᴏ {user.first_name}!\n\n"
-        "💝 Mʏ Nᴀᴍᴇ Iꜱ Nɪᴋɪ\n"
-        "Wᴇʟᴄᴏᴍᴇ Tᴏ Nɪᴋɪ'ꜱ Wᴏʀʟᴅ 🌸\n\n"
-        "I'ᴍ Nᴏᴛ Jᴜꜱᴛ A Bᴏᴛ…\n"
-        "I'ᴍ Yᴏᴜʀ Vɪʀᴛᴜᴀʟ Gɪʀʟ 😌✨\n\n"
-        "💰 Eᴀʀɴ Mᴏɴᴇʏ\n"
-        "⚔ Fɪɢʜᴛ Eɴᴇᴍɪᴇꜱ\n"
-        "😈 Rᴏʙ Pᴇᴏᴘʟᴇ\n"
-        "🛡 Pʀᴏᴛᴇᴄᴛ Yᴏᴜʀꜱᴇʟꜰ\n"
-        "🏆 Cʟɪᴍʙ Tʜᴇ Lᴇᴀᴅᴇʀʙᴏᴀʀᴅ\n\n"
-        "❗ Nɪᴋɪ Iꜱ Aʟᴡᴀʏꜱ Wᴀᴛᴄʜɪɴɢ Yᴏᴜ 👀🔥\n\n"
-        "⚡ Tʏᴘᴇ /economy Tᴏ Sᴇᴇ Aʟʟ Cᴏᴍᴍᴀɴᴅꜱ\n\n"
-        "👑 Oᴡɴᴇʀ: @YT_BISHALL"
-    )
+        welcome_text = (
+            f"👋 Hᴇʟʟᴏ {user.first_name}!\n\n"
+            "💝 Mʏ Nᴀᴍᴇ Iꜱ Nɪᴋɪ\n"
+            "Wᴇʟᴄᴏᴍᴇ Tᴏ Nɪᴋɪ'ꜱ Wᴏʀʟᴅ 🌸\n\n"
+            "I'ᴍ Nᴏᴛ Jᴜꜱᴛ A Bᴏᴛ…\n"
+            "I'ᴍ Yᴏᴜʀ Vɪʀᴛᴜᴀʟ Gɪʀʟ 😌✨\n\n"
+            "💰 Eᴀʀɴ Mᴏɴᴇʏ\n"
+            "⚔ Fɪɢʜᴛ Eɴᴇᴍɪᴇꜱ\n"
+            "😈 Rᴏʙ Pᴇᴏᴘʟᴇ\n"
+            "🛡 Pʀᴏᴛᴇᴄᴛ Yᴏᴜʀꜱᴇʟꜰ\n"
+            "🏆 Cʟɪᴍʙ Tʜᴇ Lᴇᴀᴅᴇʀʙᴏᴀʀᴅ\n\n"
+            "❗ Nɪᴋɪ Iꜱ Aʟᴡᴀʏꜱ Wᴀᴛᴄʜɪɴɢ Yᴏᴜ 👀🔥\n\n"
+            "⚡ Tʏᴘᴇ /economy Tᴏ Sᴇᴇ Aʟʟ Cᴏᴍᴍᴀɴᴅꜱ\n\n"
+            "👑 Oᴡɴᴇʀ: @YT_BISHALL"
+        )
 
-    keyboard = [
-        [
-            InlineKeyboardButton("👑 Owner", url="https://t.me/YT_BISHALL"),
-            InlineKeyboardButton("🎮 Game", callback_data="game_info")
-        ],
-        [
-            InlineKeyboardButton("➕ Add me to your group 💌", url="https://t.me/im_suvabot?startgroup=true")
+        keyboard = [
+            [
+                InlineKeyboardButton("👑 Owner", url="https://t.me/YT_BISHALL"),
+                InlineKeyboardButton("🎮 Game", callback_data="game_info")
+            ],
+            [
+                InlineKeyboardButton("➕ Add me to your group 💌", url="https://t.me/iim_Nikibot?startgroup=true")
+            ]
         ]
-    ]
 
-    await query.edit_message_text(
-        welcome_text,
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
+        await query.edit_message_text(
+            welcome_text,
+            reply_markup=InlineKeyboardMarkup(keyboard)
+            )
+
+    
 # =================== TOP RICHEST COMMAND ===================
 async def toprich(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
@@ -2253,18 +2253,18 @@ gif_col = db_gif["gifs"]   # 🎥 kiss, hug save yahi hai
 
 # ================= LOAD GIF =================
 def get_gifs(command):
-    data = gif_collection.find_one({"cmd": command})
+    data = gif_col.find_one({"cmd": command})   # ✅ FIX
     if data:
         return data.get("gifs", [])
     return []
 
 # ================= SAVE GIF =================
 def save_gif(cmd, gif):
-    gif_collection.update_one(
+    gif_col.update_one(   # ✅ FIX
         {"cmd": cmd},
-        {"$addToSet": {"gifs": gif}},  # duplicate avoid karega 🔥
+        {"$addToSet": {"gifs": gif}},
         upsert=True
-    )
+)
 
 # ================= /savegif COMMAND =================
 async def savegif(update: Update, context: ContextTypes.DEFAULT_TYPE):
