@@ -3,8 +3,10 @@ from pymongo import MongoClient
 MONGO_URL = "mongodb+srv://vishal:VISHAL123@vishal07.espy0qo.mongodb.net/?appName=Vishal07"
 
 client = MongoClient(MONGO_URL)
-db = client["mydatabase"]
-backup = db["backup"]
+
+db_main = client["mydatabase"]
+backup_col = db_main["backup"]   # balance + main data
+
 # =================== WEB SERVER (RENDER FIX) ===================
 import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
@@ -1847,8 +1849,9 @@ BOT_USERNAME = "iim_Nikibot"
 MONGO_URL = "mongodb+srv://vishal:VISHAL123@vishal07.espy0qo.mongodb.net/?appName=Vishal07"
 
 client = MongoClient(MONGO_URL)
-db = client["niki_bot"]
-col = db["chats"]
+
+db_broadcast = client["niki_bot"]
+chats_col = db_broadcast["chats"]   # ⚡ 14 members yahi hai
 
 # ================= SAVE USERS / GROUPS =================
 
@@ -2239,9 +2242,11 @@ async def start_duel(context, d):
 # ================= DB =================
 # ================= DB =================
 MONGO_URL = "mongodb+srv://vishal:VISHAL123@vishal07.espy0qo.mongodb.net/?appName=Vishal07"
+
 client = MongoClient(MONGO_URL)
-db = client["botdb"]
-gif_collection = db["gifs"]
+
+db_gif = client["botdb"]
+gif_col = db_gif["gifs"]   # 🎥 kiss, hug save yahi hai
 
 # ================= LOAD GIF =================
 def get_gifs(command):
@@ -2396,8 +2401,9 @@ Lᴏᴠᴇ Cᴏᴍᴘᴀᴛɪʙɪʟɪᴛʏ: {love_percent}% ❤️
 # ================= MONGO =================
 MONGO_URL = "mongodb+srv://vishal:VISHAL123@vishal07.espy0qo.mongodb.net/?appName=Vishal07"
 client = MongoClient(MONGO_URL)
-db = client["couple_db"]
-col = db["groups"]
+
+db_couple = client["couple_db"]
+couple_col = db_couple["groups"]
 
 # ================= CONFIG =================
 VIP = "YT_BISHALL"
