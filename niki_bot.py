@@ -2798,6 +2798,24 @@ async def partner(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(text, parse_mode="HTML")
 
+# ================= ADD GIF =================
+async def addgifs(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.message.reply_to_message:
+        await update.message.reply_text("❌ GIF pe reply karo")
+        return
+
+    msg = update.message.reply_to_message
+
+    if not msg.animation:
+        await update.message.reply_text("❌ Sirf GIF (animation) hi add karo")
+        return
+
+    file_id = msg.animation.file_id
+
+    gif_col.insert_one({"gif": file_id})
+
+    await update.message.reply_text("💖 Romantic GIF saved ho gaya!")
+
 # ================= HISTORY =================
 async def history(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = list(marriage_col.find())
