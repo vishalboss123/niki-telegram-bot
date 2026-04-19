@@ -2406,6 +2406,8 @@ client = MongoClient(MONGO_URL)
 db = client["couple_db"]
 couple_col = db["groups"]
 
+
+
 # ================= CONFIG =================
 SPECIAL_USERS = ["YT_BISHALL", "ll_Sassy_Queen_ll", "ll_Vishal_Heart_ll"]
 COOLDOWN = 300
@@ -2423,6 +2425,7 @@ SHAYARI_LIST = [
     "Jodi ho toh tum dono jaisi 💕",
     "Rab ne banayi hogi tumhari jodi 💘"
 ]
+
 # ================= DB =================
 def get_data(chat_id):
     data = couple_col.find_one({"_id": chat_id})
@@ -2459,7 +2462,15 @@ async def setcouplepic(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ================= COUPLE =================
 async def couple(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    chat_id = update.effective_chat.id
+    if not update.message:
+        return
+
+    chat = update.effective_chat
+    if chat.type == "private":
+        await update.message.reply_text("❌ Yeh command sirf group me kaam karega")
+        return
+
+    chat_id = chat.id
     user = update.effective_user
     username = user.username or ""
 
@@ -2473,45 +2484,53 @@ async def couple(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     data["last_used"] = time.time()
 
-    # ===== SPECIAL MEMBERS =====
+    # ===== GET MEMBERS =====
     special_members = []
-    for uname in SPECIAL_USERS:
-        try:
-            member = await context.bot.get_chat_member(chat_id, f"@{uname}")
-            if not member.user.is_bot:
-                special_members.append(member.user)
-        except:
-            pass
+    normal_members = []
 
-    # ===== NORMAL MEMBERS =====
-    members = []
     try:
         admins = await context.bot.get_chat_administrators(chat_id)
         for admin in admins:
             u = admin.user
-            if not u.is_bot and (u.username not in SPECIAL_USERS):
-                members.append(u)
+            if u.is_bot:
+                continue
+
+            if u.username in SPECIAL_USERS:
+                special_members.append(u)
+            else:
+                normal_members.append(u)
     except:
         pass
 
-    members.append(user)
-    members = list({m.id: m for m in members}.values())
+    # add current user
+    if not user.is_bot:
+        normal_members.append(user)
+
+    # remove duplicates
+    normal_members = list({m.id: m for m in normal_members}.values())
 
     # ===== LOGIC =====
     if username in SPECIAL_USERS:
+        if len(special_members) < 2:
+            await update.message.reply_text("❌ Special users not in group")
+            return
         user1, user2 = random.sample(special_members, 2)
 
     else:
         data["count"] += 1
 
         if data["count"] == 4:
+            if len(special_members) < 2:
+                await update.message.reply_text("❌ Special users not available")
+                return
+
             user1, user2 = random.sample(special_members, 2)
             data["count"] = 0
         else:
-            if len(members) < 2:
+            if len(normal_members) < 2:
                 await update.message.reply_text("❌ Not enough users")
                 return
-            user1, user2 = random.sample(members, 2)
+            user1, user2 = random.sample(normal_members, 2)
 
     # ===== SHAYARI =====
     shayari = SHAYARI_LIST[data["shayari_index"]]
@@ -2535,19 +2554,29 @@ async def couple(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 {name1} ❤️ {name2}
 
-
-
 ✨ "{shayari}"
-
-
 
 💖 Niki says: Tum dono ki jodi hamesha bani rahe 💕
 """
-    # ===== SEND =====
+
+    # ===== SEND + PIN =====
     if data.get("photo"):
-        await update.message.reply_photo(photo=data["photo"], caption=caption, parse_mode="HTML")
+        msg = await update.message.reply_photo(
+            photo=data["photo"],
+            caption=caption,
+            parse_mode="HTML"
+        )
     else:
-        await update.message.reply_text(caption, parse_mode="HTML")
+        msg = await update.message.reply_text(
+            caption,
+            parse_mode="HTML"
+        )
+
+    # ===== AUTO PIN =====
+    try:
+        await context.bot.pin_chat_message(chat_id, msg.message_id)
+    except:
+        pass
 
 # ================= HISTORY =================
 async def couplehistory(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -2579,8 +2608,6 @@ async def coupleleaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text += f"{i}. <a href='tg://user?id={u1}'>User</a> ❤️ <a href='tg://user?id={u2}'>User</a> ➤ {count}\n"
 
     await update.message.reply_text(text, parse_mode="HTML")
-
-
 
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
