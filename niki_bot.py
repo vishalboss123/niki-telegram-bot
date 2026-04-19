@@ -2627,6 +2627,8 @@ async def coupleleaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 #=================≠==========propes======================
+MONGO_URL = "mongodb+srv://vishal:VISHAL123@vishal07.espy0qo.mongodb.net/?appName=Vishal07"
+
 client = MongoClient(MONGO_URL)
 db = client["botdb"]
 
@@ -2759,7 +2761,7 @@ async def accept(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     gif = get_random_gif()
 
-    if gif:
+    if gif: 
         await q.message.reply_animation(gif, caption=text, parse_mode="HTML")
         await q.message.delete()
     else:
