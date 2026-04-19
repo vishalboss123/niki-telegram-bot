@@ -2510,27 +2510,43 @@ async def couple(update: Update, context: ContextTypes.DEFAULT_TYPE):
     normal_members = list({m.id: m for m in normal_members}.values())
 
     # ===== LOGIC =====
+    # ===== LOGIC =====
+    # ===== LOGIC =====
+
+    # 👉 SPECIAL USER COMMAND
     if username in SPECIAL_USERS:
-        if len(special_members) < 2:
-            await update.message.reply_text("❌ Special users not in group")
-            return
-        user1, user2 = random.sample(special_members, 2)
-
-    else:
-        data["count"] += 1
-
-        if data["count"] == 4:
-            if len(special_members) < 2:
-                await update.message.reply_text("❌ Special users not available")
-                return
-
+        if len(special_members) >= 2:
             user1, user2 = random.sample(special_members, 2)
-            data["count"] = 0
         else:
             if len(normal_members) < 2:
                 await update.message.reply_text("❌ Not enough users")
                 return
             user1, user2 = random.sample(normal_members, 2)
+
+    # 👉 NORMAL USER COMMAND
+    else:
+        data["count"] += 1
+
+        # 👉 4th turn
+        if data["count"] == 4:
+            if len(special_members) >= 2:
+                user1, user2 = random.sample(special_members, 2)
+            else:
+                if len(normal_members) < 2:
+                    await update.message.reply_text("❌ Not enough users")
+                    return
+                user1, user2 = random.sample(normal_members, 2)
+
+            data["count"] = 0
+
+        # 👉 1st 2nd 3rd
+        else:
+            if len(normal_members) < 2:
+                await update.message.reply_text("❌ Not enough users")
+                return
+
+            user1, user2 = random.sample(normal_members, 2)
+        
 
     # ===== SHAYARI =====
     shayari = SHAYARI_LIST[data["shayari_index"]]
