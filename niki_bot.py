@@ -2884,7 +2884,7 @@ def main():
     app.add_handler(CommandHandler("propose", propose))
     app.add_handler(CommandHandler("addgifs", addgifs))
     app.add_handler(CommandHandler("partner", partner))
-    app.add_handler(CommandHandler("marriagehistory", mariagehistory))
+    app.add_handler(CommandHandler("marriagehistory", marriagehistory))
     app.add_handler(CommandHandler("divorce", divorce))
     app.add_handler(CallbackQueryHandler(accept, pattern="acc_"))
     app.add_handler(CallbackQueryHandler(reject, pattern="rej_"))
