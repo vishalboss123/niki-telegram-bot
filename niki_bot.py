@@ -2635,11 +2635,11 @@ db = client["botdb"]
 marriage_col = db["marriages"]
 gif_col = db["marriage_gifs"]
 
-# ================= SETTINGS =================
-SPECIAL_USERS = ["YT_BISHALL"]
-MAX_SPECIAL_MARRIAGE = 3
 
 # ================= HELP =================
+def link_user(user):
+    return f"<a href='tg://user?id={user.id}'>{user.first_name}</a>"
+
 def link(uid):
     return f"<a href='tg://user?id={uid}'>User</a>"
 
@@ -2652,15 +2652,6 @@ def is_married(uid):
 def get_random_gif():
     data = list(gif_col.find())
     return random.choice(data)["gif"] if data else None
-
-# ================= ADD GIF =================
-async def addgifs(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not update.message.reply_to_message or not update.message.reply_to_message.animation:
-        await update.message.reply_text("❌ GIF pe reply karo")
-        return
-
-    gif_col.insert_one({"gif": update.message.reply_to_message.animation.file_id})
-    await update.message.reply_text("💖 Romantic GIF saved successfully")
 
 # ================= PROPOSE =================
 async def propose(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -2676,62 +2667,41 @@ async def propose(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("💀 Khud se shaadi? 😂")
         return
 
-    user1_m = get_marriages(user1.id)
-
-    # 👉 Already married
-    if user1.username not in SPECIAL_USERS and user1_m:
-        text = (
-            "💞━━━━━━━💞\n"
-            "💍 Already Taken 💍\n"
-            "💞━━━━━━━💞\n\n"
-            "❤️ Tum already committed ho:\n\n"
-        )
-        for m in user1_m:
-            text += f"💖 {link(m['user1'])} Weds {link(m['user2'])}\n"
-        text += "\n😌 Loyal raho apne partner ke saath"
-        await update.message.reply_text(text, parse_mode="HTML")
-        return
-
-    # 👉 Target married
-    if is_married(user2.id):
-        m = get_marriages(user2.id)
-        text = (
-            "💞━━━━━━━💞\n"
-            "💍 Already Committed 💍\n"
-            "💞━━━━━━━💞\n\n"
-            "❤️ Inka relation:\n\n"
-        )
+    # ❌ already married
+    if is_married(user1.id):
+        m = get_marriages(user1.id)
+        text = "💞━━━━━━━💞\n💍 Already Taken 💍\n💞━━━━━━━💞\n\n"
         for x in m:
             text += f"💖 {link(x['user1'])} Weds {link(x['user2'])}\n"
-        text += "\n😅 Chance nahi hai bro"
         await update.message.reply_text(text, parse_mode="HTML")
         return
 
-    # 👉 Special limit
-    if user1.username in SPECIAL_USERS and len(user1_m) >= MAX_SPECIAL_MARRIAGE:
-        text = "💍 Tum already 3 shaadi kar chuke ho!\n\n❤️ Tumhare relations:\n\n"
-        for m in user1_m:
-            text += f"💖 {link(m['user1'])} Weds {link(m['user2'])}\n"
+    # ❌ target married
+    if is_married(user2.id):
+        m = get_marriages(user2.id)
+        text = "💞━━━━━━━💞\n💍 Already Committed 💍\n💞━━━━━━━💞\n\n"
+        for x in m:
+            text += f"💖 {link(x['user1'])} Weds {link(x['user2'])}\n"
         await update.message.reply_text(text, parse_mode="HTML")
         return
 
     keyboard = InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("💚 Accept", callback_data=f"acc_{user1.id}_{user2.id}"),
-            InlineKeyboardButton("💔 Reject", callback_data=f"rej_{user1.id}_{user2.id}")
+            InlineKeyboardButton("💚 Accept", callback_data=f"marry_acc_{user1.id}_{user2.id}"),
+            InlineKeyboardButton("💔 Reject", callback_data=f"marry_rej_{user1.id}_{user2.id}")
         ]
     ])
 
     msg = await update.message.reply_text(
-        f"💌 {link(user1.id)} ne {link(user2.id)} ko propose kiya hai!\n\n💖 Kya tum accept karte ho?",
+        f"💌 {link_user(user1)} ne {link_user(user2)} ko propose kiya hai!\n\n💖 Kya tum accept karte ho?",
         reply_markup=keyboard,
         parse_mode="HTML"
     )
 
-    # ⏳ AUTO REJECT
-    await asyncio.sleep(15)
+    # ⏳ 30 sec
+    await asyncio.sleep(30)
     try:
-        await msg.edit_text("💔 Time over... Proposal automatically reject ho gaya")
+        await msg.edit_text("💔 Time over... Proposal reject ho gaya")
     except:
         pass
 
@@ -2740,8 +2710,12 @@ async def accept(update: Update, context: ContextTypes.DEFAULT_TYPE):
     q = update.callback_query
     await q.answer()
 
-    _, u1, u2 = q.data.split("_")
+    _, _, u1, u2 = q.data.split("_")
     u1, u2 = int(u1), int(u2)
+
+    if q.from_user.id != u2:
+        await q.answer("❌ Ye tumhara proposal nahi hai!", show_alert=True)
+        return
 
     if is_married(u2):
         await q.edit_message_text("❌ Tum already married ho 😭")
@@ -2761,7 +2735,24 @@ async def accept(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     gif = get_random_gif()
 
-    if gif: 
+    # 💑 COUPLE DP AUTO
+    try:
+        photos1 = await context.bot.get_user_profile_photos(u1, limit=1)
+        photos2 = await context.bot.get_user_profile_photos(u2, limit=1)
+
+        if photos1.total_count > 0 and photos2.total_count > 0:
+            p1 = photos1.photos[0][-1].file_id
+            p2 = photos2.photos[0][-1].file_id
+
+            await q.message.reply_photo(
+                p1,
+                caption=f"💑 Couple DP 💖\n{link(u1)} ❤️ {link(u2)}",
+                parse_mode="HTML"
+            )
+    except:
+        pass
+
+    if gif:
         await q.message.reply_animation(gif, caption=text, parse_mode="HTML")
         await q.message.delete()
     else:
@@ -2771,11 +2762,32 @@ async def accept(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def reject(update: Update, context: ContextTypes.DEFAULT_TYPE):
     q = update.callback_query
     await q.answer()
+
+    _, _, u1, u2 = q.data.split("_")
+    u2 = int(u2)
+
+    if q.from_user.id != u2:
+        await q.answer("❌ Ye tumhara proposal nahi hai!", show_alert=True)
+        return
+
     await q.edit_message_text("💔 Proposal reject ho gaya...")
+
+# ================= DIVORCE =================
+async def divorce(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    uid = update.effective_user.id
+    m = get_marriages(uid)
+
+    if not m:
+        await update.message.reply_text("❌ Tum married hi nahi ho")
+        return
+
+    marriage_col.delete_many({"$or":[{"user1":uid},{"user2":uid}]})
+    await update.message.reply_text("💔 Divorce ho gaya...\nAb tum free ho 😌")
 
 # ================= PARTNER =================
 async def partner(update: Update, context: ContextTypes.DEFAULT_TYPE):
     m = get_marriages(update.effective_user.id)
+
     if not m:
         await update.message.reply_text("❌ Tum single ho 😅")
         return
@@ -2798,14 +2810,7 @@ async def history(update: Update, context: ContextTypes.DEFAULT_TYPE):
     for x in data:
         text += f"💖 {link(x['user1'])} Weds {link(x['user2'])}\n"
 
-    await update.message.reply_text(text, parse_mode="HTML")
-
-# ================= DIVORCE =================
-async def divorce(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    uid = update.effective_user.id
-    marriage_col.delete_many({"$or":[{"user1":uid},{"user2":uid}]})
-    await update.message.reply_text("💔 Divorce ho gaya...\nAb tum free ho 😌")
-
+    await update.message.reply_text(text, parse_mode="HTML")            
 
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -2863,8 +2868,7 @@ def main():
     app.add_handler(CommandHandler("stats", stats))
     app.add_handler(CommandHandler("duel", duel))
     app.add_handler(CallbackQueryHandler(accept_btn, pattern="^accept_"))
-    app.add_handler(CallbackQueryHandler(cancel_btn, pattern="^cancel_"))
-    app.add_handler(CallbackQueryHandler(button)) 
+    app.add_handler(CallbackQueryHandler(cancel_btn, pattern="^cancel_")) 
     app.add_handler(CommandHandler("savegif", savegif))  # 🔥 NEW
     app.add_handler(CommandHandler("kiss", kiss))
     app.add_handler(CommandHandler("hug", hug))
@@ -2886,9 +2890,10 @@ def main():
     app.add_handler(CommandHandler("partner", partner))
     app.add_handler(CommandHandler("marriagehistory", history))
     app.add_handler(CommandHandler("divorce", divorce))
-    app.add_handler(CallbackQueryHandler(accept, pattern="acc_"))
-    app.add_handler(CallbackQueryHandler(reject, pattern="rej_"))
-
+    app.add_handler(CallbackQueryHandler(accept, pattern="^marry_acc_"))
+    app.add_handler(CallbackQueryHandler(reject, pattern="^marry_rej_"))
+    app.add_handler(CallbackQueryHandler(button))
+    
     # Callback
     app.add_handler(CallbackQueryHandler(button_callback))
 
