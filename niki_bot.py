@@ -8,7 +8,7 @@ client = MongoClient(MONGO_URL)
 # ========= 1️⃣ MAIN DATA (BALANCE, BACKUP) =========
 db_main = client["mydatabase"]
 backup = db_main["backup"]   # ⚡ IMPORTANT (error fix)
-
+col = db_main["chats"]       # groups/users save  ✅ (IMPORTANT)
 
 # =================== WEB SERVER (RENDER FIX) ===================
 import threading
