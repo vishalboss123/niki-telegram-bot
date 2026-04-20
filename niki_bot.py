@@ -113,7 +113,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 # =================== CALLBACK HANDLER FOR GAME & BACK ===================
-async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -161,7 +161,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         )
         keyboard = [
-            [InlineKeyboardButton("🔙 Back", callback_data="back_to_start")]
+            [InlineKeyboardButton("🔙 Back", callback_data="start_back")]
         ]
         await query.edit_message_text(
             economy_text,
