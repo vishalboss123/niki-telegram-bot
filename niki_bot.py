@@ -3004,12 +3004,18 @@ def progress_bar(percent):
 
 # ================= BRAIN COMMAND =================
 async def brain(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = update.effective_user
-    name = mention(user)
-    user_id = user.id
+
+    # ❌ MUST REPLY
+    if not update.message.reply_to_message:
+        await update.message.reply_text("❌ Reply karke use karo /brain")
+        return
+
+    target = update.message.reply_to_message.from_user
+    name = mention(target)
+    user_id = target.id
 
     msg = await update.message.reply_text("🧠 Initializing Brain Scan...")
-
+    
     # ================= SPECIAL USER =================
     if user_id in SPECIAL_USERS:
 
