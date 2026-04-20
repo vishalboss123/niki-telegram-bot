@@ -2895,6 +2895,64 @@ async def divorce(update: Update, context: ContextTypes.DEFAULT_TYPE):
     marriage_col.delete_many({"$or":[{"user1":uid},{"user2":uid}]})
     await update.message.reply_text("💔 Divorce ho gaya...\nAb tum free ho 😌")
     
+
+ #====================LOOKRATE=======================
+    
+# 👉 YAHAPE APNE 5 VIP USERNAME DAL (without @)
+SPECIAL_USERS = [
+    "YT_BISHALL",
+    "iim_Nikibot",
+    "ll_Vishal_Heart_ll",
+    "ll_Sassy_Queen_ll",
+    "ll_Evil_ll"
+]
+
+# ================= LOOK COMMAND =================
+async def look(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.message.reply_to_message:
+        await update.message.reply_text("❌ Reply karke /look use karo")
+        return
+
+    user = update.message.reply_to_message.from_user
+    name = user.first_name
+    user_id = user.id
+    username = user.username.lower() if user.username else ""
+
+    # 👉 VIP CHECK
+    if username in SPECIAL_USERS:
+        rating = "∞"
+        emoji = "😍🔥👑"
+        status = "✨ 𝙑𝙄𝙋 𝙎𝙔𝙎𝙏𝙀𝙈 𝘼𝘾𝙏𝙄𝙑𝙀"
+    else:
+        percent = random.randint(1, 100)
+        rating = f"{percent}%"
+
+        if percent >= 90:
+            emoji = "😍🔥"
+        elif percent >= 70:
+            emoji = "😎✨"
+        elif percent >= 50:
+            emoji = "🙂"
+        else:
+            emoji = "😐💔"
+
+        status = "✨ 𝙉𝙊𝙍𝙈𝘼𝙇 𝙐𝙎𝙀𝙍"
+
+    # 👉 FANCY TEXT OUTPUT
+    text = f"""
+ꙮ๊ 『🇻⃪͢𝗜𝗣』𝙇𝙊𝙊𝙆 𝙍𝘼𝙏𝙄𝙉𝙂 𝙎𝙔𝙎𝙏𝙀𝙈 🦅✨
+
+👤 <a href="tg://user?id={user_id}">{name}</a>
+💖 𝙇𝙊𝙊𝙆 𝙍𝘼𝙏𝙄𝙉𝙂 𝙄𝙎: {rating} {emoji}
+
+{status}
+"""
+
+    await update.message.reply_text(text, parse_mode="HTML")
+
+
+# ================= HANDLER =================
+ = CommandHandler("look", look)
     
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -2975,6 +3033,7 @@ def main():
     app.add_handler(CommandHandler("profile", profile))
     app.add_handler(CommandHandler("marriagehistory", history))
     app.add_handler(CommandHandler("divorce", divorce))
+    app.add_handler(CommandHandler("look", look))
     app.add_handler(CallbackQueryHandler(accept, pattern="^marry_acc_"))
     app.add_handler(CallbackQueryHandler(reject, pattern="^marry_rej_"))
     app.add_handler(CallbackQueryHandler(button))
