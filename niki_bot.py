@@ -2964,9 +2964,127 @@ async def look(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(text, parse_mode="HTML")
 
 
-# ================= HANDLER =================
-look_handler = CommandHandler("look", look)
- 
+    #=============BRAIN==================
+    
+# ================= SPECIAL USERS =================
+SPECIAL_USERS = [
+    6175559434,
+    8798985968,
+    8336495718,
+    8798985968,
+    8667537253,
+    444444444
+]
+
+# ================= EMOJI SYSTEM =================
+def get_iq_emoji(iq):
+    if iq <= 20:
+        return "🤡"
+    elif iq <= 40:
+        return "😵"
+    elif iq <= 60:
+        return "😎"
+    elif iq <= 80:
+        return "🔥"
+    elif iq <= 99:
+        return "🧠"
+    else:
+        return "🚀"
+
+# ================= CLICKABLE NAME =================
+def mention(user):
+    return f"<a href='tg://user?id={user.id}'>{user.first_name}</a>"
+
+# ================= PROGRESS BAR =================
+def progress_bar(percent):
+    total = 10
+    filled = int(percent / 10)
+    empty = total - filled
+    return "█" * filled + "░" * empty
+
+# ================= BRAIN COMMAND =================
+async def brain(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    name = mention(user)
+    user_id = user.id
+
+    msg = await update.message.reply_text("🧠 Initializing Brain Scan...")
+
+    # ================= SPECIAL USER =================
+    if user_id in SPECIAL_USERS:
+
+        # 🔥 FULL ANIMATION (0 → 100)
+        for i in range(0, 101, 10):
+            bar = progress_bar(i)
+            try:
+                await msg.edit_text(f"⚡ OVERRIDE SCAN...\n\n[{bar}] {i}%")
+                await asyncio.sleep(0.2)
+            except:
+                pass
+
+        # 🔥 FINAL RESULT (INFINITY)
+        text = f"""
+<pre>
+╔═══━━━─── • ───━━━═══╗
+     ⚡ SYSTEM OVERRIDE ⚡
+╚═══━━━─── • ───━━━═══╝
+
+🎯 TARGET : {name}
+
+🧬 IQ LEVEL : ∞ ♾️
+🧠 STATUS : GOD MODE ☠️
+💻 ACCESS : VIP ROOT
+
+[██████████] ∞%
+
+╔═━━━─── • ───━━━═╗
+   ☠️ NO LIMIT SYSTEM ☠️
+╚═━━━─── • ───━━━═╝
+</pre>
+"""
+        await msg.edit_text(text, parse_mode="HTML")
+        return
+
+    # ================= NORMAL USER =================
+    iq = random.randint(1, 100)
+    emoji = get_iq_emoji(iq)
+
+    # 🔥 ANIMATION (0 → IQ)
+    for i in range(0, iq + 1, 10):
+        bar = progress_bar(i)
+        try:
+            await msg.edit_text(f"🧠 Scanning Brain...\n\n[{bar}] {i}%")
+            await asyncio.sleep(0.2)
+        except:
+            pass
+
+    # 🔥 FINAL BAR EXACT IQ
+    final_bar = progress_bar(iq)
+
+    text = f"""
+<pre>
+╔═══━━━─── • ───━━━═══╗
+        🧠 BRAIN SCAN
+╚═══━━━─── • ───━━━═══╝
+
+🎯 TARGET : {name}
+
+🧬 IQ LEVEL : {iq}% {emoji}
+🧠 STATUS : ANALYZED
+💻 ACCESS : USER MODE
+
+[{final_bar}] {iq}%
+
+╔═━━━─── • ───━━━═╗
+   🔍 SYSTEM REPORT
+╚═━━━─── • ───━━━═╝
+</pre>
+"""
+
+    await msg.edit_text(text, parse_mode="HTML")
+
+
+
 
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -3048,6 +3166,7 @@ def main():
     app.add_handler(CommandHandler("marriagehistory", history))
     app.add_handler(CommandHandler("divorce", divorce))
     app.add_handler(CommandHandler("look", look))
+    app.add_handler(CommandHandler("brain", brain))
 
     # ================= CALLBACKS =================
     app.add_handler(CallbackQueryHandler(accept, pattern="^marry_acc_"))
