@@ -2633,6 +2633,9 @@ async def coupleleaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 #=================≠==========propes======================
+SPECIAL_USER = "YT_BISHALL"
+MAX_SPECIAL_MARRIAGE = 3
+#==========================❤️❤️❤️=========================
 MONGO_URL = "mongodb+srv://vishal:VISHAL123@vishal07.espy0qo.mongodb.net/?appName=Vishal07"
 
 client = MongoClient(MONGO_URL)
@@ -2692,23 +2695,29 @@ async def propose(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if key in pending_proposals:
         await update.message.reply_text("⏳ Proposal already pending hai")
         return
+# ================= SPECIAL USER CHECK =================
+    m1 = get_marriages(user1.id)
 
-    if is_married(user1.id):
-        m = get_marriages(user1.id)
-        text = (
-            "💞━━━━━━━💞\n"
-            "💍 Already Taken 💍\n"
-            "💞━━━━━━━💞\n\n"
-            "❤️ Tum already committed ho:\n\n"
-        )
-        for x in m:
-            u1 = await context.bot.get_chat(x['user1'])
-            u2 = await context.bot.get_chat(x['user2'])
-            text += f"💖 {link_user(u1)} Weds {link_user(u2)}\n"
+    if user1.username != SPECIAL_USER:
+        if m1:
+            text = (
+                "💞━━━━━━━💞\n"
+                "💍 Already Taken 💍\n"
+                "💞━━━━━━━💞\n\n"
+                "❤️ Tum already committed ho:\n\n"
+            )
+            for x in m1:
+                u1 = await context.bot.get_chat(x['user1'])
+                u2 = await context.bot.get_chat(x['user2'])
+                text += f"💖 {link_user(u1)} Weds {link_user(u2)}\n"
 
-        await update.message.reply_text(text, parse_mode="HTML")
-        return
-
+            await update.message.reply_text(text, parse_mode="HTML")
+            return
+    else:
+        if len(m1) >= MAX_SPECIAL_MARRIAGE:
+            await update.message.reply_text("💀 Tum already 3 marriages kar chuke ho!")
+            return
+        
     if is_married(user2.id):
         m = get_marriages(user2.id)
         text = (
