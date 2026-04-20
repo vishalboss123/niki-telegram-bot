@@ -2895,9 +2895,9 @@ async def divorce(update: Update, context: ContextTypes.DEFAULT_TYPE):
     marriage_col.delete_many({"$or":[{"user1":uid},{"user2":uid}]})
     await update.message.reply_text("💔 Divorce ho gaya...\nAb tum free ho 😌")
     
+#====================LOOKRATE=======================
 
- #====================LOOKRATE=======================
-    
+
 # 👉 YAHAPE APNE 5 VIP USERNAME DAL (without @)
 SPECIAL_USERS = [
     "YT_BISHALL",
@@ -2918,8 +2918,8 @@ async def look(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = user.id
     username = user.username.lower() if user.username else ""
 
-    # 👉 VIP CHECK
-    if username in SPECIAL_USERS:
+    # 👉 FIXED VIP CHECK (case-insensitive)
+    if username in [u.lower() for u in SPECIAL_USERS]:
         rating = "∞"
         emoji = "😍🔥👑"
         status = "✨ 𝙑𝙄𝙋 𝙎𝙔𝙎𝙏𝙀𝙈 𝘼𝘾𝙏𝙄𝙑𝙀"
@@ -2938,7 +2938,7 @@ async def look(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         status = "✨ 𝙉𝙊𝙍𝙈𝘼𝙇 𝙐𝙎𝙀𝙍"
 
-    # 👉 FANCY TEXT OUTPUT
+    # 👉 FANCY TEXT OUTPUT (same as yours)
     text = f"""
 ꙮ๊ 『🇻⃪͢𝗜𝗣』𝙇𝙊𝙊𝙆 𝙍𝘼𝙏𝙄𝙉𝙂 𝙎𝙔𝙎𝙏𝙀𝙈 🦅✨
 
@@ -2950,6 +2950,10 @@ async def look(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(text, parse_mode="HTML")
 
+
+# ================= HANDLER =================
+look_handler = CommandHandler("look", look)
+ 
 
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
