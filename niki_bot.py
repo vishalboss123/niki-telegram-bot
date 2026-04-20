@@ -100,45 +100,47 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [
             InlineKeyboardButton("👑 Owner", url="https://t.me/YT_BISHALL"),
-            InlineKeyboardButton("🎮 Game", callback_data="game_info")
+            InlineKeyboardButton("🎮 Game", callback_data="start_game")
         ],
         [
-            InlineKeyboardButton("➕ Add me to your group 💌", url="https://t.me/iim_Nikibot?startgroup=true")
+            InlineKeyboardButton("➕ Add me", url="https://t.me/iim_Nikibot?startgroup=true")
         ]
     ]
 
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
     await update.message.reply_text(
         welcome_text,
-        reply_markup=reply_markup
+        reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
 # =================== CALLBACK HANDLER FOR GAME & BACK ===================
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-    if query.data == "game_info":
-        game_text = (
-            "🎲 Ye ek game ka rule aur command guide hai:\n\n"
-            "⬇️ Neeche buttons use karke check karo ⬇️"
-        )
+    data = query.data
+
+    # ❌ Skip other systems
+    if data.startswith("marry_") or data.startswith("duel_"):
+        return
+
+    # ================= GAME MENU =================
+    if data == "start_game":
         keyboard = [
             [
-                InlineKeyboardButton("💰 Economy", callback_data="economy"),
-                InlineKeyboardButton("❓ Help", callback_data="help")
+                InlineKeyboardButton("💰 Economy", callback_data="start_economy"),
+                InlineKeyboardButton("❓ Help", callback_data="start_help")
             ],
             [
-                InlineKeyboardButton("🔙 Back", callback_data="back_to_start")
+                InlineKeyboardButton("🔙 Back", callback_data="start_back")
             ]
         ]
+
         await query.edit_message_text(
-            game_text,
+            "🎲 Game Menu:",
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
-
-    elif query.data == "economy":
+    elif data == "start_economy":
         economy_text = (
                        "💰 *Nɪᴋɪ Eᴄᴏɴᴏᴍʏ Sʏꜱᴛᴇᴍ Oᴠᴇʀᴠɪᴇᴡ*\n\n"
                       "💬 *Hᴏᴡ Iᴛ Wᴏʀᴋꜱ:*\n"
@@ -166,17 +168,18 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
 
-    elif query.data == "help":
+    elif data == "start_help":
         help_text = "💡 Help ke liye apna owner dekho 👑"
         keyboard = [
-            [InlineKeyboardButton("👑 Owner Profile", url="https://t.me/YT_BISHALL")],
-            [InlineKeyboardButton("🔙 Back", callback_data="back_to_start")]
+            [InlineKeyboardButton("👑 Owner", url="https://t.me/YT_BISHALL")],
+            [InlineKeyboardButton("🔙 Back", callback_data="start_game")]
         ]
+
         await query.edit_message_text(
             help_text,
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
-    elif query.data == "back_to_start":
+    elif data == "start_back":
         user = query.from_user
 
         welcome_text = (
@@ -198,12 +201,13 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         keyboard = [
             [
                 InlineKeyboardButton("👑 Owner", url="https://t.me/YT_BISHALL"),
-                InlineKeyboardButton("🎮 Game", callback_data="game_info")
+                InlineKeyboardButton("🎮 Game", callback_data="start_game")
             ],
             [
-                InlineKeyboardButton("➕ Add me to your group 💌", url="https://t.me/iim_Nikibot?startgroup=true")
+                InlineKeyboardButton("➕ Add me", url="https://t.me/iim_Nikibot?startgroup=true")
             ]
         ]
+
 
         await query.edit_message_text(
             welcome_text,
@@ -2981,7 +2985,6 @@ def main():
 
     load_data()
 
-    # 🔥 MongoDB se load
     mongo_data = load_from_mongo()
     if mongo_data:
         data = mongo_data
@@ -3019,9 +3022,8 @@ def main():
     app.add_handler(CommandHandler("send", send))
     app.add_handler(CommandHandler("stats", stats))
     app.add_handler(CommandHandler("duel", duel))
-    app.add_handler(CallbackQueryHandler(accept_btn, pattern="^accept_"))
-    app.add_handler(CallbackQueryHandler(cancel_btn, pattern="^cancel_")) 
-    app.add_handler(CommandHandler("savegif", savegif))  # 🔥 NEW
+
+    app.add_handler(CommandHandler("savegif", savegif))
     app.add_handler(CommandHandler("kiss", kiss))
     app.add_handler(CommandHandler("hug", hug))
     app.add_handler(CommandHandler("slap", slap))
@@ -3033,10 +3035,12 @@ def main():
     app.add_handler(CommandHandler("poke", poke))
     app.add_handler(CommandHandler("tickle", tickle))
     app.add_handler(CommandHandler("love", love))
+
     app.add_handler(CommandHandler("couple", couple))
     app.add_handler(CommandHandler("setcouplepic", setcouplepic))
     app.add_handler(CommandHandler("couplehistory", couplehistory))
     app.add_handler(CommandHandler("coupleleaderboard", coupleleaderboard))
+
     app.add_handler(CommandHandler("propose", propose))
     app.add_handler(CommandHandler("addgifs", addgifs))
     app.add_handler(CommandHandler("partner", partner))
@@ -3044,21 +3048,22 @@ def main():
     app.add_handler(CommandHandler("marriagehistory", history))
     app.add_handler(CommandHandler("divorce", divorce))
     app.add_handler(CommandHandler("look", look))
+
+    # ================= CALLBACKS =================
     app.add_handler(CallbackQueryHandler(accept, pattern="^marry_acc_"))
     app.add_handler(CallbackQueryHandler(reject, pattern="^marry_rej_"))
-    app.add_handler(CallbackQueryHandler(button))
-    
-    # Callback
-    app.add_handler(CallbackQueryHandler(button_callback))
 
-    # Message Handlers
+    app.add_handler(CallbackQueryHandler(accept_btn, pattern="^duel_acc_"))
+    app.add_handler(CallbackQueryHandler(cancel_btn, pattern="^duel_rej_"))
+
+    app.add_handler(CallbackQueryHandler(button_callback, pattern="^start_"))
+
+    # ================= MESSAGE =================
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, track_chat))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, auto_niki_reply))
 
     print("🔥 Niki Bot started...")
-
     app.run_polling()
-
 
 if __name__ == "__main__":
     main()
