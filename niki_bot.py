@@ -2248,9 +2248,11 @@ MONGO_URL = "mongodb+srv://vishal:VISHAL123@vishal07.espy0qo.mongodb.net/?appNam
 
 client = MongoClient(MONGO_URL)
 
-db_gif = client["botdb"]
-gif_col = db_gif["gifs"]   # 🎥 kiss, hug save yahi hai
 
+db = client["botdb"]
+
+marriage_col = db["marriages"]
+gif_col = db["gifs"]   # 💋 kiss + hug yahi se aayega
 # ================= LOAD GIF =================
 def get_gifs(command):
     data = gif_col.find_one({"cmd": command})   # ✅ FIX
@@ -2308,7 +2310,11 @@ async def send_action(update: Update, context: ContextTypes.DEFAULT_TYPE, cmd, t
         await update.message.reply_text("❌ GIF nahi mila")
         return
 
-    gif = random.choice(gifs)
+    gif = random.choice(gifs) if gifs else None
+
+    if not gif:
+        await update.message.reply_text("❌ GIF nahi mila")
+        return
 
     msg = text_template.format(u1=user1, u2=user2)
 
@@ -2632,9 +2638,11 @@ MONGO_URL = "mongodb+srv://vishal:VISHAL123@vishal07.espy0qo.mongodb.net/?appNam
 client = MongoClient(MONGO_URL)
 db = client["botdb"]
 
-marriage_col = db["marriages"]
-gif_col = db["marriage_gifs"]
+client = MongoClient(MONGO_URL)
+db = client["botdb"]
 
+marriage_col = db["marriages"]
+gif_col = db["gifs"]   # 💋 kiss + hug yahi se aayega
 # ================= GLOBAL =================
 pending_proposals = {}
 
@@ -2648,9 +2656,13 @@ def get_marriages(uid):
 def is_married(uid):
     return len(get_marriages(uid)) > 0
 
-def get_random_gif():
-    data = list(gif_col.find())
-    return random.choice(data)["gif"] if data else None
+def get_gifs(cmd):
+    data = gif_col.find_one({"cmd": cmd})
+    return data.get("gifs", []) if data else []
+
+def get_random_gif(cmd):
+    gifs = get_gifs(cmd)
+    return random.choice(gifs) if gifs else None
 
 # ================= ADD GIF =================
 async def addgifs(update: Update, context: ContextTypes.DEFAULT_TYPE):
