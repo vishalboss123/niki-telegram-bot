@@ -2123,38 +2123,38 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                d["p1_num"] = num
                d["p1_done"] = True
 
-                await query.edit_message_text(
-                    f"✅ {d['p1_name']} Nᴜᴍʙᴇʀ Lᴏᴄᴋᴇᴅ 🔒"
-                )
+               await query.edit_message_text(
+                   f"✅ {d['p1_name']} Nᴜᴍʙᴇʀ Lᴏᴄᴋᴇᴅ 🔒"
+               )
 
-                await context.bot.send_message(
-                    d["chat"],
-                    f"🎯 {d['p1_name']} ɴᴇ ɴᴜᴍʙᴇʀ ᴄʜᴏᴏꜱᴇ ᴋɪʏᴀ!"
-                )
+               await context.bot.send_message(
+                   d["chat"],
+                   f"🎯 {d['p1_name']} ɴᴇ ɴᴜᴍʙᴇʀ ᴄʜᴏᴏꜱᴇ ᴋɪʏᴀ!"
+               )
 
-                await send_number_choice(context, d["p2"])
-                return
+               await send_number_choice(context, d["p2"])
+               return
 
-            if d["p2"] == uid and not d["p2_done"]:
-                d["p2_num"] = num
-                d["p2_done"] = True
+           if d["p2"] == uid and not d["p2_done"]:
+               d["p2_num"] = num
+               d["p2_done"] = True
 
-                await query.edit_message_text(
-                    f"✅ {d['p2_name']} Nᴜᴍʙᴇʀ Lᴏᴄᴋᴇᴅ 🔒"
-                )
+               await query.edit_message_text(
+                   f"✅ {d['p2_name']} Nᴜᴍʙᴇʀ Lᴏᴄᴋᴇᴅ 🔒"
+               )
 
-                await context.bot.send_message(
-                    d["chat"],
-                    f"🎯 {d['p2_name']} ʀᴇᴀᴅʏ!"
-                )
+               await context.bot.send_message(
+                   d["chat"],
+                   f"🎯 {d['p2_name']} ʀᴇᴀᴅʏ!"
+               )
 
-                await context.bot.send_message(
-                    d["chat"],
-                    f"🔥 {d['p1_name']} vs {d['p2_name']} ʀᴇᴀᴅʏ!"
-                )
+               await context.bot.send_message(
+                   d["chat"],
+                   f"🔥 {d['p1_name']} vs {d['p2_name']} ʀᴇᴀᴅʏ!"
+               )
 
-                await send_bet_choice(context, d["p1"])
-                return
+               await send_bet_choice(context, d["p1"])
+               return
 
             if data[0] == "bet":
 
