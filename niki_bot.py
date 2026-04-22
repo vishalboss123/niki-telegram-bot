@@ -270,7 +270,8 @@ OWNER_ID = 6175559434  # Apna Telegram ID
 #====================load/save===================
 
 def load_data():
-    global data
+    global data, shop_items
+
     try:
         if os.path.exists(DATA_FILE):
             with open(DATA_FILE, "r") as f:
@@ -285,6 +286,12 @@ def load_data():
     except:
         data = {}
 
+    # 🔥 IMPORTANT: SHOP ITEMS LOAD
+    if "shop_items" in data:
+        for name in shop_items:
+            if name in data["shop_items"]:
+                shop_items[name]["gifs"] = data["shop_items"][name].get("gifs", [])
+                
 def load_from_mongo():
     result = backup.find_one({"_id": "main_data"})
     
@@ -823,10 +830,18 @@ async def addgif(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("GIF ko reply karo aur /addgif rose likho")
         return
 
-    if not update.message.reply_to_message.animation:
+    msg = update.message.reply_to_message
+
+    file_id = None
+
+    if msg.animation:
+        file_id = msg.animation.file_id
+    elif msg.document:
+        file_id = msg.document.file_id
+    else:
         await update.message.reply_text("Ye GIF nahi hai")
         return
-
+        
     if len(context.args) == 0:
         await update.message.reply_text("Example: /addgif rose")
         return
