@@ -2000,8 +2000,8 @@ async def duel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     kb = InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("⚔️ Accept Duel", callback_data=f"accept_{user2.id}"),
-            InlineKeyboardButton("❌ Cancel", callback_data=f"cancel_{user2.id}")
+            InlineKeyboardButton("⚔️ Accept Duel", callback_data=f"duel_acc_{user2.id}"),
+            InlineKeyboardButton("❌ Cancel", callback_data=f"duel_rej_{user2.id}")
         ]
     ])
 
@@ -2156,29 +2156,49 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await send_bet_choice(context, d["p1"])
                 return
 
+            if data[0] == "bet":
+                uid = int(data[1])
+                bet = int(data[2])
 
-        if data[0] == "bet":
+                if d["p1"] == uid:
+                    d["bet"] = bet
 
-            uid = int(data[1])
-            bet = int(data[2])
+                    await query.edit_message_text(
+                        f"💰 {d['p1_name']} ɴᴇ ʙᴇᴛ ʟᴏᴄᴋ ᴋɪʏᴀ: {bet}"
+                    )
 
-            if d["p1"] == uid:
-                d["bet"] = bet
+                    await context.bot.send_message(
+                        d["chat"],
+                        f"💰 {d['p1_name']} ɴᴇ {bet} ʙᴇᴛ ʟᴀɢᴀʏᴀ!"
+                    )
 
-                await query.edit_message_text(
-                    f"💰 {d['p1_name']} ɴᴇ ʙᴇᴛ ʟᴏᴄᴋ ᴋɪʏᴀ: {bet}"
-                )
+                    # ✅ P2 ko SAME BET button
+                    kb = InlineKeyboardMarkup([
+                        [InlineKeyboardButton(
+                            f"✅ Accept Bet {d['bet']}",
+                            callback_data=f"bet_{d['p2']}_{d['bet']}"
+                        )]
+                    ])
 
-                await context.bot.send_message(
-                    d["chat"],
-                    f"💰 {d['p1_name']} ɴᴇ {bet} ʙᴇᴛ ʟᴀɢᴀʏᴀ!"
-                )
+                    await context.bot.send_message(
+                        d["p2"],
+                        f"💰 {d['p1_name']} ne {d['bet']} bet lagaya hai\nAccept karo 😈",
+                        reply_markup=kb
+                    )
 
-                await send_bet_choice(context, d["p2"])
-                return
+                    await context.bot.send_message(
+                        d["chat"],
+                        f"💰 {d['p1_name']} ne {d['bet']} bet lagaya!\n⏳ {d['p2_name']} wait kar raha hai..."
+                    )
 
-            if d["p2"] == uid:
+                    return
+    
 
+        
+            uid_clicked = query.from_user.id
+
+            if d["p2"] == uid_clicked:
+                
                 if not d.get("bet"):
                     await query.answer("Wait for P1 bet", show_alert=True)
                     return
@@ -2186,12 +2206,22 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 u1 = data_store[str(d["p1"])]
                 u2 = data_store[str(d["p2"])]
 
+                # ✅ P1 money check (ADD HERE)
+                if u1["money"] < d["bet"]:
+                    await context.bot.send_message(
+                        d["chat"],
+                        f"❌ {d['p1_name']} ke paas paise kam hai"
+                    )
+                    return
+
+                # ✅ P2 money check
                 if u2["money"] < d["bet"]:
                     await context.bot.send_message(
                         d["chat"],
                         f"❌ {d['p2_name']} ke paas paise kam hai"
                     )
                     return
+
 
                 u1["money"] -= d["bet"]
                 u2["money"] -= d["bet"]
@@ -2205,11 +2235,16 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
                 await context.bot.send_message(
                     d["chat"],
-                    f"🔥 {d['p1_name']} vs {d['p2_name']} ᴅᴜᴇʟ ꜱᴛᴀʀᴛ!"
+                    f"🔥 Duel Start!\n💰 Bet: {d['bet']}\n🎲 Gᴀᴍᴇ Bᴇɢɪɴꜱ Nᴏᴡ!"
                 )
-
+                await query.answer("✅ Bet accepted!", show_alert=True)
+                
                 await start_duel(context, d)
+                # ✅ CLEANUP
+                duels.pop(d["p1"], None)
+
                 return
+                
 
 
 # ================= DUEL ENGINE =================
@@ -3197,6 +3232,7 @@ def main():
     app.add_handler(CallbackQueryHandler(cancel_btn, pattern="^duel_rej_"))
 
     app.add_handler(CallbackQueryHandler(button_callback, pattern="^start_"))
+    app.add_handler(CallbackQueryHandler(button, pattern="^(num_|bet_)"))
 
     # ================= MESSAGE =================
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, track_chat))
