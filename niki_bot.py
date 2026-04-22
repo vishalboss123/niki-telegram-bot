@@ -2121,7 +2121,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             if d["p1"] == uid and not d["p1_done"]:
                d["p1_num"] = num
-                d["p1_done"] = True
+               d["p1_done"] = True
 
                 await query.edit_message_text(
                     f"✅ {d['p1_name']} Nᴜᴍʙᴇʀ Lᴏᴄᴋᴇᴅ 🔒"
