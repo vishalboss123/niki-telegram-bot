@@ -3234,7 +3234,8 @@ async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
         username = f"@{member.username}" if member.username else "No Username"
         group_name = update.effective_chat.title
 
-        f='tg://user?id={user_id}'>{name}</a>"
+        # ✅ FIXED: clickable mention
+        mention = f"<a href='tg://user?id={user_id}'>{name}</a>"
 
         # 🔥 Animation start
         msg = await update.message.reply_text("⚠️ Detecting new entity...")
@@ -3370,6 +3371,8 @@ async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # ================= MAGIC =================
+user_balance = {}
+#==================MAGIC====================
 async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     user_id = user.id
@@ -3403,17 +3406,23 @@ async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reward = random.randint(10000, 20000)
     magic_used[user_id] = True
 
+    # 💰 BALANCE ADD
+    if user_id not in user_balance:
+        user_balance[user_id] = 0
+
+    user_balance[user_id] += reward
+
     await msg.edit_text(f"""
 ╭━━━〔 💰 HACK SUCCESSFUL 〕━━━╮
 
 👤 {mention}
 💰 Reward: <b>{reward}</b> coins
+🏦 Total Balance: <b>{user_balance[user_id]}</b> coins
 
 💖 Niki Says:
 "Wow 😍 tum lucky nikle!"
 ╰━━━━━━━━━━━━━━━━━━━━╯
 """, parse_mode="HTML")
-
 
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
