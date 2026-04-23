@@ -2231,6 +2231,57 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 asyncio.create_task(bet_timeout())
 
                 return
+
+#===================ACCEPT BET===================
+async def accept(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+
+    for key, d in duels.items():
+
+        if user_id != d["p2"]:
+            continue
+
+        if not d.get("bet"):
+            await update.message.reply_text("❌ Bet abhi set nahi hua")
+            return
+
+        u1 = data_store[str(d["p1"])]
+        u2 = data_store[str(d["p2"])]
+
+        # 💰 money check
+        if u2["money"] < d["bet"]:
+            await update.message.reply_text("❌ Tumhare paas paise kam hai")
+            return
+
+        # 💸 P2 paisa cut
+        u2["money"] -= d["bet"]
+
+        save_data()
+        save_to_mongo()
+
+        # 📩 DM to both
+        await context.bot.send_message(
+            d["p1"],
+            "🔥 Bet accepted!\n👉 Group me game start ho gaya"
+        )
+
+        await context.bot.send_message(
+            d["p2"],
+            "🔥 Tumne bet accept kiya!\n👉 Group check karo"
+        )
+
+        # 📢 Group msg
+        await context.bot.send_message(
+            d["chat"],
+            f"🔥 Duel Start!\n💰 Bet: {d['bet']}\n🎮 Game begins now!"
+        )
+
+        await start_duel(context, d)
+
+        duels.pop(key, None)
+        return
+
+    await update.message.reply_text("❌ Koi active bet nahi mila")
 # ================= DUEL ENGINE =================
 async def start_duel(context, d):
     chat = d["chat"]
