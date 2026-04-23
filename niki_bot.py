@@ -2113,124 +2113,125 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = query.data.split("_")
 
     for d in duels.values():
-
+        
+        if query.from_user.id not in [d["p1"], d["p2"]]:
+            continue
+        # ================= NUMBER =================
         if data[0] == "num":
 
             uid = int(data[1])
             num = int(data[2])
 
             if d["p1"] == uid and not d["p1_done"]:
-               d["p1_num"] = num
-               d["p1_done"] = True
+                d["p1_num"] = num
+                d["p1_done"] = True
 
-               await query.edit_message_text(
-                   f"✅ {d['p1_name']} Nᴜᴍʙᴇʀ Lᴏᴄᴋᴇᴅ 🔒"
-               )
+                await query.edit_message_text(
+                    f"✅ {d['p1_name']} Nᴜᴍʙᴇʀ Lᴏᴄᴋᴇᴅ 🔒"
+                )
 
-               await context.bot.send_message(
-                   d["chat"],
-                   f"🎯 {d['p1_name']} ɴᴇ ɴᴜᴍʙᴇʀ ᴄʜᴏᴏꜱᴇ ᴋɪʏᴀ!"
-               )
+                await context.bot.send_message(
+                    d["chat"],
+                    f"🎯 {d['p1_name']} ɴᴇ ɴᴜᴍʙᴇʀ ᴄʜᴏᴏꜱᴇ ᴋɪʏᴀ!"
+                )
 
-               await send_number_choice(context, d["p2"])
-               return
+                await send_number_choice(context, d["p2"])
+                return
 
-           if d["p2"] == uid and not d["p2_done"]:
-               d["p2_num"] = num
-               d["p2_done"] = True
+            if d["p2"] == uid and not d["p2_done"]:
+                d["p2_num"] = num
+                d["p2_done"] = True
 
-               await query.edit_message_text(
-                   f"✅ {d['p2_name']} Nᴜᴍʙᴇʀ Lᴏᴄᴋᴇᴅ 🔒"
-               )
+                await query.edit_message_text(
+                    f"✅ {d['p2_name']} Nᴜᴍʙᴇʀ Lᴏᴄᴋᴇᴅ 🔒"
+                )
 
-               await context.bot.send_message(
-                   d["chat"],
-                   f"🎯 {d['p2_name']} ʀᴇᴀᴅʏ!"
-               )
+                await context.bot.send_message(
+                    d["chat"],
+                    f"🎯 {d['p2_name']} ʀᴇᴀᴅʏ!"
+                )
 
-               await context.bot.send_message(
-                   d["chat"],
-                   f"🔥 {d['p1_name']} vs {d['p2_name']} ʀᴇᴀᴅʏ!"
-               )
+                await context.bot.send_message(
+                    d["chat"],
+                    f"🔥 {d['p1_name']} vs {d['p2_name']} ʀᴇᴀᴅʏ!"
+                )
 
-               await send_bet_choice(context, d["p1"])
-               return
+                await send_bet_choice(context, d["p1"])
+                return
 
-            if data[0] == "bet":
+        # ================= BET =================
+        if data[0] == "bet":
 
-                uid = int(data[1])
-                bet = int(data[2])
-                uid_clicked = query.from_user.id
+            uid = int(data[1])
+            bet = int(data[2])
+            uid_clicked = query.from_user.id
 
-                # ✅ P1 bet
-                if d["p1"] == uid_clicked:
-                    d["bet"] = bet
+            # ✅ P1 bet
+            if d["p1"] == uid_clicked:
+                d["bet"] = bet
 
-                    await query.edit_message_text(
-                        f"💰 {d['p1_name']} ɴᴇ ʙᴇᴛ ʟᴏᴄᴋ ᴋɪʏᴀ: {bet}"
-                    )
+                await query.edit_message_text(
+                    f"💰 {d['p1_name']} ɴᴇ ʙᴇᴛ ʟᴏᴄᴋ ᴋɪʏᴀ: {bet}"
+                )
 
-                    await context.bot.send_message(
-                        d["chat"],
-                        f"💰 {d['p1_name']} ɴᴇ {bet} ʙᴇᴛ ʟᴀɢᴀʏᴀ!"
-                    )
+                await context.bot.send_message(
+                    d["chat"],
+                    f"💰 {d['p1_name']} ɴᴇ {bet} ʙᴇᴛ ʟᴀɢᴀʏᴀ!"
+                )
 
-                    kb = InlineKeyboardMarkup([
-                        [InlineKeyboardButton(
-                            f"✅ Accept Bet {bet}",
-                            callback_data=f"bet_{d['p2']}_{bet}"
-                        )]
-                    ])
+                kb = InlineKeyboardMarkup([
+                    [InlineKeyboardButton(
+                        f"✅ Accept Bet {bet}",
+                        callback_data=f"bet_{d['p2']}_{bet}"
+                    )]
+                ])
 
-                    await context.bot.send_message(
-                        d["p2"],
-                        f"💰 {d['p1_name']} ne {bet} bet lagaya hai\nAccept karo 😈",
-                        reply_markup=kb
-                   )
+                await context.bot.send_message(
+                    d["p2"],
+                    f"💰 {d['p1_name']} ne {bet} bet lagaya hai\nAccept karo 😈",
+                    reply_markup=kb
+                )
 
+                return
+
+            # ✅ P2 accept
+            if d["p2"] == uid_clicked:
+
+                if not d.get("bet"):
+                    await query.answer("Wait for P1 bet", show_alert=True)
                     return
 
-                # ✅ P2 accept
-                if d["p2"] == uid_clicked:
+                u1 = data_store[str(d["p1"])]
+                u2 = data_store[str(d["p2"])]
 
-                    if not d.get("bet"):
-                        await query.answer("Wait for P1 bet", show_alert=True)
-                        return
-
-                    u1 = data_store[str(d["p1"])]
-                    u2 = data_store[str(d["p2"])]
-
-                    if u1["money"] < d["bet"] or u2["money"] < d["bet"]:
-                        await context.bot.send_message(
-                            d["chat"],
-                            "❌ Kisi ke paas paise kam hai"
-                        )
-                        return
-
-                    u1["money"] -= d["bet"]
-                    u2["money"] -= d["bet"]
-
-                    save_data()
-                    save_to_mongo()
-
-                    await query.edit_message_text(
-                        f"💰 {d['p2_name']} ɴᴇ ʙᴇᴛ ᴄᴏɴꜰɪʀᴍ ᴋɪʏᴀ: {d['bet']}"
-                    )
-
+                if u1["money"] < d["bet"] or u2["money"] < d["bet"]:
                     await context.bot.send_message(
                         d["chat"],
-                        f"🔥 Duel Start!\n💰 Bet: {d['bet']}"
+                        "❌ Kisi ke paas paise kam hai"
                     )
-
-                    await query.answer("✅ Bet accepted!", show_alert=True)
-
-                    await start_duel(context, d)
-                    duels.pop(d["p1"], None)
-
                     return
-                
 
+                u1["money"] -= d["bet"]
+                u2["money"] -= d["bet"]
 
+                save_data()
+                save_to_mongo()
+
+                await query.edit_message_text(
+                    f"💰 {d['p2_name']} ɴᴇ ʙᴇᴛ ᴄᴏɴꜰɪʀᴍ ᴋɪʏᴀ: {d['bet']}"
+                )
+
+                await context.bot.send_message(
+                    d["chat"],
+                    f"🔥 Duel Start!\n💰 Bet: {d['bet']}"
+                )
+
+                await query.answer("✅ Bet accepted!", show_alert=True)
+
+                await start_duel(context, d)
+                duels.pop(d["p1"], None)
+
+                return
 # ================= DUEL ENGINE =================
 async def start_duel(context, d):
     chat = d["chat"]
