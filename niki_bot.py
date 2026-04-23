@@ -3216,6 +3216,194 @@ async def brain(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await msg.edit_text(text, parse_mode="HTML")
 
 
+#==============WELCOME MSG===============
+magic_used = {}
+
+# ================= BUTTON =================
+def get_start_button():
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton("🎮 Start Game", url="https://t.me/YOUR_BOT_USERNAME?start=start")]
+    ])
+
+# ================= WELCOME =================
+async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    for member in update.message.new_chat_members:
+
+        user_id = member.id
+        name = member.first_name
+        username = f"@{member.username}" if member.username else "No Username"
+        group_name = update.effective_chat.title
+
+        mention = f"<a href='tg://user?id={user_id}'>{name}</a>"
+
+        # 🔥 Animation start
+        msg = await update.message.reply_text("⚠️ Detecting new entity...")
+
+        steps = [
+            "🛰️ Scanning biometric data...",
+            "🧠 Reading brain signals...",
+            "💀 Bypassing security...",
+            "🧬 Injecting system core...",
+            "📡 Connecting to NIKI server...",
+            "☠️ Unauthorized access detected...",
+            "💻 Granting VIP access..."
+        ]
+
+        for step in steps:
+            await asyncio.sleep(1.2)
+            await msg.edit_text(f"⚠️ {step}")
+
+        # 🔥 Final welcome (with DP)
+        final_text = f"""
+╭━━━〔 ☠️ SYSTEM BREACH ☠️ 〕━━━╮
+
+👤 Identity: {mention}
+🆔 ID: <code>{user_id}</code>
+🔰 Username: {username}
+
+━━━━━━━━━━━━━━━━━━━
+💀 STATUS: USER CAPTURED
+💻 ACCESS: GRANTED
+🔓 LEVEL: VIP ENTRY
+━━━━━━━━━━━━━━━━━━━
+
+💖 <b>Vishal welcomed you</b>
+
+『🔥 WELCOME TO DARK ZONE 🔥』
+
+🏷️ Group: <b>{group_name}</b>
+
+━━━━━━━━━━━━━━━━━━━
+🤖 <b>Niki Says:</b>
+"Dar gaye kya? 😏 relax baby 💕"
+━━━━━━━━━━━━━━━━━━━
+"""
+
+        photos = await context.bot.get_user_profile_photos(user_id)
+
+        if photos.total_count > 0:
+            photo = photos.photos[0][-1].file_id
+            await msg.delete()
+
+            await update.message.reply_photo(
+                photo=photo,
+                caption=final_text,
+                parse_mode="HTML",
+                reply_markup=get_start_button()
+            )
+        else:
+            await msg.edit_text(
+                final_text,
+                parse_mode="HTML",
+                reply_markup=get_start_button()
+            )
+
+        # 🔥 Game message (clickable name)
+        await asyncio.sleep(2)
+
+        game_text = f"""
+╭━━━〔 🎮 GAME SYSTEM ONLINE 〕━━━╮
+
+👤 Player: {mention}
+
+💻 Connecting to NIKI SERVER...
+█▒▒▒▒▒▒▒▒ 10%
+███▒▒▒▒▒▒ 30%
+█████▒▒▒▒ 50%
+███████▒▒ 70%
+██████████ 100%
+
+✅ Access Granted!
+
+🎯 Welcome to Game World
+
+━━━━━━━━━━━━━━━━━━━
+⚡ Use /magic — Secret Reward Hack 😈
+━━━━━━━━━━━━━━━━━━━
+"""
+
+        await update.message.reply_text(
+            game_text,
+            parse_mode="HTML",
+            reply_markup=get_start_button()
+        )
+
+        # 🔥 Magic loading
+        await asyncio.sleep(2)
+
+        hack_msg = await update.message.reply_text("💻 Preparing secret hack...")
+
+        steps2 = [
+            "🔍 Locating hidden vault...",
+            "💣 Breaking encryption...",
+            "📡 Accessing dark server...",
+            "🧠 Syncing reward system...",
+            "💰 Ready to extract..."
+        ]
+
+        for step in steps2:
+            await asyncio.sleep(1.2)
+            await hack_msg.edit_text(f"💻 {step}")
+
+        await hack_msg.edit_text(f"""
+🪄 <b>SECRET MAGIC UNLOCKED</b>
+
+👤 {mention}
+
+⚡ Ab /magic type karo 😈
+💰 Reward tumhara wait kar raha hai...
+
+💖 Niki Says:
+"Try karo na 😘 lucky ho sakte ho"
+""", parse_mode="HTML", reply_markup=get_start_button())
+
+
+# ================= MAGIC =================
+async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    user_id = user.id
+    mention = f"<a href='tg://user?id={user_id}'>{user.first_name}</a>"
+
+    msg = await update.message.reply_text("💻 Initializing hack...")
+
+    steps = [
+        "🔍 Scanning system...",
+        "💣 Breaking firewall...",
+        "📡 Accessing root...",
+        "💰 Opening vault..."
+    ]
+
+    for step in steps:
+        await asyncio.sleep(1.5)
+        await msg.edit_text(f"💻 {step}")
+
+    if user_id in magic_used:
+        await msg.edit_text(f"""
+❌ ACCESS DENIED
+
+👤 {mention}
+🛑 Reward already claimed!
+
+💖 Niki Says:
+"Ek hi chance milta hai 😏"
+""", parse_mode="HTML")
+        return
+
+    reward = random.randint(10000, 20000)
+    magic_used[user_id] = True
+
+    await msg.edit_text(f"""
+╭━━━〔 💰 HACK SUCCESSFUL 〕━━━╮
+
+👤 {mention}
+💰 Reward: <b>{reward}</b> coins
+
+💖 Niki Says:
+"Wow 😍 tum lucky nikle!"
+╰━━━━━━━━━━━━━━━━━━━━╯
+""", parse_mode="HTML")
+
+
 
 
 # =================== MAIN FUNCTION ===================
@@ -3300,6 +3488,7 @@ def main():
     app.add_handler(CommandHandler("look", look))
     app.add_handler(CommandHandler("brain", brain))
     app.add_handler(CommandHandler("accept", accept))
+    app.add_handler(CommandHandler("magic", magic))
 
     # ================= CALLBACKS =================
     app.add_handler(CallbackQueryHandler(accept, pattern="^marry_acc_"))
@@ -3315,7 +3504,8 @@ def main():
     # ================= MESSAGE =================
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, track_chat))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, auto_niki_reply))
-
+    app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome))
+9
     print("🔥 Niki Bot started...")
     app.run_polling()
 
