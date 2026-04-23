@@ -3299,6 +3299,7 @@ def main():
     app.add_handler(CommandHandler("divorce", divorce))
     app.add_handler(CommandHandler("look", look))
     app.add_handler(CommandHandler("brain", brain))
+    app.add_handler(CommandHandler("accept", accept))
 
     # ================= CALLBACKS =================
     app.add_handler(CallbackQueryHandler(accept, pattern="^marry_acc_"))
@@ -3309,7 +3310,7 @@ def main():
 
     app.add_handler(CallbackQueryHandler(button_callback, pattern="^start_"))
     
-    app.add_handler(CommandHandler("accept", accept_bet))
+    
 
     # ================= MESSAGE =================
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, track_chat))
