@@ -2111,14 +2111,14 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
 
     data = query.data.split("_")
-
     uid_clicked = query.from_user.id
 
     for key, d in duels.items():
 
-        # 👉 ONLY correct duel process kare
+        # 👉 sirf duel ke players hi interact kare
         if uid_clicked not in [d["p1"], d["p2"]]:
             continue
+
         # ================= NUMBER =================
         if data[0] == "num":
 
@@ -2135,7 +2135,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
                 await context.bot.send_message(
                     d["chat"],
-                    f"🎯 {d['p1_name']} ɴᴇ ɴᴜᴍʙᴇʀ ᴄʜᴏᴏꜱᴇ ᴋɪʏᴀ!"
+                    f"🎯 {d['p1_name']} ne number choose kiya!"
                 )
 
                 await send_number_choice(context, d["p2"])
@@ -2151,12 +2151,12 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
                 await context.bot.send_message(
                     d["chat"],
-                    f"🎯 {d['p2_name']} ʀᴇᴀᴅʏ!"
+                    f"🎯 {d['p2_name']} ready!"
                 )
 
                 await context.bot.send_message(
                     d["chat"],
-                    f"🔥 {d['p1_name']} vs {d['p2_name']} ʀᴇᴀᴅʏ!"
+                    f"🔥 {d['p1_name']} vs {d['p2_name']} ready!"
                 )
 
                 await send_bet_choice(context, d["p1"])
@@ -2167,15 +2167,26 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             uid = int(data[1])
             bet = int(data[2])
-            uid_clicked = query.from_user.id
 
-            # 🔥 only correct user ka button chale
+            # 👉 wrong user click ignore
             if uid_clicked != uid:
                 continue
 
-            # ✅ P1 bet
+            # ================= P1 BET =================
             if d["p1"] == uid_clicked:
+
+                u1 = data_store[str(d["p1"])]
+
+                if u1["money"] < bet:
+                    await query.answer("❌ Paise kam hai", show_alert=True)
+                    return
+
                 d["bet"] = bet
+
+                # 💸 P1 paisa cut
+                u1["money"] -= bet
+                save_data()
+                save_to_mongo()
 
                 await query.edit_message_text(
                     f"💰 {d['p1_name']} ne bet lock kiya: {bet}"
@@ -2183,62 +2194,41 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
                 await context.bot.send_message(
                     d["chat"],
-                    f"💰 {d['p1_name']} ne {bet} bet lagaya!"
+                    f"💰 {d['p1_name']} ne {bet} bet lagaya!\n⏳ {d['p2_name']} /accept karega..."
                 )
 
-                kb = InlineKeyboardMarkup([
-                    [InlineKeyboardButton(
-                        f"✅ Accept Bet {bet}",
-                        callback_data=f"bet_{d['p2']}_{bet}"
-                    )]
-                ])
-
+                # 📩 P2 DM
                 await context.bot.send_message(
                     d["p2"],
-                    f"💰 {d['p1_name']} ne {bet} bet lagaya hai\nAccept karo 😈",
-                    reply_markup=kb
+                    f"💰 {d['p1_name']} ne {bet} bet lagaya hai!\n\n👉 Accept karne ke liye /accept likho 😈"
                 )
 
-                return
+                # ⏳ TIMER SYSTEM
+                async def bet_timeout():
+                    await asyncio.sleep(20)
 
-            # ✅ P2 accept
-            if d["p2"] == uid_clicked:
+                    if key in duels:
+                        await context.bot.send_message(
+                            d["chat"],
+                            f"⏳ {d['p2_name']} jaldi karo! /accept karo (20 sec left)"
+                        )
 
-                if not d.get("bet"):
-                    await query.answer("Wait for P1 bet", show_alert=True)
-                    return
+                    await asyncio.sleep(20)
 
-                u1 = data_store[str(d["p1"])]
-                u2 = data_store[str(d["p2"])]
+                    if key in duels:
+                        # 💸 refund P1
+                        u1["money"] += bet
+                        save_data()
+                        save_to_mongo()
 
-                if u1["money"] < d["bet"] or u2["money"] < d["bet"]:
-                    await context.bot.send_message(
-                        d["chat"],
-                        "❌ Kisi ke paas paise kam hai"
-                    )
-                    return
+                        await context.bot.send_message(
+                            d["chat"],
+                            "❌ Duel cancel ho gaya (no accept)\n💰 P1 ka paisa wapas"
+                        )
 
-                u1["money"] -= d["bet"]
-                u2["money"] -= d["bet"]
+                        duels.pop(key, None)
 
-                save_data()
-                save_to_mongo()
-
-                await query.edit_message_text(
-                    f"💰 {d['p2_name']} ne bet accept kiya: {d['bet']}"
-                )
-
-                await context.bot.send_message(
-                    d["chat"],
-                    f"🔥 Duel Start!\n💰 Bet: {d['bet']}"
-                )
-
-                await query.answer("✅ Bet accepted!", show_alert=True)
-
-                await start_duel(context, d)
-
-                # ✅ cleanup
-                duels.pop(key, None)
+                asyncio.create_task(bet_timeout())
 
                 return
 # ================= DUEL ENGINE =================
@@ -2462,9 +2452,20 @@ couple_col = db["groups"]
 
 
 
-# ================= CONFIG =================
-SPECIAL_USERS = ["YT_BISHALL", "ll_Sassy_Queen_ll", "ll_Vishal_Heart_ll"]
-COOLDOWN = 300
+
+
+# ================= SPECIAL USERS (USERNAME YA ID) =================
+SPECIAL_USERS = [
+    "YT_BISHALL",   # username without @
+    "ll_Sassy_Queen_ll",
+    "ll_Vishal_Heart_ll",
+    "user4",
+    "user5"
+]
+
+# ================= COOLDOWN =================
+COOLDOWN = 300  # 5 min
+
 
 # ================= SHAYARI =================
 SHAYARI_LIST = [
@@ -2480,8 +2481,11 @@ SHAYARI_LIST = [
     "Rab ne banayi hogi tumhari jodi 💘"
 ]
 
-# ================= DB =================
+
+# ================= DATA FUNCTIONS =================
 def get_data(chat_id):
+    chat_id = str(chat_id)
+
     data = couple_col.find_one({"_id": chat_id})
     if not data:
         data = {
@@ -2494,13 +2498,18 @@ def get_data(chat_id):
             "leaderboard": {}
         }
         couple_col.insert_one(data)
+
     return data
 
+
 def update_data(chat_id, data):
+    chat_id = str(chat_id)
+
+    data.pop("_id", None)  # ❗ VERY IMPORTANT
     couple_col.update_one({"_id": chat_id}, {"$set": data})
 
 # ================= SET PHOTO =================
-async def setcouplepic(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def setcouplepic(update, context):
     if not update.message.reply_to_message or not update.message.reply_to_message.photo:
         await update.message.reply_text("❌ Photo pe reply karo!")
         return
@@ -2509,13 +2518,20 @@ async def setcouplepic(update: Update, context: ContextTypes.DEFAULT_TYPE):
     photo_id = update.message.reply_to_message.photo[-1].file_id
 
     data = get_data(chat_id)
+
+    # ✅ already saved check
+    if data.get("photo"):
+        await update.message.reply_text("⚠️ Couple photo already saved hai!")
+        return
+
     data["photo"] = photo_id
+
     update_data(chat_id, data)
 
     await update.message.reply_text("✅ Couple photo permanently saved 💖")
 
 # ================= COUPLE =================
-async def couple(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def couple(update, context):
     if not update.message:
         return
 
@@ -2532,7 +2548,7 @@ async def couple(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # ===== COOLDOWN =====
     if username not in SPECIAL_USERS:
-        if time.time() - data["last_used"] < COOLDOWN:
+        if time.time() - data.get("last_used", 0) < COOLDOWN:
             await update.message.reply_text("⏳ Try after 5 mins")
             return
 
@@ -2544,69 +2560,82 @@ async def couple(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         admins = await context.bot.get_chat_administrators(chat_id)
+
         for admin in admins:
             u = admin.user
             if u.is_bot:
                 continue
 
-            if u.username in SPECIAL_USERS:
+            uname = u.username or ""
+
+            if uname in SPECIAL_USERS:
                 special_members.append(u)
             else:
                 normal_members.append(u)
+
     except:
         pass
 
-    # add current user
+    # 👉 current user add
     if not user.is_bot:
-        normal_members.append(user)
+        if username in SPECIAL_USERS:
+            special_members.append(user)
+        else:
+            normal_members.append(user)
 
-    # remove duplicates
+    # 👉 remove duplicates
+    special_members = list({m.id: m for m in special_members}.values())
     normal_members = list({m.id: m for m in normal_members}.values())
 
     # ===== LOGIC =====
-    # ===== LOGIC =====
-    # ===== LOGIC =====
 
-    # 👉 SPECIAL USER COMMAND
+    # 🔥 SPECIAL USER COMMAND
     if username in SPECIAL_USERS:
+
         if len(special_members) >= 2:
             user1, user2 = random.sample(special_members, 2)
+
         else:
             if len(normal_members) < 2:
                 await update.message.reply_text("❌ Not enough users")
                 return
+
             user1, user2 = random.sample(normal_members, 2)
 
-    # 👉 NORMAL USER COMMAND
+    # 🔥 NORMAL USER COMMAND
     else:
-        data["count"] += 1
+        data["count"] = data.get("count", 0) + 1
 
-        # 👉 4th turn
+        # 👉 4th turn special
         if data["count"] == 4:
+
             if len(special_members) >= 2:
                 user1, user2 = random.sample(special_members, 2)
             else:
                 if len(normal_members) < 2:
                     await update.message.reply_text("❌ Not enough users")
                     return
+
                 user1, user2 = random.sample(normal_members, 2)
 
             data["count"] = 0
 
-        # 👉 1st 2nd 3rd
         else:
             if len(normal_members) < 2:
                 await update.message.reply_text("❌ Not enough users")
                 return
 
             user1, user2 = random.sample(normal_members, 2)
-        
 
     # ===== SHAYARI =====
-    shayari = SHAYARI_LIST[data["shayari_index"]]
-    data["shayari_index"] = (data["shayari_index"] + 1) % len(SHAYARI_LIST)
+    shayari_index = data.get("shayari_index", 0)
+    shayari = SHAYARI_LIST[shayari_index]
+    data["shayari_index"] = (shayari_index + 1) % len(SHAYARI_LIST)
 
-    # ===== SAVE =====
+    # ===== SAVE HISTORY =====
+    data.setdefault("history", [])
+    data.setdefault("leaderboard", {})
+
     data["history"].append((user1.id, user2.id, user1.first_name, user2.first_name))
     data["history"] = data["history"][-10:]
 
@@ -2629,16 +2658,18 @@ async def couple(update: Update, context: ContextTypes.DEFAULT_TYPE):
 💖 Niki says: Tum dono ki jodi hamesha bani rahe 💕
 """
 
-    # ===== SEND + PIN =====
+    # ===== SEND =====
     if data.get("photo"):
-        msg = await update.message.reply_photo(
+        msg = await context.bot.send_photo(
+            chat_id=chat_id,
             photo=data["photo"],
             caption=caption,
             parse_mode="HTML"
         )
     else:
-        msg = await update.message.reply_text(
-            caption,
+        msg = await context.bot.send_message(
+            chat_id=chat_id,
+            text=caption,
             parse_mode="HTML"
         )
 
@@ -3227,6 +3258,7 @@ def main():
 
     app.add_handler(CallbackQueryHandler(button_callback, pattern="^start_"))
     app.add_handler(CallbackQueryHandler(button, pattern="^(num_|bet_)"))
+    app.add_handler(CommandHandler("accept", accept_bet))
 
     # ================= MESSAGE =================
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, track_chat))
