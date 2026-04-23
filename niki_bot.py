@@ -3505,7 +3505,7 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, track_chat))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, auto_niki_reply))
     app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome))
-9
+
     print("🔥 Niki Bot started...")
     app.run_polling()
 
