@@ -2112,9 +2112,12 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     data = query.data.split("_")
 
-    for d in duels.values():
-        
-        if query.from_user.id not in [d["p1"], d["p2"]]:
+    uid_clicked = query.from_user.id
+
+    for key, d in duels.items():
+
+        # 👉 ONLY correct duel process kare
+        if uid_clicked not in [d["p1"], d["p2"]]:
             continue
         # ================= NUMBER =================
         if data[0] == "num":
@@ -2166,17 +2169,21 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             bet = int(data[2])
             uid_clicked = query.from_user.id
 
+            # 🔥 only correct user ka button chale
+            if uid_clicked != uid:
+                continue
+
             # ✅ P1 bet
             if d["p1"] == uid_clicked:
                 d["bet"] = bet
 
                 await query.edit_message_text(
-                    f"💰 {d['p1_name']} ɴᴇ ʙᴇᴛ ʟᴏᴄᴋ ᴋɪʏᴀ: {bet}"
+                    f"💰 {d['p1_name']} ne bet lock kiya: {bet}"
                 )
 
                 await context.bot.send_message(
                     d["chat"],
-                    f"💰 {d['p1_name']} ɴᴇ {bet} ʙᴇᴛ ʟᴀɢᴀʏᴀ!"
+                    f"💰 {d['p1_name']} ne {bet} bet lagaya!"
                 )
 
                 kb = InlineKeyboardMarkup([
@@ -2218,7 +2225,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 save_to_mongo()
 
                 await query.edit_message_text(
-                    f"💰 {d['p2_name']} ɴᴇ ʙᴇᴛ ᴄᴏɴꜰɪʀᴍ ᴋɪʏᴀ: {d['bet']}"
+                    f"💰 {d['p2_name']} ne bet accept kiya: {d['bet']}"
                 )
 
                 await context.bot.send_message(
@@ -2229,7 +2236,9 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await query.answer("✅ Bet accepted!", show_alert=True)
 
                 await start_duel(context, d)
-                duels.pop(d["p1"], None)
+
+                # ✅ cleanup
+                duels.pop(key, None)
 
                 return
 # ================= DUEL ENGINE =================
