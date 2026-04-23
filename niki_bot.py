@@ -3257,7 +3257,7 @@ def main():
     app.add_handler(CallbackQueryHandler(cancel_btn, pattern="^duel_rej_"))
 
     app.add_handler(CallbackQueryHandler(button_callback, pattern="^start_"))
-    app.add_handler(CallbackQueryHandler(button, pattern="^(num_|bet_)"))
+    
     app.add_handler(CommandHandler("accept", accept_bet))
 
     # ================= MESSAGE =================
