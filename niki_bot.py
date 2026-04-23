@@ -3213,7 +3213,7 @@ async def brain(update: Update, context: ContextTypes.DEFAULT_TYPE):
 </pre>
 """
 
-    await msg.edit_text(text, parse_mode="HTML")
+    await msg.edit_text(text, ENTRY_mode="HTML")
 
 
 #==============WELCOME MSG===============
@@ -3222,7 +3222,7 @@ magic_used = {}
 # ================= BUTTON =================
 def get_start_button():
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("🎮 Start Game", url="https://t.me/YOUR_BOT_USERNAME?start=start")]
+        [InlineKeyboardButton("🎮 Start Game", url="https://t.me/iim_Nikibot?start=start")]
     ])
 
 # ================= WELCOME =================
@@ -3234,7 +3234,7 @@ async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
         username = f"@{member.username}" if member.username else "No Username"
         group_name = update.effective_chat.title
 
-        mention = f"<a href='tg://user?id={user_id}'>{name}</a>"
+        f='tg://user?id={user_id}'>{name}</a>"
 
         # 🔥 Animation start
         msg = await update.message.reply_text("⚠️ Detecting new entity...")
@@ -3298,19 +3298,36 @@ async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 reply_markup=get_start_button()
             )
 
-        # 🔥 Game message (clickable name)
-        await asyncio.sleep(2)
+        # 🔥 Game message
+        await asyncio.sleep(15)  # ✅ CHANGED (2 → 15)
 
-        game_text = f"""
+        msg2 = await update.message.reply_text("💻 Connecting to NIKI SERVER...")
+
+        # 🔥 REAL MOVING BAR + GLITCH
+        for i in range(0, 101, 5):
+            filled = "█" * (i // 10)
+            empty = "▒" * (10 - (i // 10))
+
+            # glitch text
+            glitch = random.choice(["", "⚠️", "⚡", "✖️", "☠️"])
+
+            await msg2.edit_text(f"""
 ╭━━━〔 🎮 GAME SYSTEM ONLINE 〕━━━╮
 
 👤 Player: {mention}
 
 💻 Connecting to NIKI SERVER...
-█▒▒▒▒▒▒▒▒ 10%
-███▒▒▒▒▒▒ 30%
-█████▒▒▒▒ 50%
-███████▒▒ 70%
+{filled}{empty} {i}% {glitch}
+""", parse_mode="HTML")
+
+            await asyncio.sleep(0.4)
+
+        await msg2.edit_text(f"""
+╭━━━〔 🎮 GAME SYSTEM ONLINE 〕━━━╮
+
+👤 Player: {mention}
+
+💻 Connecting to NIKI SERVER...
 ██████████ 100%
 
 ✅ Access Granted!
@@ -3320,16 +3337,10 @@ async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
 ━━━━━━━━━━━━━━━━━━━
 ⚡ Use /magic — Secret Reward Hack 😈
 ━━━━━━━━━━━━━━━━━━━
-"""
-
-        await update.message.reply_text(
-            game_text,
-            parse_mode="HTML",
-            reply_markup=get_start_button()
-        )
+""", parse_mode="HTML", reply_markup=get_start_button())
 
         # 🔥 Magic loading
-        await asyncio.sleep(2)
+        await asyncio.sleep(10)  # ✅ CHANGED (2 → 10)
 
         hack_msg = await update.message.reply_text("💻 Preparing secret hack...")
 
@@ -3402,8 +3413,6 @@ async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
 "Wow 😍 tum lucky nikle!"
 ╰━━━━━━━━━━━━━━━━━━━━╯
 """, parse_mode="HTML")
-
-
 
 
 # =================== MAIN FUNCTION ===================
