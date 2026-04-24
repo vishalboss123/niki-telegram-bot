@@ -3410,7 +3410,6 @@ async def member_update_welcome(update: Update, context: ContextTypes.DEFAULT_TY
 
 
 # ================= MAGIC =================
-# ================= MAGIC =================
 async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     user_id = user.id
@@ -3429,41 +3428,49 @@ async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await asyncio.sleep(1.5)
         await msg.edit_text(f"💻 {step}")
 
-    # 🔥 SAFE USER DATA (FIXED)
-    try:
-        u = get_user(user_id)
-    except:
-        u = {"money": 0, "magic_used": False}
+    # 🔥 SAME DATA (balance wala)
+    user_id_str = str(user_id)
 
-    # ✅ DEFAULT FIX (IMPORTANT)
+    if user_id_str not in data:
+        data[user_id_str] = {
+            "money": 0,
+            "magic_used": False
+        }
+
+    u = data[user_id_str]
+
+    # ✅ default safety
     if "magic_used" not in u:
         u["magic_used"] = False
 
-    # ❌ Already used check (PERMANENT)
-    if u.get("magic_used"):
+    # ❌ ALREADY USED (IMPROVED MESSAGE)
+    if u["magic_used"]:
         await msg.edit_text(f"""
-❌ ACCESS DENIED
+╭━━━〔 ❌ ACCESS DENIED 〕━━━╮
 
 👤 {mention}
-🛑 Reward already claimed!
 
+🛑 Tum pehle hi magic use kar chuke ho!
+
+💀 System Log:
+"Reward already extracted..."
+
+━━━━━━━━━━━━━━━━━━━
 💖 Niki Says:
 "Ek hi chance milta hai 😏"
+━━━━━━━━━━━━━━━━━━━
 """, parse_mode="HTML")
         return
 
-    # 💰 Reward
+    # 💰 reward
     reward = random.randint(10000, 20000)
 
-    # ✅ SAVE PERMANENT FLAG
     u["magic_used"] = True
-
-    # 💰 ADD BALANCE
     u["money"] += reward
 
-    # 💾 SAVE DB
+    # 💾 save
     save_data()
-    
+    save_to_mongo()
 
     await msg.edit_text(f"""
 ╭━━━〔 💰 HACK SUCCESSFUL 〕━━━╮
