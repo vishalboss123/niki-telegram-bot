@@ -31,6 +31,7 @@ threading.Thread(target=run_web).start()
 
 # =================== IMPORTS ===================
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from collections import deque
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
@@ -44,6 +45,7 @@ import json
 import time
 import random
 import os
+
 
 # =================== GLOBALS ===================
 kill_cooldown = {}
