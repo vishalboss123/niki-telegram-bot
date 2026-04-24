@@ -3561,7 +3561,7 @@ def main():
 
     app.add_handler(CallbackQueryHandler(button_callback, pattern="^start_"))
     
-    
+    app.add_handler(CallbackQueryHandler(button, pattern="^(num_|bet_)"))
 
     # ================= MESSAGE =================
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, track_chat))
