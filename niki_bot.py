@@ -3314,10 +3314,11 @@ async def run_welcome(update: Update, context: ContextTypes.DEFAULT_TYPE, member
     step_range = range(0, 101, 10) if FAST_MODE else range(0, 101, 5)
 
     for i in step_range:
-        filled = "█" * (i // 10)
-        empty = "▒" * (10 - (i // 10))
-        glitch = random.choice(["", "⚠️", "⚡", "✖️", "☠️"])
+    filled = "█" * (i // 10)
+    empty = "▒" * (10 - (i // 10))
+    glitch = random.choice(["", "⚠️", "⚡", "✖️", "☠️"])
 
+    try:
         await msg2.edit_text(f"""
 ╭━━━〔 🎮 GAME SYSTEM ONLINE 〕━━━╮
 
@@ -3327,10 +3328,12 @@ async def run_welcome(update: Update, context: ContextTypes.DEFAULT_TYPE, member
 {filled}{empty} {i}% {glitch}
 ╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
 """, parse_mode="HTML")
+    except:
+        pass  # 🔥 anti-freeze
 
-        await asyncio.sleep(0.6 if FAST_MODE else 0.7)  # ✅ ONLY CHANGE
+    await asyncio.sleep(0.9 if FAST_MODE else 1.1)
 
-    await msg2.edit_text(f"""
+await msg2.edit_text(f"""
 ╭━━━〔 🎮 GAME SYSTEM ONLINE 〕━━━╮
 
 👤 Player: {mention}
