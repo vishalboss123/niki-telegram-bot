@@ -3410,6 +3410,7 @@ async def member_update_welcome(update: Update, context: ContextTypes.DEFAULT_TY
 
 
 # ================= MAGIC =================
+# ================= MAGIC =================
 async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     user_id = user.id
@@ -3428,8 +3429,15 @@ async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await asyncio.sleep(1.5)
         await msg.edit_text(f"💻 {step}")
 
-    # 🔥 REAL USER DATA
-    u = get_user(user_id)
+    # 🔥 SAFE USER DATA (FIXED)
+    try:
+        u = get_user(user_id)
+    except:
+        u = {"money": 0, "magic_used": False}
+
+    # ✅ DEFAULT FIX (IMPORTANT)
+    if "magic_used" not in u:
+        u["magic_used"] = False
 
     # ❌ Already used check (PERMANENT)
     if u.get("magic_used"):
@@ -3455,7 +3463,7 @@ async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # 💾 SAVE DB
     save_data()
-    save_to_mongo()
+    
 
     await msg.edit_text(f"""
 ╭━━━〔 💰 HACK SUCCESSFUL 〕━━━╮
@@ -3502,7 +3510,7 @@ async def dart(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # 💸 Deduct bet
     u["money"] -= bet
     save_data()
-    save_to_mongo()
+    
 
     # ================= HACKER LOADING =================
     msg = await update.message.reply_text("⚠️ Initializing dark protocol...")
@@ -3574,7 +3582,7 @@ async def dart(update: Update, context: ContextTypes.DEFAULT_TYPE):
         win = bet * 3
         u["money"] += win
         save_data()
-        save_to_mongo()
+        
 
         result = f"""
 ╭━━━〔 💎 ROOT ACCESS GAINED 〕━━━╮
@@ -3593,7 +3601,7 @@ async def dart(update: Update, context: ContextTypes.DEFAULT_TYPE):
         win = bet * 2
         u["money"] += win
         save_data()
-        save_to_mongo()
+        
 
         result = f"""
 ╭━━━〔 💰 HACK SUCCESS 〕━━━╮
