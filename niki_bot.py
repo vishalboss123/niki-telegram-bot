@@ -3217,7 +3217,15 @@ async def brain(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 #==============WELCOME MSG===============
-magic_used = {}
+
+
+# ================= VIP USERS =================
+VIP_USERS = [6175559434]
+
+# ================= QUEUE =================
+welcome_queue = deque()
+active_workers = 0
+MAX_WORKERS = 3
 
 # ================= BUTTON =================
 def get_start_button():
@@ -3225,37 +3233,38 @@ def get_start_button():
         [InlineKeyboardButton("🎮 Start Game", url="https://t.me/iim_Nikibot?start=start")]
     ])
 
-# ================= WELCOME =================
-async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    for member in update.message.new_chat_members:
+# ================= SMART WELCOME =================
+async def run_welcome(update: Update, context: ContextTypes.DEFAULT_TYPE, member):
 
-        user_id = member.id
-        name = member.first_name
-        username = f"@{member.username}" if member.username else "No Username"
-        group_name = update.effective_chat.title
+    user_id = member.id
+    name = member.first_name
+    username = f"@{member.username}" if member.username else "No Username"
+    group_name = update.effective_chat.title
+    mention = f"<a href='tg://user?id={user_id}'>{name}</a>"
 
-        # ✅ FIXED: clickable mention
-        mention = f"<a href='tg://user?id={user_id}'>{name}</a>"
+    queue_size = len(welcome_queue)
+    FAST_MODE = queue_size > 5 and user_id not in VIP_USERS
 
-        # 🔥 Animation start
-        msg = await update.message.reply_text("⚠️ Detecting new entity...")
+    msg = await update.effective_chat.send_message("⚠️ Detecting new entity...")
 
-        steps = [
-            "🛰️ Scanning biometric data...",
-            "🧠 Reading brain signals...",
-            "💀 Bypassing security...",
-            "🧬 Injecting system core...",
-            "📡 Connecting to NIKI server...",
-            "☠️ Unauthorized access detected...",
-            "💻 Granting VIP access..."
-        ]
+    steps = [
+        "🛰️ Scanning biometric data...",
+        "🧠 Reading brain signals...",
+        "💀 Bypassing security...",
+        "🧬 Injecting system core...",
+        "📡 Connecting to NIKI server...",
+        "☠️ Unauthorized access detected...",
+        "💻 Granting VIP access..."
+    ]
 
-        for step in steps:
-            await asyncio.sleep(1.2)
-            await msg.edit_text(f"⚠️ {step}")
+    if FAST_MODE:
+        steps = ["🛰️ Scanning...", "💀 Accessing...", "💻 Granted"]
 
-        # 🔥 Final welcome (with DP)
-        final_text = f"""
+    for step in steps:
+        await asyncio.sleep(0.8 if FAST_MODE else 1.2)
+        await msg.edit_text(f"⚠️ {step}")
+
+    final_text = f"""
 ╭━━━〔 ☠️ SYSTEM BREACH ☠️ 〕━━━╮
 
 👤 Identity: {mention}
@@ -3280,50 +3289,46 @@ async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
 ━━━━━━━━━━━━━━━━━━━
 """
 
-        photos = await context.bot.get_user_profile_photos(user_id)
+    photos = await context.bot.get_user_profile_photos(user_id)
 
-        if photos.total_count > 0:
-            photo = photos.photos[0][-1].file_id
-            await msg.delete()
+    if photos.total_count > 0:
+        photo = photos.photos[0][-1].file_id
+        await msg.delete()
 
-            await update.message.reply_photo(
-                photo=photo,
-                caption=final_text,
-                parse_mode="HTML",
-                reply_markup=get_start_button()
-            )
-        else:
-            await msg.edit_text(
-                final_text,
-                parse_mode="HTML",
-                reply_markup=get_start_button()
-            )
+        await update.effective_chat.send_photo(
+            photo=photo,
+            caption=final_text,
+            parse_mode="HTML",
+            reply_markup=get_start_button()
+        )
+    else:
+        await msg.edit_text(final_text, parse_mode="HTML", reply_markup=get_start_button())
 
-        # 🔥 Game message
-        await asyncio.sleep(15)  # ✅ CHANGED (2 → 15)
+    delay1 = 0 if user_id in VIP_USERS else (5 if FAST_MODE else 15)
+    await asyncio.sleep(delay1)
 
-        msg2 = await update.message.reply_text("💻 Connecting to NIKI SERVER...")
+    msg2 = await update.effective_chat.send_message("💻 Connecting to NIKI SERVER...")
 
-        # 🔥 REAL MOVING BAR + GLITCH
-        for i in range(0, 101, 5):
-            filled = "█" * (i // 10)
-            empty = "▒" * (10 - (i // 10))
+    step_range = range(0, 101, 10) if FAST_MODE else range(0, 101, 5)
 
-            # glitch text
-            glitch = random.choice(["", "⚠️", "⚡", "✖️", "☠️"])
+    for i in step_range:
+        filled = "█" * (i // 10)
+        empty = "▒" * (10 - (i // 10))
+        glitch = random.choice(["", "⚠️", "⚡", "✖️", "☠️"])
 
-            await msg2.edit_text(f"""
+        await msg2.edit_text(f"""
 ╭━━━〔 🎮 GAME SYSTEM ONLINE 〕━━━╮
 
 👤 Player: {mention}
 
 💻 Connecting to NIKI SERVER...
 {filled}{empty} {i}% {glitch}
+╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
 """, parse_mode="HTML")
 
-            await asyncio.sleep(0.4)
+        await asyncio.sleep(0.6 if FAST_MODE else 0.7)  # ✅ ONLY CHANGE
 
-        await msg2.edit_text(f"""
+    await msg2.edit_text(f"""
 ╭━━━〔 🎮 GAME SYSTEM ONLINE 〕━━━╮
 
 👤 Player: {mention}
@@ -3340,24 +3345,25 @@ async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
 ━━━━━━━━━━━━━━━━━━━
 """, parse_mode="HTML", reply_markup=get_start_button())
 
-        # 🔥 Magic loading
-        await asyncio.sleep(10)  # ✅ CHANGED (2 → 10)
+    delay2 = 0 if user_id in VIP_USERS else (3 if FAST_MODE else 10)
+    await asyncio.sleep(delay2)
 
-        hack_msg = await update.message.reply_text("💻 Preparing secret hack...")
+    hack_msg = await update.effective_chat.send_message("💻 Preparing secret hack...")
 
-        steps2 = [
-            "🔍 Locating hidden vault...",
-            "💣 Breaking encryption...",
-            "📡 Accessing dark server...",
-            "🧠 Syncing reward system...",
-            "💰 Ready to extract..."
-        ]
+    steps2 = ["🔍 Locating...", "💣 Breaking...", "💰 Ready..."] if FAST_MODE else [
+        "🔍 Locating hidden vault...",
+        "💣 Breaking encryption...",
+        "📡 Accessing dark server...",
+        "🧠 Syncing reward system...",
+        "💰 Ready to extract..."
+    ]
 
-        for step in steps2:
-            await asyncio.sleep(1.2)
-            await hack_msg.edit_text(f"💻 {step}")
+    for step in steps2:
+        await asyncio.sleep(0.8 if FAST_MODE else 1.2)
+        await hack_msg.edit_text(f"💻 {step}")
 
-        await hack_msg.edit_text(f"""
+    await hack_msg.edit_text(f"""
+╭━━━〔 🎮 🇺 🇳 🇱 🇴 🇨 🇰 🎊 〕━━━╮
 🪄 <b>SECRET MAGIC UNLOCKED</b>
 
 👤 {mention}
@@ -3367,12 +3373,41 @@ async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 💖 Niki Says:
 "Try karo na 😘 lucky ho sakte ho"
+╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
 """, parse_mode="HTML", reply_markup=get_start_button())
 
 
+# ================= WORKER =================
+async def worker(context):
+    global active_workers
+    while welcome_queue:
+        update, member = welcome_queue.popleft()
+        await run_welcome(update, context, member)
+    active_workers -= 1
+
+
+async def process_queue(context):
+    global active_workers
+    while welcome_queue and active_workers < MAX_WORKERS:
+        active_workers += 1
+        asyncio.create_task(worker(context))
+
+
+# ================= TRIGGERS =================
+async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    for member in update.message.new_chat_members:
+        welcome_queue.append((update, member))
+    await process_queue(context)
+
+
+async def member_update_welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    cm = update.chat_member
+    if cm.new_chat_member.status == "member":
+        welcome_queue.append((update, cm.new_chat_member.user))
+        await process_queue(context)
+
+
 # ================= MAGIC =================
-user_balance = {}
-#==================MAGIC====================
 async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     user_id = user.id
@@ -3391,7 +3426,11 @@ async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await asyncio.sleep(1.5)
         await msg.edit_text(f"💻 {step}")
 
-    if user_id in magic_used:
+    # 🔥 REAL USER DATA
+    u = get_user(user_id)
+
+    # ❌ Already used check (PERMANENT)
+    if u.get("magic_used"):
         await msg.edit_text(f"""
 ❌ ACCESS DENIED
 
@@ -3403,26 +3442,31 @@ async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
 """, parse_mode="HTML")
         return
 
+    # 💰 Reward
     reward = random.randint(10000, 20000)
-    magic_used[user_id] = True
 
-    # 💰 BALANCE ADD
-    if user_id not in user_balance:
-        user_balance[user_id] = 0
+    # ✅ SAVE PERMANENT FLAG
+    u["magic_used"] = True
 
-    user_balance[user_id] += reward
+    # 💰 ADD BALANCE
+    u["money"] += reward
+
+    # 💾 SAVE DB
+    save_data()
+    save_to_mongo()
 
     await msg.edit_text(f"""
 ╭━━━〔 💰 HACK SUCCESSFUL 〕━━━╮
 
 👤 {mention}
 💰 Reward: <b>{reward}</b> coins
-🏦 Total Balance: <b>{user_balance[user_id]}</b> coins
+🏦 Total Balance: <b>{u['money']}</b> coins
 
 💖 Niki Says:
 "Wow 😍 tum lucky nikle!"
 ╰━━━━━━━━━━━━━━━━━━━━╯
 """, parse_mode="HTML")
+
 
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -3523,6 +3567,7 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, track_chat))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, auto_niki_reply))
     app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome))
+    app.add_handler(ChatMemberHandler(member_update_welcome, ChatMemberHandler.CHAT_MEMBER))
 
     print("🔥 Niki Bot started...")
     app.run_polling()
