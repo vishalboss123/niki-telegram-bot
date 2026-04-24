@@ -3426,9 +3426,12 @@ async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     for step in steps:
         await asyncio.sleep(1.5)
-        await msg.edit_text(f"💻 {step}")
+        try:
+            await msg.edit_text(f"💻 {step}")
+        except:
+            pass  # 🔥 prevent crash
 
-    # 🔥 SAME DATA (balance wala)
+    # 🔥 USER DATA
     user_id_str = str(user_id)
 
     if user_id_str not in data:
@@ -3439,27 +3442,25 @@ async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     u = data[user_id_str]
 
-    # ✅ default safety
     if "magic_used" not in u:
         u["magic_used"] = False
 
-    # ❌ ALREADY USED (IMPROVED MESSAGE)
+    # ❌ already used
     if u["magic_used"]:
-        await msg.edit_text(f"""
+        try:
+            await msg.edit_text(f"""
 ╭━━━〔 ❌ ACCESS DENIED 〕━━━╮
 
 👤 {mention}
 
 🛑 Tum pehle hi magic use kar chuke ho!
 
-💀 System Log:
-"Reward already extracted..."
-
-━━━━━━━━━━━━━━━━━━━
 💖 Niki Says:
 "Ek hi chance milta hai 😏"
-━━━━━━━━━━━━━━━━━━━
+╰━━━━━━━━━━━━━━━━━━━━╯
 """, parse_mode="HTML")
+        except:
+            await update.message.reply_text("❌ Already used!")
         return
 
     # 💰 reward
@@ -3468,11 +3469,12 @@ async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
     u["magic_used"] = True
     u["money"] += reward
 
-    # 💾 save
     save_data()
     save_to_mongo()
 
-    await msg.edit_text(f"""
+    # 🔥 FINAL MESSAGE (SAFE)
+    try:
+        await msg.edit_text(f"""
 ╭━━━〔 💰 HACK SUCCESSFUL 〕━━━╮
 
 👤 {mention}
@@ -3483,6 +3485,11 @@ async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
 "Wow 😍 tum lucky nikle!"
 ╰━━━━━━━━━━━━━━━━━━━━╯
 """, parse_mode="HTML")
+    except:
+        await update.message.reply_text(f"""
+💰 Reward: {reward}
+🏦 Total: {u['money']}
+""")
 
 # ================= DART SOLO =================
 async def dart(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -3508,13 +3515,18 @@ async def dart(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ Invalid amount")
         return
 
-    # ❌ MIN BET CHECK (ADDED)
+    # ❌ MIN BET CHECK
     if bet < 100:
         await update.message.reply_text("❌ Minimum bet 100 hai")
         return
 
-    # 💾 Get user
-    u = get_user(user_id)
+    # 💾 Get user (🔥 FIXED SAFE SYSTEM)
+    user_id_str = str(user_id)
+
+    if user_id_str not in data:
+        data[user_id_str] = {"money": 0}
+
+    u = data[user_id_str]
 
     # ❌ Not enough money
     if u["money"] < bet:
@@ -3597,7 +3609,6 @@ async def dart(update: Update, context: ContextTypes.DEFAULT_TYPE):
         u["money"] += win
         save_data()
         save_to_mongo()
-        
 
         result = f"""
 ╭━━━〔 💎 ROOT ACCESS GAINED 〕━━━╮
@@ -3617,7 +3628,6 @@ async def dart(update: Update, context: ContextTypes.DEFAULT_TYPE):
         u["money"] += win
         save_data()
         save_to_mongo()
-        
 
         result = f"""
 ╭━━━〔 💰 HACK SUCCESS 〕━━━╮
@@ -3633,7 +3643,6 @@ async def dart(update: Update, context: ContextTypes.DEFAULT_TYPE):
 """
 
     await update.message.reply_text(result, parse_mode="HTML")
-
 
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
