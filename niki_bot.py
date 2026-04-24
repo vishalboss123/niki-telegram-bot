@@ -3725,10 +3725,11 @@ def main():
     app.add_handler(CommandHandler("divorce", divorce))
     app.add_handler(CommandHandler("look", look))
     app.add_handler(CommandHandler("brain", brain))
-    app.add_handler(CommandHandler("accept", accept))
     app.add_handler(CommandHandler("magic", magic))
     app.add_handler(CommandHandler("dart", dart))
-
+   
+    app.add_handler(CommandHandler("accept", accept))
+    
     # ================= CALLBACKS =================
     app.add_handler(CallbackQueryHandler(accept, pattern="^marry_acc_"))
     app.add_handler(CallbackQueryHandler(reject, pattern="^marry_rej_"))
