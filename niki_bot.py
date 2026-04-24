@@ -3467,6 +3467,147 @@ async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
 ╰━━━━━━━━━━━━━━━━━━━━╯
 """, parse_mode="HTML")
 
+# ================= DART SOLO =================
+async def dart(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    user_id = user.id
+    mention = f"<a href='tg://user?id={user_id}'>{user.first_name}</a>"
+
+    # ❌ No bet
+    if not context.args:
+        await update.message.reply_text("❌ Use: /dart <amount>\nExample: /dart 1000")
+        return
+
+    try:
+        bet = int(context.args[0])
+    except:
+        await update.message.reply_text("❌ Invalid amount")
+        return
+
+    # ❌ MIN BET CHECK (ADDED)
+    if bet < 100:
+        await update.message.reply_text("❌ Minimum bet 100 hai")
+        return
+
+    # 💾 Get user
+    u = get_user(user_id)
+
+    # ❌ Not enough money
+    if u["money"] < bet:
+        await update.message.reply_text("❌ Paise kam hai")
+        return
+
+    # 💸 Deduct bet
+    u["money"] -= bet
+    save_data()
+    save_to_mongo()
+
+    # ================= HACKER LOADING =================
+    msg = await update.message.reply_text("⚠️ Initializing dark protocol...")
+
+    steps = [
+        "🧠 Syncing neural aim...",
+        "💻 Injecting target system...",
+        "📡 Tracking wind velocity...",
+        "🔓 Breaking aim firewall...",
+        "⚡ Calibrating shot precision...",
+        "🛰️ Locking final coordinates..."
+    ]
+
+    for step in steps:
+        await asyncio.sleep(1)
+        await msg.edit_text(f"⚠️ {step}")
+
+    # ================= BLACK BAR LOADING =================
+    for i in range(0, 101, 10):
+        bar = "█" * (i // 10) + "▒" * (10 - (i // 10))
+        glitch = ["", "⚡", "☠️", "✖️", "⚠️"]
+        await msg.edit_text(f"""
+💻 SYSTEM BREACH IN PROGRESS...
+
+{bar} {i}% {glitch[i % len(glitch)]}
+""")
+        await asyncio.sleep(0.6)
+
+    # ================= PREMIUM HACK SCREEN =================
+    await msg.edit_text(f"""
+╭━━━〔 ☠️ DARK SYSTEM ☠️ 〕━━━╮
+
+👤 {mention}
+
+💀 Dart Solo Challenge Initialized
+🔓 Access Level: ELITE
+⚡ Mode: HACKED PRECISION
+
+━━━━━━━━━━━━━━━━━━━
+🔥 TARGET LOCK COMPLETE
+━━━━━━━━━━━━━━━━━━━
+""", parse_mode="HTML")
+
+    # ⏳ Delay before dart
+    await asyncio.sleep(3)
+
+    # ================= REAL TELEGRAM DART =================
+    dart_msg = await update.message.reply_dice(emoji="🎯")
+    value = dart_msg.dice.value
+
+    await asyncio.sleep(2)
+
+    # ================= RESULT =================
+    if value <= 3:
+        result = f"""
+╭━━━〔 ❌ SYSTEM FAILED 〕━━━╮
+
+👤 {mention}
+🎯 Score: {value}
+
+💸 Lost: {bet}
+
+💔 Niki Says:
+"System hack fail ho gaya 😢"
+╰━━━━━━━━━━━━━━━━━━━━╯
+"""
+
+    elif value == 6:
+        win = bet * 3
+        u["money"] += win
+        save_data()
+        save_to_mongo()
+
+        result = f"""
+╭━━━〔 💎 ROOT ACCESS GAINED 〕━━━╮
+
+👤 {mention}
+🎯 PERFECT HIT: {value}
+
+💰 Won: {win} (3X)
+
+🔥 Niki Says:
+"OMG 😳 FULL CONTROL MIL GAYA!"
+╰━━━━━━━━━━━━━━━━━━━━╯
+"""
+
+    else:
+        win = bet * 2
+        u["money"] += win
+        save_data()
+        save_to_mongo()
+
+        result = f"""
+╭━━━〔 💰 HACK SUCCESS 〕━━━╮
+
+👤 {mention}
+🎯 Score: {value}
+
+💰 Won: {win}
+
+💖 Niki Says:
+"Nice hack 😘"
+╰━━━━━━━━━━━━━━━━━━━━╯
+"""
+
+    await update.message.reply_text(result, parse_mode="HTML")
+
 
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -3551,6 +3692,7 @@ def main():
     app.add_handler(CommandHandler("brain", brain))
     app.add_handler(CommandHandler("accept", accept))
     app.add_handler(CommandHandler("magic", magic))
+    app.add_handler(CommandHandler("dart", dart))
 
     # ================= CALLBACKS =================
     app.add_handler(CallbackQueryHandler(accept, pattern="^marry_acc_"))
