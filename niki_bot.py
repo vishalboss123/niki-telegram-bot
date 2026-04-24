@@ -3488,6 +3488,13 @@ async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def dart(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     user_id = user.id
+    
+    # 🔥 FIX (IMPORTANT)
+    if not context.args:
+        text = update.message.text.split()
+        if len(text) > 1:
+            context.args = text[1:]
+    
     mention = f"<a href='tg://user?id={user_id}'>{user.first_name}</a>"
 
     # ❌ No bet
@@ -3517,7 +3524,7 @@ async def dart(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # 💸 Deduct bet
     u["money"] -= bet
     save_data()
-    
+    save_to_mongo()
 
     # ================= HACKER LOADING =================
     msg = await update.message.reply_text("⚠️ Initializing dark protocol...")
@@ -3589,6 +3596,7 @@ async def dart(update: Update, context: ContextTypes.DEFAULT_TYPE):
         win = bet * 3
         u["money"] += win
         save_data()
+        save_to_mongo()
         
 
         result = f"""
@@ -3608,6 +3616,7 @@ async def dart(update: Update, context: ContextTypes.DEFAULT_TYPE):
         win = bet * 2
         u["money"] += win
         save_data()
+        save_to_mongo()
         
 
         result = f"""
