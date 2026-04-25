@@ -66,6 +66,9 @@ DATABASE_FILE = "database.json"
 
 # =================== START COMMAND ===================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await check_bot_active(update, context):
+    return
+    
     user = update.effective_user
     chat = update.effective_chat
 
@@ -220,6 +223,8 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
 # =================== TOP RICHEST COMMAND ===================
 async def toprich(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await check_bot_active(update, context):
+    return
     
 
     # ✅ sirf real users filter karo
@@ -241,7 +246,8 @@ async def toprich(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(msg)
 # =================== TOP KILLERS COMMAND ===================
 async def topkill(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    
+    if not await check_bot_active(update, context):
+    return
 
     users_only = {
         uid: u for uid, u in data.items()
@@ -352,6 +358,8 @@ def is_protected(user_data):
 # ------------------ DAILY COMMAND ------------------
 # ------------------ DAILY COMMAND ------------------
 async def daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await check_bot_active(update, context):
+    return
 
     user = get_user(update.effective_user.id, update.effective_user.first_name)
     now = time.time()
@@ -387,6 +395,8 @@ async def daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
+    if not await check_bot_active(update, context):
+    return
 
     if update.message.reply_to_message:
         target_user = update.message.reply_to_message.from_user
@@ -418,6 +428,9 @@ async def balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 # ------------------ PROTECT COMMAND ------------------
 async def protect(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not await check_bot_active(update, context):
+    return
     
     user = get_user(update.effective_user.id, update.effective_user.first_name)
     now = time.time()
@@ -451,6 +464,9 @@ async def protect(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ------------------ CLAIM GROUP ------------------
 # ------------------ CLAIM GROUP ------------------
 async def claim(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not await check_bot_active(update, context):
+    return
     
 
     chat = update.effective_chat
@@ -515,6 +531,9 @@ async def claim(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ------------------ ROB COMMAND ------------------
 async def rob(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not await check_bot_active(update, context):
+    return
     
     now = time.time()
 
@@ -646,6 +665,10 @@ async def rob(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ------------------ KILL COMMAND ------------------
 # ------------------ KILL COMMAND ------------------
 async def kill(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not await check_bot_active(update, context):
+    return
+    
     print("KILL START")
 
     
@@ -740,6 +763,9 @@ async def kill(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ------------------ BAIL COMMAND ------------------
 # ------------------ BAIL COMMAND ------------------
 async def bail(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not await check_bot_active(update, context):
+    return
     
     user = update.effective_user
     user_id = str(user.id)
@@ -883,6 +909,10 @@ async def addgif(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ---------------- SHOP COMMAND ----------------
 async def shop(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not await check_bot_active(update, context):
+    return
+    
     text = "🛒 ITEM SHOP\n━━━━━━━━━━━━━━\n"
     for name, item in shop_items.items():
         text += f"• {item['emoji']} {name.title()} : ₹{item['price']}\n"
@@ -893,6 +923,10 @@ async def shop(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ---------------- GIFT COMMAND ----------------
 # ---------------- GIFT COMMAND ----------------
 async def gift(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not await check_bot_active(update, context):
+    return
+    
     if not update.message.reply_to_message:
         await update.message.reply_text("Reply karke /gift <amount> likho")
         return
@@ -957,6 +991,10 @@ async def gift(update: Update, context: ContextTypes.DEFAULT_TYPE):
 from telegram import Update
 from telegram.ext import ContextTypes
 async def economy(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not await check_bot_active(update, context):
+    return
+    
     text = (
          "💰 *Nɪᴋɪ Eᴄᴏɴᴏᴍʏ Sʏꜱᴛᴇᴍ Oᴠᴇʀᴠɪᴇᴡ*\n\n"
        "💬 *Hᴏᴡ Iᴛ Wᴏʀᴋꜱ:*\n"
@@ -989,6 +1027,10 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 async def revive(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not await check_bot_active(update, context):
+    return
+    
     reviver = update.effective_user
     #... yahaoe loaddata
     reviver_data = get_user(reviver.id, reviver.first_name)
@@ -1124,6 +1166,10 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 async def economy_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not await check_bot_active(update, context):
+    return
+    
     text = (
         "💰 *NIKI ECONOMY SYSTEM OVERVIEW*\n\n"
         "💬 *How it works:*\n"
@@ -1158,6 +1204,10 @@ OWNER_ID = 6175559434  # Owner numeric ID
 OWNER_USERNAME = "YT_BISHALL"  # Owner Telegram username
 
 async def show_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not await check_bot_active(update, context):
+    return
+    
     # Check if command is in reply
     if update.message.reply_to_message:
         target_user = update.message.reply_to_message.from_user
@@ -1196,6 +1246,10 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 async def check(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not await check_bot_active(update, context):
+    return
+    
     #loaddata
 
     checker = update.effective_user
@@ -1280,6 +1334,10 @@ pending_users = {}  # user_id : sticker_file_id
 
 # ---------------- /own command ----------------
 async def own(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not await check_bot_active(update, context):
+    return
+    
     user = update.effective_user
 
     if not update.message.reply_to_message:
@@ -1329,6 +1387,10 @@ async def pack_name_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ---------------- ITEM COMMAND ----------------
 async def items(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not await check_bot_active(update, context):
+    return
+   
 
     if update.message.reply_to_message:
         target = update.message.reply_to_message.from_user
@@ -1389,6 +1451,9 @@ async def auto_niki_reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ------------------ GIVE COMMAND ------------------
 
 async def give(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not await check_bot_active(update, context):
+    return
 
     message = update.message
     giver = message.from_user
@@ -1643,6 +1708,9 @@ import random
 import asyncio
 
 async def dice(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not await check_bot_active(update, context):
+    return
 
     message = update.message
     user = message.from_user
@@ -1970,6 +2038,10 @@ duel_tasks = {}
 
 # ================= DUEL =================
 async def duel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not await check_bot_active(update, context):
+    return
+    
     user1 = update.effective_user
 
     if not update.message.reply_to_message:
@@ -3492,6 +3564,10 @@ async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ================= DART SOLO =================
 async def dart(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not await check_bot_active(update, context):
+    return
+    
     user = update.effective_user
     user_id = user.id
 
@@ -3658,6 +3734,9 @@ async def dart(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ================= TRANSLATE COMMAND =================
 async def tr(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
+    if not await check_bot_active(update, context):
+    return
+
     # ❌ must reply to a message
     if not update.message.reply_to_message:
         await update.message.reply_text("❌ Reply to a message and type /tr")
@@ -3779,6 +3858,30 @@ async def block_system(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
+        
+#====================CHEACK BOT ACTIVE================
+async def check_bot_active(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat = update.effective_chat
+    user_id = update.effective_user.id
+
+    if chat.type not in ["group", "supergroup"]:
+        return True
+
+    status = BOT_STATUS.get(chat.id, True)
+
+    if status:
+        return True
+
+    if user_id == YOUR_OWNER_ID:
+        return True
+
+    member = await context.bot.get_chat_member(chat.id, user_id)
+    if member.status in ["administrator", "creator"]:
+        return True
+
+    await update.message.reply_text("🚫 Bot OFF hai yaha 💔")
+    return False
+    
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
