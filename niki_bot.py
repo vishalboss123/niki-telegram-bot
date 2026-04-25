@@ -32,6 +32,7 @@ threading.Thread(target=run_web).start()
 # =================== IMPORTS ===================
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from collections import deque
+from deep_translator import GoogleTranslator
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
@@ -3428,45 +3429,40 @@ async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
 
     for step in steps:
-        await asyncio.sleep(1.5)
         try:
+            await asyncio.sleep(1.5)
             await msg.edit_text(f"💻 {step}")
         except:
-            pass  # 🔥 prevent crash
+            pass  # 🔥 anti-freeze
 
-    # 🔥 USER DATA
-    user_id_str = str(user_id)
+    # 🔥 USER DATA FIX
+    u = get_user(user_id)
 
-    if user_id_str not in data:
-        data[user_id_str] = {
-            "money": 0,
-            "magic_used": False
-        }
+    if not u:
+        u = {}
 
-    u = data[user_id_str]
+    if "money" not in u:
+        u["money"] = 0
 
     if "magic_used" not in u:
         u["magic_used"] = False
 
-    # ❌ already used
+    # ❌ SAME DESIGN (WITH BAR)
     if u["magic_used"]:
-        try:
-            await msg.edit_text(f"""
+        await msg.edit_text(f"""
 ╭━━━〔 ❌ ACCESS DENIED 〕━━━╮
 
 👤 {mention}
-
-🛑 Tum pehle hi magic use kar chuke ho!
+🛑 Reward already claimed!
 
 💖 Niki Says:
 "Ek hi chance milta hai 😏"
+
 ╰━━━━━━━━━━━━━━━━━━━━╯
 """, parse_mode="HTML")
-        except:
-            await update.message.reply_text("❌ Already used!")
         return
 
-    # 💰 reward
+    # 💰 REWARD
     reward = random.randint(10000, 20000)
 
     u["magic_used"] = True
@@ -3475,7 +3471,7 @@ async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
     save_data()
     save_to_mongo()
 
-    # 🔥 FINAL MESSAGE (SAFE)
+    # ✅ FINAL (SAME BAR STYLE)
     try:
         await msg.edit_text(f"""
 ╭━━━〔 💰 HACK SUCCESSFUL 〕━━━╮
@@ -3486,34 +3482,34 @@ async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 💖 Niki Says:
 "Wow 😍 tum lucky nikle!"
+
 ╰━━━━━━━━━━━━━━━━━━━━╯
 """, parse_mode="HTML")
     except:
-        await update.message.reply_text(f"""
-💰 Reward: {reward}
-🏦 Total: {u['money']}
-""")
+        pass
 
 # ================= DART SOLO =================
 async def dart(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     user_id = user.id
-    
-    # 🔥 FIX (IMPORTANT)
-    if not context.args:
-        text = update.message.text.split()
-        if len(text) > 1:
-            context.args = text[1:]
-    
+
+    # 🔥 STRONG ARG PARSE (FIXED)
+    text = update.message.text.strip().split()
+
+    if len(text) > 1:
+        bet_arg = text[1]
+    else:
+        bet_arg = None
+
     mention = f"<a href='tg://user?id={user_id}'>{user.first_name}</a>"
 
     # ❌ No bet
-    if not context.args:
+    if not bet_arg:
         await update.message.reply_text("❌ Use: /dart <amount>\nExample: /dart 1000")
         return
 
     try:
-        bet = int(context.args[0])
+        bet = int(bet_arg)
     except:
         await update.message.reply_text("❌ Invalid amount")
         return
@@ -3523,13 +3519,16 @@ async def dart(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ Minimum bet 100 hai")
         return
 
-    # 💾 Get user (🔥 FIXED SAFE SYSTEM)
+    # 💾 SAFE USER SYSTEM
     user_id_str = str(user_id)
 
     if user_id_str not in data:
         data[user_id_str] = {"money": 0}
 
     u = data[user_id_str]
+
+    if "money" not in u:
+        u["money"] = 0
 
     # ❌ Not enough money
     if u["money"] < bet:
@@ -3554,21 +3553,29 @@ async def dart(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
 
     for step in steps:
-        await asyncio.sleep(1)
-        await msg.edit_text(f"⚠️ {step}")
+        try:
+            await asyncio.sleep(1)
+            await msg.edit_text(f"⚠️ {step}")
+        except:
+            pass
 
-    # ================= BLACK BAR LOADING =================
+    # ================= LOADING BAR =================
     for i in range(0, 101, 10):
         bar = "█" * (i // 10) + "▒" * (10 - (i // 10))
         glitch = ["", "⚡", "☠️", "✖️", "⚠️"]
-        await msg.edit_text(f"""
+
+        try:
+            await msg.edit_text(f"""
 💻 SYSTEM BREACH IN PROGRESS...
 
 {bar} {i}% {glitch[i % len(glitch)]}
 """)
-        await asyncio.sleep(0.6)
+        except:
+            pass
 
-    # ================= PREMIUM HACK SCREEN =================
+        await asyncio.sleep(0.8)
+
+    # ================= PREMIUM SCREEN =================
     await msg.edit_text(f"""
 ╭━━━〔 ☠️ DARK SYSTEM ☠️ 〕━━━╮
 
@@ -3583,10 +3590,9 @@ async def dart(update: Update, context: ContextTypes.DEFAULT_TYPE):
 ━━━━━━━━━━━━━━━━━━━
 """, parse_mode="HTML")
 
-    # ⏳ Delay before dart
     await asyncio.sleep(3)
 
-    # ================= REAL TELEGRAM DART =================
+    # ================= REAL DART =================
     dart_msg = await update.message.reply_dice(emoji="🎯")
     value = dart_msg.dice.value
 
@@ -3647,6 +3653,43 @@ async def dart(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(result, parse_mode="HTML")
 
+# ================= TRANSLATE COMMAND =================
+async def tr(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    # ❌ must reply to a message
+    if not update.message.reply_to_message:
+        await update.message.reply_text("❌ Reply to a message and type /tr")
+        return
+
+    text = update.message.reply_to_message.text
+
+    if not text:
+        await update.message.reply_text("❌ Only text messages can be translated")
+        return
+
+    try:
+        # 🌐 Translators
+        en = GoogleTranslator(source='auto', target='en').translate(text)
+        hi = GoogleTranslator(source='auto', target='hi').translate(text)
+        or_ = GoogleTranslator(source='auto', target='or').translate(text)
+
+        result = f"""
+🌐 𝗧𝗥𝗔𝗡𝗦𝗟𝗔𝗧𝗜𝗢𝗡
+
+🇬🇧 English:
+{en}
+
+🇮🇳 Hindi:
+{hi}
+
+🟠 Odia:
+{or_}
+"""
+
+        await update.message.reply_text(result)
+
+    except Exception as e:
+        await update.message.reply_text("❌ Translation failed. Try again later.")
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
@@ -3732,7 +3775,7 @@ def main():
     app.add_handler(CommandHandler("dart", dart))
    
     app.add_handler(CommandHandler("accept", accept))
-    
+    app.add_handler(CommandHandler("tr", tr))
     # ================= CALLBACKS =================
     app.add_handler(CallbackQueryHandler(accept, pattern="^marry_acc_"))
     app.add_handler(CallbackQueryHandler(reject, pattern="^marry_rej_"))
