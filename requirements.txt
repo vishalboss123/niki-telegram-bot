@@ -12,3 +12,4 @@ sniffio==1.3.1
 urllib3==2.6.3
 pymongo
 dnspython
+deep-translator==1.11.4
