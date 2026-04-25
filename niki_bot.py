@@ -3315,26 +3315,26 @@ async def run_welcome(update: Update, context: ContextTypes.DEFAULT_TYPE, member
     step_range = range(0, 101, 10) if FAST_MODE else range(0, 101, 5)
 
     for i in step_range:
-    filled = "█" * (i // 10)
-    empty = "▒" * (10 - (i // 10))
-    glitch = random.choice(["", "⚠️", "⚡", "✖️", "☠️"])
+        filled = "█" * (i // 10)
+        empty = "▒" * (10 - (i // 10))
+        glitch = random.choice(["", "⚠️", "⚡", "✖️", "☠️"])
 
-    try:
-        await msg2.edit_text(f"""
-╭━━━〔 🎮 GAME SYSTEM ONLINE 〕━━━╮
+        try:
+            await msg2.edit_text(f"""
+    ╭━━━〔 🎮 GAME SYSTEM ONLINE 〕━━━╮
 
-👤 Player: {mention}
+    👤 Player: {mention}
 
-💻 Connecting to NIKI SERVER...
-{filled}{empty} {i}% {glitch}
-╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
-""", parse_mode="HTML")
-    except:
-        pass  # 🔥 anti-freeze
+    💻 Connecting to NIKI SERVER...
+    {filled}{empty} {i}% {glitch}
+    ╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
+    """, parse_mode="HTML")
+        except:
+            pass  # 🔥 anti-freeze
 
-    await asyncio.sleep(0.9 if FAST_MODE else 1.1)
+        await asyncio.sleep(0.9 if FAST_MODE else 1.1)
 
-await msg2.edit_text(f"""
+    await msg2.edit_text(f"""
 ╭━━━〔 🎮 GAME SYSTEM ONLINE 〕━━━╮
 
 👤 Player: {mention}
@@ -3411,6 +3411,8 @@ async def member_update_welcome(update: Update, context: ContextTypes.DEFAULT_TY
     if cm.new_chat_member.status == "member":
         welcome_queue.append((update, cm.new_chat_member.user))
         await process_queue(context)
+
+
 
 
 # ================= MAGIC =================
