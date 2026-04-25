@@ -3883,7 +3883,7 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, track_chat))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, auto_niki_reply))
     app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome))
-    app.add_handler(MessageHandler(filters.ALL, block_system), group=0))
+    app.add_handler(MessageHandler(filters.ALL, block_system), group=0)
     app.add_handler(ChatMemberHandler(member_update_welcome, ChatMemberHandler.CHAT_MEMBER))
 
     print("🔥 Niki Bot started...")
