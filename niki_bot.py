@@ -3692,6 +3692,93 @@ async def tr(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     except Exception as e:
         await update.message.reply_text("❌ Translation failed. Try again later.")
+
+
+# ================= CONFIG =================
+
+YOUR_OWNER_ID = 6175559434  # 👉 apna Telegram user ID daal
+
+# ================= STORAGE =================
+BOT_STATUS = {}  # {chat_id: True/False}
+
+
+# ================= ADMIN / OWNER CHECK =================
+async def is_admin_or_owner(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    chat = update.effective_chat
+
+    # 👑 Owner always allowed
+    if user_id == YOUR_OWNER_ID:
+        return True
+
+    member = await context.bot.get_chat_member(chat.id, user_id)
+    return member.status in ["administrator", "creator"]
+
+
+# ================= CLOSE COMMAND =================
+async def close_bot(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat = update.effective_chat
+
+    # ❌ only group
+    if chat.type not in ["group", "supergroup"]:
+        return await update.message.reply_text("❌ Ye command sirf group me use hota hai!")
+
+    # 🔐 check
+    if not await is_admin_or_owner(update, context):
+        return await update.message.reply_text("❌ Sirf admin ya owner hi bot band kar sakta hai!")
+
+    BOT_STATUS[chat.id] = False
+
+    await update.message.reply_text("🔒 Niki Bot ab is group me OFF ho gaya 💔")
+
+
+# ================= OPEN COMMAND =================
+async def open_bot(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat = update.effective_chat
+
+    if chat.type not in ["group", "supergroup"]:
+        return await update.message.reply_text("❌ Ye command sirf group me use hota hai!")
+
+    if not await is_admin_or_owner(update, context):
+        return await update.message.reply_text("❌ Sirf admin ya owner hi bot ON kar sakta hai!")
+
+    BOT_STATUS[chat.id] = True
+
+    await update.message.reply_text("🔓 Niki Bot ab is group me ON ho gaya 🎮✨")
+
+
+# ================= BLOCK SYSTEM =================
+async def block_system(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    chat = update.effective_chat
+
+    # ❌ only group
+    if chat.type not in ["group", "supergroup"]:
+        return
+
+    status = BOT_STATUS.get(chat.id, True)
+
+    if status:
+        return  # bot ON
+
+    user_id = update.effective_user.id
+
+    # 👑 OWNER bypass
+    if user_id == YOUR_OWNER_ID:
+        return
+
+    # 👑 ADMIN bypass
+    member = await context.bot.get_chat_member(chat.id, user_id)
+    if member.status in ["administrator", "creator"]:
+        return
+
+    # ❌ block all commands
+    if update.message and update.message.text and update.message.text.startswith("/"):
+        await update.message.reply_text(
+            "🚫 Niki Bot abhi OFF hai 💔\nAdmin ya owner se bolo open kare..."
+        )
+        return
+
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
@@ -3778,6 +3865,9 @@ def main():
    
     app.add_handler(CommandHandler("accept", accept))
     app.add_handler(CommandHandler("tr", tr))
+    app.add_handler(CommandHandler("close", close_bot))
+    app.add_handler(CommandHandler("open", open_bot))
+    
     # ================= CALLBACKS =================
     app.add_handler(CallbackQueryHandler(accept, pattern="^marry_acc_"))
     app.add_handler(CallbackQueryHandler(reject, pattern="^marry_rej_"))
@@ -3793,6 +3883,7 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, track_chat))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, auto_niki_reply))
     app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome))
+    app.add_handler(MessageHandler(filters.ALL, block_system), group=0))
     app.add_handler(ChatMemberHandler(member_update_welcome, ChatMemberHandler.CHAT_MEMBER))
 
     print("🔥 Niki Bot started...")
