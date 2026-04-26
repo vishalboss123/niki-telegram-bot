@@ -84,7 +84,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if uid not in data:
         data[uid] = {"name": user.first_name, "money": 1000, "kills": 0}
         save_data()
-        save_to_mongo()
+        
 
     welcome_text = (
         f"👋 Hᴇʟʟᴏ {user.first_name}!\n\n"
@@ -1609,7 +1609,7 @@ async def coin(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # cut bet
         user_data["money"] -= 100
         save_data()
-        save_to_mongo()
+        
 
         await message.reply_text(f"🎮 {user.first_name} game start!\n🍀 Best of luck!")
 
@@ -1630,7 +1630,7 @@ async def coin(update: Update, context: ContextTypes.DEFAULT_TYPE):
             win = random.randint(100, 1000)
             user_data["money"] += win
             save_data()
-            save_to_mongo()
+            
 
             await message.reply_text(f"🎉 WIN! ₹{win} mila 😎")
         else:
@@ -1683,7 +1683,7 @@ async def guess(update: Update, context: ContextTypes.DEFAULT_TYPE):
         win = random.randint(100, 500)
         user_data["money"] += win
         save_data()
-        save_to_mongo()
+        
 
         await message.reply_text(
             f"🎉 Sahi pakda!\n\n"
@@ -1694,7 +1694,7 @@ async def guess(update: Update, context: ContextTypes.DEFAULT_TYPE):
         loss = 50
         user_data["money"] -= loss
         save_data()
-        save_to_mongo()
+        
 
         await message.reply_text(
             f"💔 Galat guess\n\n"
@@ -1814,7 +1814,7 @@ async def track_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if chat_id not in data["groups"]:
             data["groups"].append(chat_id)
             save_data()
-            save_to_mongo()# auto save groups
+            # auto save groups
             print(f"Group saved: {chat_id}")
 
     # === USERS SAVE ===
@@ -1824,7 +1824,7 @@ async def track_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if user_id not in data["users"]:
             data["users"].append(user_id)
             save_data() 
-            save_to_mongo()# auto save users
+            # auto save users
             print(f"User saved: {user_id}")
 
 # =================== FORWARD COMMAND /fw ===================
@@ -2261,7 +2261,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 # 💸 P1 paisa cut
                 u1["money"] -= bet
                 save_data()
-                save_to_mongo()
+                
 
                 await query.edit_message_text(
                     f"💰 {d['p1_name']} ne bet lock kiya: {bet}"
@@ -2332,7 +2332,7 @@ async def accept(update: Update, context: ContextTypes.DEFAULT_TYPE):
         u2["money"] -= d["bet"]
 
         save_data()
-        save_to_mongo()
+        
 
         # 📩 DM to both
         await context.bot.send_message(
@@ -2391,7 +2391,7 @@ async def start_duel(context, d):
         winner = "Draw"
 
     save_data()
-    save_to_mongo()
+    
 
     await context.bot.send_message(
         chat,
@@ -3543,7 +3543,7 @@ async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
     u["money"] += reward
 
     save_data()
-    save_to_mongo()
+    
 
     # ✅ FINAL (SAME BAR STYLE)
     try:
@@ -3616,7 +3616,7 @@ async def dart(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # 💸 Deduct bet
     u["money"] -= bet
     save_data()
-    save_to_mongo()
+    
 
     # ================= HACKER LOADING =================
     msg = await update.message.reply_text("⚠️ Initializing dark protocol...")
@@ -3695,7 +3695,7 @@ async def dart(update: Update, context: ContextTypes.DEFAULT_TYPE):
         win = bet * 3
         u["money"] += win
         save_data()
-        save_to_mongo()
+        
 
         result = f"""
 ╭━━━〔 💎 ROOT ACCESS GAINED 〕━━━╮
@@ -3714,7 +3714,7 @@ async def dart(update: Update, context: ContextTypes.DEFAULT_TYPE):
         win = bet * 2
         u["money"] += win
         save_data()
-        save_to_mongo()
+        
 
         result = f"""
 ╭━━━〔 💰 HACK SUCCESS 〕━━━╮
