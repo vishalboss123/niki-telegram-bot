@@ -10,6 +10,8 @@ db_main = client["mydatabase"]
 backup = db_main["backup"]   # ⚡ IMPORTANT (error fix)
 col = db_main["chats"]       # groups/users save  ✅ (IMPORTANT)
 filters_col = db_main["filters"]
+user_profile = db_main["user_profile"]
+
 
 # =================== WEB SERVER (RENDER FIX) ===================
 import threading
@@ -4071,7 +4073,126 @@ async def tban_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except:
         await update.message.reply_text("❌ Timed ban failed")    
 
-        
+ # ================= TRACK CHAT =================
+import time
+from datetime import datetime
+
+async def track_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.message or not update.message.from_user:
+        return
+
+    user = update.message.from_user
+    chat_id = update.effective_chat.id
+    now = int(time.time())
+
+    data = user_profile.find_one({"chat_id": chat_id, "user_id": user.id})
+
+    added_time = 0
+
+    if data:
+        last_seen = data.get("last_seen", now)
+        diff = now - last_seen
+
+        # 🔥 agar 5 min ke andar hai toh active count karega
+        if diff < 300:
+            added_time = diff
+
+    user_profile.update_one(
+        {"chat_id": chat_id, "user_id": user.id},
+        {
+            "$inc": {
+                "messages": 1,
+                "active_time": added_time
+            },
+            "$set": {
+                "name": user.first_name,
+                "username": user.username,
+                "last_seen": now
+            },
+            "$setOnInsert": {
+                "join_date": str(datetime.utcnow()),
+                "song": "Not set",
+                "active_time": 0
+            }
+        },
+        upsert=True
+    )
+# ================= JOIN TRACK =================
+async def join_track(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.message and update.message.new_chat_members:
+        for member in update.message.new_chat_members:
+
+            user_profile.update_one(
+                {"chat_id": update.effective_chat.id, "user_id": member.id},
+                {
+                    "$setOnInsert": {
+                        "join_date": str(datetime.utcnow()),
+                        "name": member.first_name,
+                        "username": member.username,
+                        "song": "Not set",
+                        "messages": 0
+                    }
+                },
+                upsert=True
+            )
+
+
+# ================= SET SONG =================
+async def setsong(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not context.args:
+        return await update.message.reply_text("❌ Use: /setsong song name")
+
+    song = " ".join(context.args)
+    user = update.effective_user
+    chat_id = update.effective_chat.id
+
+    user_profile.update_one(
+        {"chat_id": chat_id, "user_id": user.id},
+        {"$set": {"song": song}},
+        upsert=True
+    )
+
+    await update.message.reply_text(f"🎵 Song set: {song}")
+
+
+# ================= USERINFO =================
+async def userinfo(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.message.reply_to_message:
+        user = update.message.reply_to_message.from_user
+    else:
+        user = update.effective_user
+
+    chat_id = update.effective_chat.id
+
+    data = user_profile.find_one({"chat_id": chat_id, "user_id": user.id})
+
+    if not data:
+        return await update.message.reply_text("❌ No data found")
+
+    total_sec = data.get("active_time", 0)
+
+    hours = total_sec // 3600
+    minutes = (total_sec % 3600) // 60
+
+    text = f"""
+━━━━━━━━━━━━━━━
+👤 Name: {data.get("name")}
+🆔 ID: {user.id}
+🔰 Username: @{data.get("username")}
+
+━━━━━━━━━━━━━━━
+🎵 Song: {data.get("song")}
+
+📅 Join: {data.get("join_date")}
+
+💬 Messages: {data.get("messages", 0)}
+
+⏳ Active Time: {hours}h {minutes}m
+━━━━━━━━━━━━━━━
+"""
+
+    await update.message.reply_text(text)
+       
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
@@ -4170,6 +4291,8 @@ def main():
 
     app.add_handler(CommandHandler("tmute", tmute_cmd))
     app.add_handler(CommandHandler("tban", tban_cmd))
+    app.add_handler(CommandHandler("userinfo", userinfo))
+    app.add_handler(CommandHandler("setsong", setsong))
     
     # ================= CALLBACKS =================
     app.add_handler(CallbackQueryHandler(accept, pattern="^marry_acc_"))
@@ -4183,10 +4306,13 @@ def main():
     app.add_handler(CallbackQueryHandler(button, pattern="^(num_|bet_)"))
 
     # ================= MESSAGE =================
-    # ================= MESSAGE =================
+    
 
-    # 🔹 1. Track data
+    # 🔹 1. Track data (messages + activity)
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, track_chat), group=0)
+
+    # 🔹 1.1 JOIN TRACK (NEW ADD)
+    app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, join_track), group=0)
 
     # 🔹 2. Filter system (auto reply)
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, filter_checker), group=1)
@@ -4199,6 +4325,7 @@ def main():
 
     # 🔹 5. Welcome system
     app.add_handler(ChatMemberHandler(member_update_welcome, ChatMemberHandler.CHAT_MEMBER))
+ 
 
 
     print("🔥 Niki Bot started...")
