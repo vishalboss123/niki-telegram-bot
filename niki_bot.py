@@ -9,6 +9,7 @@ client = MongoClient(MONGO_URL)
 db_main = client["mydatabase"]
 backup = db_main["backup"]   # ⚡ IMPORTANT (error fix)
 col = db_main["chats"]       # groups/users save  ✅ (IMPORTANT)
+filters_col = db_main["filters"]
 
 # =================== WEB SERVER (RENDER FIX) ===================
 import threading
@@ -46,7 +47,7 @@ import json
 import time
 import random
 import os
-
+import re
 
 # =================== GLOBALS ===================
 kill_cooldown = {}
@@ -3782,7 +3783,96 @@ async def check_bot_active(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text("🚫 Bot OFF hai yaha 💔")
     return False
-    
+
+# ================= ADD FILTER =================
+async def filter_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.message.reply_to_message:
+        return await update.message.reply_text("❌ Reply to a message/sticker")
+
+    if len(context.args) == 0:
+        return await update.message.reply_text("❌ Use: /filter name")
+
+    name = context.args[0].lower()
+    reply = update.message.reply_to_message
+    chat_id = update.effective_chat.id
+
+    data = {"type": None, "content": None}
+
+    if reply.text:
+        data["type"] = "text"
+        data["content"] = reply.text
+
+    elif reply.sticker:
+        data["type"] = "sticker"
+        data["content"] = reply.sticker.file_id
+
+    elif reply.photo:
+        data["type"] = "photo"
+        data["content"] = reply.photo[-1].file_id
+        data["caption"] = reply.caption
+
+    else:
+        return await update.message.reply_text("❌ Unsupported type")
+
+    filters_col.update_one(
+        {"chat_id": chat_id, "name": name},
+        {"$set": data},
+        upsert=True
+    )
+
+    await update.message.reply_text(f"✅ Filter '{name}' saved!")
+
+
+# ================= DELETE FILTER =================
+async def dfilter_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if len(context.args) == 0:
+        return await update.message.reply_text("❌ Use: /dfilter name")
+
+    name = context.args[0].lower()
+    chat_id = update.effective_chat.id
+
+    result = filters_col.delete_one({"chat_id": chat_id, "name": name})
+
+    if result.deleted_count:
+        await update.message.reply_text(f"🗑️ Filter '{name}' deleted!")
+    else:
+        await update.message.reply_text("❌ Filter not found")
+
+
+# ================= AUTO FILTER CHECK =================
+async def filter_checker(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.message or not update.message.text:
+        return
+
+    text = update.message.text.lower()
+    chat_id = update.effective_chat.id
+
+    try:
+        filters_data = list(filters_col.find({"chat_id": chat_id}))
+    except Exception as e:
+        print("Filter Error:", e)
+        return
+
+    for f in filters_data:
+        # 🔥 exact word match (no fake trigger)
+        if re.search(rf"\b{re.escape(f['name'])}\b", text):
+
+            try:
+                if f["type"] == "text":
+                    await update.message.reply_text(f["content"])
+
+                elif f["type"] == "sticker":
+                    await update.message.reply_sticker(f["content"])
+
+                elif f["type"] == "photo":
+                    await update.message.reply_photo(
+                        photo=f["content"],
+                        caption=f.get("caption") or ""
+                    )
+            except Exception as e:
+                print("Send Error:", e)
+
+            break  # ek hi filter chalega    
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
@@ -3871,6 +3961,8 @@ def main():
     app.add_handler(CommandHandler("tr", tr))
     app.add_handler(CommandHandler("close", close_bot))
     app.add_handler(CommandHandler("open", open_bot))
+    app.add_handler(CommandHandler("filter", filter_cmd))
+    app.add_handler(CommandHandler("dfilter", dfilter_cmd))
     
     # ================= CALLBACKS =================
     app.add_handler(CallbackQueryHandler(accept, pattern="^marry_acc_"))
@@ -3884,13 +3976,22 @@ def main():
     app.add_handler(CallbackQueryHandler(button, pattern="^(num_|bet_)"))
 
     # ================= MESSAGE =================
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, track_chat))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, auto_niki_reply))
+    # ================= MESSAGE =================
 
-    # ✅ ONLY ONE WELCOME HANDLER
+    # 🔹 1. Track data
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, track_chat), group=0)
+
+    # 🔹 2. Filter system (auto reply)
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, filter_checker), group=1)
+
+    # 🔹 3. AI / Niki reply
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, auto_niki_reply), group=2)
+
+    # 🔹 4. Block system (last me hona chahiye)
+    app.add_handler(MessageHandler(filters.ALL, block_system), group=3)
+
+    # 🔹 5. Welcome system
     app.add_handler(ChatMemberHandler(member_update_welcome, ChatMemberHandler.CHAT_MEMBER))
-
-    app.add_handler(MessageHandler(filters.ALL, block_system), group=0)
 
 
     print("🔥 Niki Bot started...")
