@@ -32,6 +32,8 @@ threading.Thread(target=run_web).start()
 
 # =================== IMPORTS ===================
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import ChatPermissions, Update
+from datetime import datetime, timedelta
 from collections import deque
 from deep_translator import GoogleTranslator
 from telegram.ext import (
@@ -3873,6 +3875,203 @@ async def filter_checker(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 print("Send Error:", e)
 
             break  # ek hi filter chalega    
+
+# ================= MODERATION SYSTEM =================
+
+
+
+OWNER_USERNAME = "YT_BISHALL"   # without @
+
+
+# ================= ADMIN CHECK =================
+async def is_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    chat_id = update.effective_chat.id
+
+    member = await context.bot.get_chat_member(chat_id, user_id)
+    return member.status in ["administrator", "creator"]
+
+
+# ================= GET USER =================
+async def get_user(update, context):
+    user = None
+
+    if update.message.reply_to_message:
+        user = update.message.reply_to_message.from_user
+
+    elif context.args:
+        try:
+            user = await context.bot.get_chat(context.args[-1])
+        except:
+            return None
+
+    return user
+
+
+def is_owner(user):
+    return user.username and user.username.lower() == OWNER_USERNAME.lower()
+
+
+# ================= TIME PARSER =================
+def parse_time(time_str):
+    match = re.match(r"(\d+)([smhd])", time_str)
+    if not match:
+        return None
+
+    value, unit = match.groups()
+    value = int(value)
+
+    if unit == "s":
+        return timedelta(seconds=value)
+    elif unit == "m":
+        return timedelta(minutes=value)
+    elif unit == "h":
+        return timedelta(hours=value)
+    elif unit == "d":
+        return timedelta(days=value)
+
+
+# ================= BAN =================
+async def ban_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_admin(update, context):
+        return await update.message.reply_text("❌ Admin only command")
+
+    user = await get_user(update, context)
+    if not user:
+        return await update.message.reply_text("❌ User not found")
+
+    if is_owner(user):
+        return await update.message.reply_text("❌ Owner ko ban nahi kar sakte 😎")
+
+    try:
+        await update.effective_chat.ban_member(user.id)
+        await update.message.reply_text(f"🔨 {user.first_name} banned!")
+    except:
+        await update.message.reply_text("❌ Ban failed")
+
+
+# ================= UNBAN =================
+async def unban_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_admin(update, context):
+        return await update.message.reply_text("❌ Admin only command")
+
+    user = await get_user(update, context)
+    if not user:
+        return await update.message.reply_text("❌ User not found")
+
+    try:
+        await update.effective_chat.unban_member(user.id)
+        await update.message.reply_text(f"✅ {user.first_name} unbanned!")
+    except:
+        await update.message.reply_text("❌ Unban failed")
+
+
+# ================= MUTE =================
+async def mute_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_admin(update, context):
+        return await update.message.reply_text("❌ Admin only command")
+
+    user = await get_user(update, context)
+    if not user:
+        return await update.message.reply_text("❌ User not found")
+
+    if is_owner(user):
+        return await update.message.reply_text("❌ Owner ko mute nahi kar sakte 😎")
+
+    try:
+        await update.effective_chat.restrict_member(
+            user.id,
+            permissions=ChatPermissions(can_send_messages=False)
+        )
+        await update.message.reply_text(f"🔇 {user.first_name} muted!")
+    except:
+        await update.message.reply_text("❌ Mute failed")
+
+
+# ================= UNMUTE =================
+async def unmute_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_admin(update, context):
+        return await update.message.reply_text("❌ Admin only command")
+
+    user = await get_user(update, context)
+    if not user:
+        return await update.message.reply_text("❌ User not found")
+
+    try:
+        await update.effective_chat.restrict_member(
+            user.id,
+            permissions=ChatPermissions(
+                can_send_messages=True,
+                can_send_media_messages=True,
+                can_send_other_messages=True,
+                can_add_web_page_previews=True
+            )
+        )
+        await update.message.reply_text(f"🔊 {user.first_name} unmuted!")
+    except:
+        await update.message.reply_text("❌ Unmute failed")
+
+
+# ================= TIMED MUTE =================
+async def tmute_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_admin(update, context):
+        return await update.message.reply_text("❌ Admin only command")
+
+    if len(context.args) < 1:
+        return await update.message.reply_text("❌ Use: /tmute 10m")
+
+    duration = parse_time(context.args[0])
+    if not duration:
+        return await update.message.reply_text("❌ Invalid time")
+
+    user = await get_user(update, context)
+    if not user:
+        return await update.message.reply_text("❌ User not found")
+
+    if is_owner(user):
+        return await update.message.reply_text("❌ Owner ko mute nahi kar sakte 😎")
+
+    until_time = datetime.utcnow() + duration
+
+    try:
+        await update.effective_chat.restrict_member(
+            user.id,
+            permissions=ChatPermissions(can_send_messages=False),
+            until_date=until_time
+        )
+        await update.message.reply_text(f"⏳ {user.first_name} muted for {context.args[0]}")
+    except:
+        await update.message.reply_text("❌ Timed mute failed")
+
+
+# ================= TIMED BAN =================
+async def tban_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_admin(update, context):
+        return await update.message.reply_text("❌ Admin only command")
+
+    if len(context.args) < 1:
+        return await update.message.reply_text("❌ Use: /tban 10m")
+
+    duration = parse_time(context.args[0])
+    if not duration:
+        return await update.message.reply_text("❌ Invalid time")
+
+    user = await get_user(update, context)
+    if not user:
+        return await update.message.reply_text("❌ User not found")
+
+    if is_owner(user):
+        return await update.message.reply_text("❌ Owner ko ban nahi kar sakte 😎")
+
+    until_time = datetime.utcnow() + duration
+
+    try:
+        await update.effective_chat.ban_member(user.id, until_date=until_time)
+        await update.message.reply_text(f"⛔ {user.first_name} banned for {context.args[0]}")
+    except:
+        await update.message.reply_text("❌ Timed ban failed")    
+
+        
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
@@ -3963,6 +4162,14 @@ def main():
     app.add_handler(CommandHandler("open", open_bot))
     app.add_handler(CommandHandler("filter", filter_cmd))
     app.add_handler(CommandHandler("dfilter", dfilter_cmd))
+    app.add_handler(CommandHandler("ban", ban_cmd))
+    app.add_handler(CommandHandler("unban", unban_cmd))
+
+    app.add_handler(CommandHandler("mute", mute_cmd))
+    app.add_handler(CommandHandler("unmute", unmute_cmd))
+
+    app.add_handler(CommandHandler("tmute", tmute_cmd))
+    app.add_handler(CommandHandler("tban", tban_cmd))
     
     # ================= CALLBACKS =================
     app.add_handler(CallbackQueryHandler(accept, pattern="^marry_acc_"))
