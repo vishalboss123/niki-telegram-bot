@@ -4176,16 +4176,22 @@ async def userinfo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     hours = total_sec // 3600
     minutes = (total_sec % 3600) // 60
 
+    # 🔥 REAL NAME + CLICKABLE
+    name = user.first_name
+    username = f"@{user.username}" if user.username else "No Username"
+
+    mention = f"<a href='tg://user?id={user.id}'>{name}</a>"
+
     text = f"""
 ━━━━━━━━━━━━━━━
-👤 Name: {data.get("name")}
-🆔 ID: {user.id}
-🔰 Username: @{data.get("username")}
+👤 Name: {mention}
+🆔 ID: <code>{user.id}</code>
+🔰 Username: {username}
 
 ━━━━━━━━━━━━━━━
-🎵 Song: {data.get("song")}
+🎵 Song: {data.get("song", "Not set")}
 
-📅 Join: {data.get("join_date")}
+📅 Join: {data.get("join_date", "Unknown")}
 
 💬 Messages: {data.get("messages", 0)}
 
@@ -4193,7 +4199,7 @@ async def userinfo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 ━━━━━━━━━━━━━━━
 """
 
-    await update.message.reply_text(text)
+    await update.message.reply_text(text, parse_mode="HTML")
        
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
