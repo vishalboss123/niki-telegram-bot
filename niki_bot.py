@@ -286,21 +286,23 @@ OWNER_ID = 6175559434  # Apna Telegram ID
 def load_data():
     global data, shop_items
 
-    try:
-        if os.path.exists(DATA_FILE):
-            with open(DATA_FILE, "r") as f:
-                content = f.read().strip()
+    mongo_data = load_from_mongo()
 
-                if content.count("{") > 1:
-                    content = content[:content.rfind("}")+1]
-
-                data = json.loads(content)
-        else:
+    if mongo_data:
+        print("✅ Data loaded from Mongo")
+        data = mongo_data
+    else:
+        print("⚠️ Mongo empty, loading JSON")
+        try:
+            if os.path.exists(DATA_FILE):
+                with open(DATA_FILE, "r") as f:
+                    data = json.load(f)
+            else:
+                data = {}
+        except:
             data = {}
-    except:
-        data = {}
 
-    # 🔥 IMPORTANT: SHOP ITEMS LOAD
+    # shop items
     if "shop_items" in data:
         for name in shop_items:
             if name in data["shop_items"]:
@@ -345,7 +347,7 @@ def get_user(user_id, name):
             "last_daily": 0
         }
         save_data()
-        save_to_mongo()
+        
 
     return data[uid]   # ✅ correct
 
