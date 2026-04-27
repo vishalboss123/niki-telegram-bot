@@ -4309,9 +4309,9 @@ Forever saath rahoge tum dono 🌹"
 
         await msg.edit_text(text, parse_mode="HTML", reply_markup=buttons)
 
-    # ✅ NORMAL USER (ADDED - NO CHANGE STYLE)
-    else:
-        await update.message.reply_text(f"""
+# ✅ NORMAL USER (NO CHANGE STYLE)
+else:
+    await update.message.reply_text(f"""
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🇺 🇸 🇪 🇷  ☠️ 🇮 🇳 🇫 🇴 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -4328,8 +4328,7 @@ Forever saath rahoge tum dono 🌹"
 
 ⏳ Active Time: {hours}h {minutes}m
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-"""
-        await update.message.reply_text(text, parse_mode="HTML")
+""", parse_mode="HTML")
 
 # ================= BUTTON LOGIC =================
 async def userinfo_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
