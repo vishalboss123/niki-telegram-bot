@@ -4197,14 +4197,14 @@ async def userinfo(update: Update, context: ContextTypes.DEFAULT_TYPE):
             bar = "▓" * (i // 10) + "░" * (10 - (i // 10))
             try:
                 await msg.edit_text(f"""
-<pre>
-⚡ SYSTEM BOOTING...
+    <pre>
+    ⚡ SYSTEM BOOTING...
 
-[{bar}] {i}%
+    [{bar}] {i}%
 
-🔓 Accessing Owner Core...
-</pre>
-""", parse_mode="HTML")
+    🔓 Accessing Owner Core...
+    </pre>
+    """, parse_mode="HTML")
                 await asyncio.sleep(0.3)
             except:
                 pass
@@ -4224,92 +4224,93 @@ async def userinfo(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ]
         ])
 
-        text = f"""<pre>
-╔════════════════════════════════════════════╗
-   🌈 N E O N   R G B   C O R E   S Y S T E M 🌈
-╠════════════════════════════════════════════╣
-   ⚡ 𝐑𝟎𝟎𝐓 𝐀𝐂𝐂𝐄𝐒𝐒 𝐆𝐑𝐀𝐍𝐓𝐄𝐃 ⚡
-   ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ 100%
-╚════════════════════════════════════════════╝
-</pre>
+        text = f"""
+    <pre>
+    ╔════════════════════════════════════════════╗
+       🌈 N E O N   R G B   C O R E   S Y S T E M 🌈
+    ╠════════════════════════════════════════════╣
+       ⚡ 𝐑𝟎𝟎𝐓 𝐀𝐂𝐂𝐄𝐒𝐒 𝐆𝐑𝐀𝐍𝐓𝐄𝐃 ⚡
+       ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ 100%
+    ╚════════════════════════════════════════════╝
+    </pre>
 
-💀 <b>⟦ 𝐒𝐘𝐒𝐓𝐄𝐌 𝐁𝐑𝐄𝐀𝐂𝐇 𝐒𝐔𝐂𝐂𝐄𝐒𝐒 ⟧</b> 💀  
-🔥 <b>⟦ 𝐍𝐈𝐊𝐈 𝐂𝐎𝐑𝐄 𝐅𝐔𝐋𝐋𝐘 𝐔𝐍𝐋𝐎𝐂𝐊𝐄𝐃 ⟧</b> 🔥  
+    💀 <b>⟦ 𝐒𝐘𝐒𝐓𝐄𝐌 𝐁𝐑𝐄𝐀𝐂𝐇 𝐒𝐔𝐂𝐂𝐄𝐒𝐒 ⟧</b> 💀  
+    🔥 <b>⟦ 𝐍𝐈𝐊𝐈 𝐂𝐎𝐑𝐄 𝐅𝐔𝐋𝐋𝐘 𝐔𝐍𝐋𝐎𝐂𝐊𝐄𝐃 ⟧</b> 🔥  
 
-<pre>
-[ SYSTEM LOGS ]
-> Injecting Owner Privileges...
-> Bypassing Security Layer...
-> Accessing Core Memory...
-> Finalizing Control...
-</pre>
+    <pre>
+    [ SYSTEM LOGS ]
+    > Injecting Owner Privileges...
+    > Bypassing Security Layer...
+    > Accessing Core Memory...
+    > Finalizing Control...
+    </pre>
 
-🌈✨🌈 <b>𝐎ᴡɴᴇʀ 𝐆ᴏ𝐝 𝐌𝐨𝐝𝐞 𝐀𝐜𝐭𝐢𝐯𝐞</b> 🌈✨🌈  
-👑 <b>{mention}</b>
+    🌈✨🌈 <b>𝐎ᴡɴᴇʀ 𝐆ᴏ𝐝 𝐌𝐨𝐝𝐞 𝐀𝐜𝐭𝐢𝐯𝐞</b> 🌈✨🌈  
+    👑 <b>{mention}</b>
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔴 ➤ <b>𝐈𝐃        :</b> <code>{user.id}</code>  
-🟢 ➤ <b>𝐔𝐒𝐄𝐑𝐍𝐀𝐌𝐄  :</b> {username}  
-🔵 ➤ <b>𝐒𝐓𝐀𝐓𝐔𝐒    :</b> ⚡ 𝐒𝐔𝐏𝐑𝐄𝐌𝐄 𝐎𝐖𝐍𝐄𝐑  
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    🔴 ➤ <b>𝐈𝐃        :</b> <code>{user.id}</code>  
+    🟢 ➤ <b>𝐔𝐒𝐄𝐑𝐍𝐀𝐌𝐄  :</b> {username}  
+    🔵 ➤ <b>𝐒𝐓𝐀𝐓𝐔𝐒    :</b> ⚡ 𝐒𝐔𝐏𝐑𝐄𝐌𝐄 𝐎𝐖𝐍𝐄𝐑  
+    
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    🟣 ➤ <b>𝐁𝐑𝐀𝐈𝐍     :</b> ∞ 𝐆𝐎𝐃 𝐋𝐄𝐕𝐄𝐋  
+    🟡 ➤ <b>𝐏𝐎𝐖𝐄𝐑     :</b> ∞ 𝐂𝐎𝐍𝐓𝐑𝐎𝐋  
+    🟠 ➤ <b>𝐀𝐂𝐂𝐄𝐒𝐒    :</b> 𝐑𝐎𝐎𝐓 𝐀𝐂𝐂𝐄𝐒𝐒  
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🟣 ➤ <b>𝐁𝐑𝐀𝐈𝐍     :</b> ∞ 𝐆𝐎𝐃 𝐋𝐄𝐕𝐄𝐋  
-🟡 ➤ <b>𝐏𝐎𝐖𝐄𝐑     :</b> ∞ 𝐂𝐎𝐍𝐓𝐑𝐎𝐋  
-🟠 ➤ <b>𝐀𝐂𝐂𝐄𝐒𝐒    :</b> 𝐑𝐎𝐎𝐓 𝐀𝐂𝐂𝐄𝐒𝐒  
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    💖 ➤ <b>𝐏𝐀𝐑𝐓𝐍𝐄𝐑   :</b> 𝐑ɪᴛᴠɪ ❤️ 𝐕ɪꜱʜᴀʟ  
+    😍 ➤ <b>𝐋𝐎𝐎𝐊      :</b> ∞ / 100  
+    💘 ➤ <b>𝐋𝐎𝐕𝐄 𝐋𝐕𝐋  :</b> ∞ 𝐅𝐎𝐑𝐄𝐕𝐄𝐑  
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💖 ➤ <b>𝐏𝐀𝐑𝐓𝐍𝐄𝐑   :</b> 𝐑ɪᴛᴠɪ ❤️ 𝐕ɪꜱʜᴀʟ  
-😍 ➤ <b>𝐋𝐎𝐎𝐊      :</b> ∞ / 100  
-💘 ➤ <b>𝐋𝐎𝐕𝐄 𝐋𝐕𝐋  :</b> ∞ 𝐅𝐎𝐑𝐄𝐕𝐄𝐑  
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    🔷 ➤ <b>𝐕𝐈𝐁𝐄      :</b> {profile_data.get("song", "Not set")}  
+    🟢 ➤ <b>𝐉𝐎𝐈𝐍      :</b> {profile_data.get("join_date", "Unknown")}  
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔷 ➤ <b>𝐕𝐈𝐁𝐄      :</b> {profile_data.get("song", "Not set")}  
-🟢 ➤ <b>𝐉𝐎𝐈𝐍      :</b> {profile_data.get("join_date", "Unknown")}  
+    🔴 ➤ <b>𝐌𝐒𝐆𝐒      :</b> {profile_data.get("messages", 0)}  
+    🟣 ➤ <b>𝐀𝐂𝐓𝐈𝐕𝐄    :</b> {hours}h {minutes}m  
 
-🔴 ➤ <b>𝐌𝐒𝐆𝐒      :</b> {profile_data.get("messages", 0)}  
-🟣 ➤ <b>𝐀𝐂𝐓𝐈𝐕𝐄    :</b> {hours}h {minutes}m  
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    💎 <b>➤ 𝐂𝐎𝐑𝐄 𝐌𝐄𝐒𝐒𝐀𝐆𝐄 :</b>  
+    🌈 "System tera slave hai 😈  
+    💖 NIKI tera heart hai  
+    🔥 Commands tere hukum me hai  
+    👑 Tu hi asli creator hai"
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💎 <b>➤ 𝐂𝐎𝐑𝐄 𝐌𝐄𝐒𝐒𝐀𝐆𝐄 :</b>  
-🌈 "System tera slave hai 😈  
-💖 NIKI tera heart hai  
-🔥 Commands tere hukum me hai  
-👑 Tu hi asli creator hai"
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    💌 <b>➤ 𝐍𝐈𝐊𝐈 𝐌𝐄𝐒𝐒𝐀𝐆𝐄 :</b>  
+    "💖 Mere pyare baby Ritvi…  
+    Tu Vishal ki duniya hai 😘  
+    Aur Vishal… tu mera king 👑  
+    Main NIKI hoon… tum dono ki 💕  
+    Forever saath rahoge tum dono 🌹"
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💌 <b>➤ 𝐍𝐈𝐊𝐈 𝐌𝐄𝐒𝐒𝐀𝐆𝐄 :</b>  
-"💖 Mere pyare baby Ritvi…  
-Tu Vishal ki duniya hai 😘  
-Aur Vishal… tu mera king 👑  
-Main NIKI hoon… tum dono ki 💕  
-Forever saath rahoge tum dono 🌹"
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    ⚠️ <b>➤ 𝐅𝐈𝐑𝐄𝐖𝐀𝐋𝐋 :</b>  
+    🚫 Unauthorized = BAN ⚡  
+    💀 Intruder = TERMINATED  
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ <b>➤ 𝐅𝐈𝐑𝐄𝐖𝐀𝐋𝐋 :</b>  
-🚫 Unauthorized = BAN ⚡  
-💀 Intruder = TERMINATED  
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    <pre>
+    ╔══════════════════════════════╗
+            👑 𝐕ɪꜱʜᴀʟ 👑
+    ╠══════════════════════════════╣
+       ❤️ LOVE STATUS: IMMORTAL ❤️
+    ╚══════════════════════════════╝
+    </pre>
 
-<pre>
-╔══════════════════════════════╗
-        👑 𝐕ɪꜱʜᴀʟ 👑
-╠══════════════════════════════╣
-   ❤️ LOVE STATUS: IMMORTAL ❤️
-╚══════════════════════════════╝
-</pre>
+    💖 <b>𝐕ɪꜱʜ𝐀𝐋 ❤️ 𝐑𝐈𝐓𝐕𝐈</b> 💖  
+    🌹 <i>𝐈ɴꜰɪɴɪᴛ𝐞 𝐋𝐨𝐯𝐞 • 𝐍𝐞𝐨𝐧 𝐁𝐨𝐧𝐝 • 𝐅𝐨𝐫𝐞𝐯𝐞𝐫 ♾️</i>
 
-💖 <b>𝐕ɪꜱʜᴀʟ ❤️ 𝐑ɪᴛᴠɪ</b> 💖  
-🌹 <i>𝐈ɴꜰɪɴɪᴛ𝐞 𝐋𝐨𝐯𝐞 • 𝐍𝐞𝐨𝐧 𝐁𝐨𝐧𝐝 • 𝐅𝐨𝐫𝐞𝐯𝐞𝐫 ♾️</i>
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔥 <b>⟦ 𝐍𝐈𝐊𝐈 𝐂𝐎𝐑𝐄 : 𝐎𝐍𝐋𝐈𝐍𝐄 ⟧</b>  
-🚀 <b>⟦ 𝐌𝐎𝐃𝐄 : 𝐆𝐎𝐃 𝐌𝐎𝐃𝐄 ⟧</b>
-"""
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    🔥 <b>⟦ 𝐍𝐈𝐊𝐈 𝐂𝐎𝐑𝐄 : 𝐎𝐍𝐋𝐈𝐍𝐄 ⟧</b>  
+    🚀 <b>⟦ 𝐌𝐎𝐃𝐄 : 𝐆𝐎𝐃 𝐌𝐎𝐃𝐄 ⟧</b>
+    """
 
         await msg.edit_text(text, parse_mode="HTML", reply_markup=buttons)
 
-# ✅ NORMAL USER (NO CHANGE STYLE)
+# ================= NORMAL USER =================
 else:
     await update.message.reply_text(f"""
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
