@@ -3903,24 +3903,6 @@ async def is_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return member.status in ["administrator", "creator"]
 
 
-# ================= GET USER =================
-async def get_user(update, context):
-    user = None
-
-    if update.message.reply_to_message:
-        user = update.message.reply_to_message.from_user
-
-    elif context.args:
-        try:
-            user = await context.bot.get_chat(context.args[-1])
-        except:
-            return None
-
-    return user
-
-
-def is_owner(user):
-    return user.username and user.username.lower() == OWNER_USERNAME.lower()
 
 
 # ================= TIME PARSER =================
