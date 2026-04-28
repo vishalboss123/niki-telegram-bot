@@ -368,7 +368,8 @@ async def daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await check_bot_active(update, context):
         return
 
-    user = get_user(update.effective_user.id, update.effective_user.first_name)
+    user = await get_user(update.effective_user.id, update.effective_user.first_name)
+    
     now = time.time()
 
     if now - user.get("last_daily", 0) < 86400:
@@ -410,8 +411,8 @@ async def balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         target_user = update.effective_user
 
-    user_data = get_user(target_user.id, target_user.first_name)
-
+    user_data = await get_user(target_user.id, target_user.first_name)
+    
     # ✅ sirf real users filter karo
     users_only = {
         uid: u for uid, u in data.items()
@@ -1040,8 +1041,8 @@ async def revive(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     reviver = update.effective_user
     #... yahaoe loaddata
-    reviver_data = get_user(reviver.id, reviver.first_name)
-
+    reviver_data = await get_user(reviver.id, reviver.first_name)
+    
     now = time.time()
 
     # ---------------- SELF REVIVE (NO REPLY)
@@ -1093,8 +1094,8 @@ async def revive(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # ---------------- REPLY USER CASE
     target_user = update.message.reply_to_message.from_user
-    target_data = get_user(target_user.id, target_user.first_name)
-
+    target_data = await get_user(target_user.id, target_user.first_name)
+    
     # ---------------- Reviver dead (cannot revive others)
     if reviver_data.get("dead", False):
         await update.message.reply_text(
