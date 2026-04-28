@@ -365,11 +365,14 @@ def is_protected(user_data):
 # ------------------ DAILY COMMAND ------------------
 # ------------------ DAILY COMMAND ------------------
 async def daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.message:
+        return
+
     if not await check_bot_active(update, context):
         return
 
     user = get_user(update.effective_user.id, update.effective_user.first_name)
-    
+
     now = time.time()
 
     if now - user.get("last_daily", 0) < 86400:
@@ -402,11 +405,14 @@ async def daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ------------------ BALANCE COMMAND ------------------
 
 async def balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    
+
+    if not update.message:
+        return
+
     if not await check_bot_active(update, context):
         return
 
-    if update.message.reply_to_message:
+    if update.message and update.message.reply_to_message:
         target_user = update.message.reply_to_message.from_user
     else:
         target_user = update.effective_user
@@ -1094,7 +1100,7 @@ async def revive(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # ---------------- REPLY USER CASE
     target_user = update.message.reply_to_message.from_user
-    target_data = await get_user(target_user.id, target_user.first_name)
+    target_data = get_user(target_user.id, target_user.first_name)
     
     # ---------------- Reviver dead (cannot revive others)
     if reviver_data.get("dead", False):
