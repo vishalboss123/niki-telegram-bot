@@ -10,7 +10,7 @@ db_main = client["mydatabase"]
 backup = db_main["backup"]   # ⚡ IMPORTANT (error fix)
 col = db_main["chats"]       # groups/users save  ✅ (IMPORTANT)
 filters_col = db_main["filters"]
-user_profile = db_main["user_profile"]
+
 
 
 # =================== WEB SERVER (RENDER FIX) ===================
