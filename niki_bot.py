@@ -4193,7 +4193,7 @@ def main():
     app.add_handler(CallbackQueryHandler(button_callback, pattern="^start_"))
     
     app.add_handler(CallbackQueryHandler(button, pattern="^(num_|bet_)"))
-    app.add_handler(CallbackQueryHandler(userinfo_buttons))
+    
     
 
     # ================= MESSAGE =================
