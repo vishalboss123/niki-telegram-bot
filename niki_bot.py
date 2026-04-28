@@ -3947,7 +3947,7 @@ async def ban_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_admin(update, context):
         return await update.message.reply_text("❌ Admin only command")
 
-    user = await get_user(update, context)
+    user = get_user(update, context)
     if not user:
         return await update.message.reply_text("❌ User not found")
 
@@ -3966,7 +3966,7 @@ async def unban_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_admin(update, context):
         return await update.message.reply_text("❌ Admin only command")
 
-    user = await get_user(update, context)
+    user = get_user(update, context)
     if not user:
         return await update.message.reply_text("❌ User not found")
 
@@ -3982,7 +3982,7 @@ async def mute_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_admin(update, context):
         return await update.message.reply_text("❌ Admin only command")
 
-    user = await get_user(update, context)
+    user = get_user(update, context)
     if not user:
         return await update.message.reply_text("❌ User not found")
 
@@ -4004,7 +4004,7 @@ async def unmute_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_admin(update, context):
         return await update.message.reply_text("❌ Admin only command")
 
-    user = await get_user(update, context)
+    user = get_user(update, context)
     if not user:
         return await update.message.reply_text("❌ User not found")
 
@@ -4035,7 +4035,7 @@ async def tmute_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not duration:
         return await update.message.reply_text("❌ Invalid time")
 
-    user = await get_user(update, context)
+    user = get_user(update, context)
     if not user:
         return await update.message.reply_text("❌ User not found")
 
@@ -4067,7 +4067,7 @@ async def tban_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not duration:
         return await update.message.reply_text("❌ Invalid time")
 
-    user = await get_user(update, context)
+    user = get_user(update, context)
     if not user:
         return await update.message.reply_text("❌ User not found")
 
