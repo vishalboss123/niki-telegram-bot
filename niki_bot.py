@@ -351,7 +351,7 @@ def get_user(user_id, name):
 
     return data[uid]   # ✅ correct
 
-    return user
+    
 def format_time(sec):
     sec = int(sec)
     h = sec // 3600
@@ -368,7 +368,7 @@ async def daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await check_bot_active(update, context):
         return
 
-    user = await get_user(update.effective_user.id, update.effective_user.first_name)
+    user = get_user(update.effective_user.id, update.effective_user.first_name)
     
     now = time.time()
 
@@ -411,7 +411,7 @@ async def balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         target_user = update.effective_user
 
-    user_data = await get_user(target_user.id, target_user.first_name)
+    user_data = get_user(target_user.id, target_user.first_name)
     
     # ✅ sirf real users filter karo
     users_only = {
@@ -1041,7 +1041,7 @@ async def revive(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     reviver = update.effective_user
     #... yahaoe loaddata
-    reviver_data = await get_user(reviver.id, reviver.first_name)
+    reviver_data = get_user(reviver.id, reviver.first_name)
     
     now = time.time()
 
