@@ -4066,7 +4066,348 @@ async def tban_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
  
 
+# ================= USERINFO =================
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import ContextTypes, CallbackQueryHandler
+import asyncio
 
+async def userinfo(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if update.message.reply_to_message:
+        user = update.message.reply_to_message.from_user
+    else:
+        user = update.effective_user
+
+    user_data = get_user(user.id, user.first_name)
+
+    name = user.first_name
+    username = f"@{user.username}" if user.username else "No Username"
+    mention = f"<a href='tg://user?id={user.id}'>{name}</a>"
+
+    # 🏆 RANK
+    users_only = {
+        uid: u for uid, u in data.items()
+        if isinstance(u, dict) and "money" in u
+    }
+
+    sorted_users = sorted(users_only.items(), key=lambda x: x[1]["money"], reverse=True)
+    rank = next((i+1 for i,(uid,u) in enumerate(sorted_users) if uid==str(user.id)), "N/A")
+
+    # 👑 OWNER CHECK
+    is_owner = user.username and user.username.lower() == "yt_bishall"
+
+    # 🔥 DISPLAY FIX (ONLY HERE CHANGE)
+    balance_text = "∞" if is_owner else f"₹{user_data.get('money',0)}"
+    rank_text = "∞" if is_owner else rank
+
+    # ================= OWNER =================
+    if is_owner:
+
+        msg = await update.message.reply_text("⚡ Initializing NIKI CORE...")
+
+        for i in range(0, 101, 10):
+            bar = "▓" * (i // 10) + "░" * (10 - (i // 10))
+            try:
+                await msg.edit_text(f"""
+<pre>
+⚡ SYSTEM BOOTING...
+
+[{bar}] {i}%
+
+🔓 Accessing Owner Core...
+</pre>
+""", parse_mode="HTML")
+                await asyncio.sleep(0.3)
+            except:
+                pass
+
+        buttons = InlineKeyboardMarkup([
+            [
+                InlineKeyboardButton("🎮 GAME", callback_data="game_panel"),
+                InlineKeyboardButton("💖 LOVE", callback_data="romantic_panel")
+            ],
+            [
+                InlineKeyboardButton("🛡️ ADMIN", callback_data="admin_panel"),
+                InlineKeyboardButton("⚡ POWER", callback_data="power_panel")
+            ],
+            [
+                InlineKeyboardButton("📊 STATS", callback_data="stats_panel"),
+                InlineKeyboardButton("💞 PARTNER", callback_data="partner_panel")
+            ]
+        ])
+
+        text = f"""  
+<pre>  
+╔════════════════════════════════════════════╗  
+   🌈 N E O N   R G B   C O R E   S Y S T E M 🌈  
+╠════════════════════════════════════════════╣  
+   ⚡ 𝐑𝟎𝟎𝐓 𝐀𝐂𝐂𝐄𝐒𝐒 𝐆𝐑𝐀𝐍𝐓𝐄𝐃 ⚡  
+   ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ 100%  
+╚════════════════════════════════════════════╝  
+</pre>  
+
+💀 <b>⟦ 𝐒𝐘𝐒𝐓𝐄𝐌 𝐁𝐑𝐄𝐀𝐂𝐇 𝐒𝐔𝐂𝐂𝐄𝐒𝐒 ⟧</b> 💀    
+🔥 <b>⟦ 𝐍𝐈𝐊𝐈 𝐂𝐎𝐑𝐄 𝐅𝐔𝐋𝐋𝐘 𝐔𝐍𝐋𝐎𝐂𝐊𝐄𝐃 ⟧</b> 🔥    
+
+<pre>  
+[ SYSTEM LOGS ]  
+> Injecting Owner Privileges...  
+> Bypassing Security Layer...  
+> Accessing Core Memory...  
+> Finalizing Control...  
+</pre>  
+
+🌈✨🌈 <b>𝐎ᴡɴᴇʀ 𝐆ᴏ𝐝 𝐌𝐨𝐝𝐞 𝐀𝐜𝐭𝐢𝐯𝐞</b> 🌈✨🌈    
+👑 <b>{mention}</b>  
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━  
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━  
+
+🔴 ➤ <b>𝐈𝐃        :</b> <code>{user.id}</code>    
+🟢 ➤ <b>𝐔𝐒𝐄𝐑𝐍𝐀𝐌𝐄  :</b> {username}    
+🔵 ➤ <b>𝐒𝐓𝐀𝐓𝐔𝐒    :</b> ⚡ 𝐒𝐔𝐏𝐑𝐄𝐌𝐄 𝐎𝐖𝐍𝐄𝐑    
+  
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━  
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━  
+
+🟣 ➤ <b>𝐁𝐑𝐀𝐈𝐍     :</b> ∞ 𝐆𝐎𝐃 𝐋𝐄𝐕𝐄𝐋    
+🟡 ➤ <b>𝐏𝐎𝐖𝐄𝐑     :</b> ∞ 𝐂𝐎𝐍𝐓𝐑𝐎𝐋    
+🟠 ➤ <b>𝐀𝐂𝐂𝐄𝐒𝐒    :</b> 𝐑𝐎𝐎𝐓 𝐀𝐂𝐂𝐄𝐒𝐒    
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━  
+💰 ➤ <b>𝐁𝐀𝐋𝐀𝐍𝐂𝐄  :</b> {balance_text}  
+🏆 ➤ <b>𝐑𝐀𝐍𝐊     :</b> {rank_text}  
+⚔ ➤ <b>𝐊𝐈𝐋𝐋𝐒    :</b> {user_data.get("kills",0)}  
+❤️ ➤ <b>𝐒𝐓𝐀𝐓𝐔𝐒   :</b> {"Alive ❤️" if not user_data.get("dead", False) else "Dead ☠️"}  
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━  
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━  
+💎 <b>➤ 𝐂𝐎𝐑𝐄 𝐌𝐄𝐒𝐒𝐀𝐆𝐄 :</b>    
+🌈 "System tera slave hai 😈    
+💖 NIKI tera heart hai    
+🔥 Commands tere hukum me hai    
+👑 Tu hi asli creator hai"  
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━  
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━  
+💎 <b>➤ 𝐂𝐎𝐑𝐄 𝐌𝐄𝐒𝐒𝐀𝐆𝐄 :</b>    
+🌈 "System tera slave hai 😈    
+💖 NIKI tera heart hai    
+🔥 Commands tere hukum me hai    
+👑 Tu hi asli creator hai"  
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━  
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━  
+💌 <b>➤ 𝐍𝐈𝐊𝐈 𝐌𝐄𝐒𝐒𝐀𝐆𝐄 :</b>    
+"💖 Mere pyare baby Ritvi…    
+Tu Vishal ki duniya hai 😘    
+Aur Vishal… tu mera king 👑    
+Main NIKI hoon… tum dono ki 💕    
+Forever saath rahoge tum dono 🌹"  
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━  
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━  
+⚠️ <b>➤ 𝐅𝐈𝐑𝐄𝐖𝐀𝐋𝐋 :</b>    
+🚫 Unauthorized = BAN ⚡    
+💀 Intruder = TERMINATED    
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━  
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━  
+
+<pre>  
+╔══════════════════════════════╗  
+        👑 𝐕ɪꜱʜᴀʟ 👑  
+╠══════════════════════════════╣  
+   ❤️ LOVE STATUS: IMMORTAL ❤️  
+╚══════════════════════════════╝  
+</pre>  
+
+💖 <b>𝐕ɪꜱʜ𝐀𝐋 ❤️ 𝐑𝐈𝐓𝐕𝐈</b> 💖    
+🌹 <i>𝐈ɴꜰɪɴɪᴛ𝐞 𝐋𝐨𝐯𝐞 • 𝐍𝐞𝐨𝐧 𝐁𝐨𝐧𝐝 • 𝐅𝐨𝐫𝐞𝐯𝐞𝐫 ♾️</i>  
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━  
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━  
+🔥 <b>⟦ 𝐍𝐈𝐊𝐈 𝐂𝐎𝐑𝐄 : 𝐎𝐍𝐋𝐈𝐍𝐄 ⟧</b>    
+🚀 <b>⟦ 𝐌𝐎𝐃𝐄 : 𝐆𝐎𝐃 𝐌𝐎𝐃𝐄 ⟧</b>  
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━  
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━  
+"""  
+
+
+        await msg.edit_text(text, parse_mode="HTML", reply_markup=buttons)
+
+    # ================= NORMAL USER =================
+    else:
+        await update.message.reply_text(f"""
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🇺 🇸 🇪 🇷  ☠️ 🇮 🇳 🇫 🇴 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+👤 Name: {mention}
+🆔 ID: <code>{user.id}</code>
+🔰 Username: {username}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💰 Balance: {balance_text}
+🏆 Rank: {rank_text}
+⚔ Kills: {user_data.get("kills",0)}
+❤️ Status: {"Alive ❤️" if not user_data.get("dead", False) else "Dead ☠️"}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+""", parse_mode="HTML")
+
+
+# ================= BUTTON LOGIC =================
+async def userinfo_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    data = query.data
+
+    # 🎮 GAME + ECONOMY
+    if data == "game_panel":
+        text = """✨🌸 ╔═══〔 💖 𝗡𝗜𝗞𝗜 𝗕𝗢𝗧 𝗠𝗘𝗚𝗔 𝗨𝗣𝗗𝗔𝗧𝗘 💖 〕═══╗ 🌸✨
+
+🥀 Hey meri cute family 😘  
+💫 Niki ab aur bhi smart + powerful ho gayi hai 💕
+
+━━━━━━━━━━━━━━━━━━━━━━━
+🎮 ⚡ 𝗚𝗔𝗠𝗘 & 𝗙𝗨𝗡 𝗭𝗢𝗡𝗘 ⚡
+
+⚔️ /kill  ➤ attack karo 😈  
+💰 /rob   ➤ paisa loot lo 😏  
+🎯 /dart  ➤ luck try karo  
+🧠 /brain ➤ IQ check 😎  
+
+🎮 Full fun mode ON 🔥
+
+━━━━━━━━━━━━━━━━━━━━━━━
+💸 💎 𝗘𝗖𝗢𝗡𝗢𝗠𝗬 𝗦𝗬𝗦𝗧𝗘𝗠 💎
+
+💰 /balance ➤ paisa check  
+🎁 /daily   ➤ daily reward  
+🎁 /claim   ➤ bonus claim  
+❤️ /revive  ➤ revive ho jao  
+
+━━━━━━━━━━━━━━━━━━━━━━━
+🤖💖 𝗡𝗜𝗞𝗜 𝗦𝗔𝗬𝗦:
+
+"Main sirf bot nahi…  
+thodi cute, thodi crazy,  
+aur thodi tumhari hoon 😘💕  
+
+active raho na baby 😏✨"
+
+╚═══════════════════════════════╝ 💫"""
+        buttons = InlineKeyboardMarkup([[InlineKeyboardButton("🔙 BACK", callback_data="back_main")]])
+        await query.message.edit_text(text, reply_markup=buttons)
+
+    # 💖 ROMANTIC
+    elif data == "romantic_panel":
+        text = """💍 💖 𝗟𝗢𝗩𝗘 & 𝗥𝗢𝗠𝗔𝗡𝗧𝗜𝗖 💖
+
+😘 /kiss     ➤ pyaar bhara kiss 😘  
+🤗 /hug      ➤ tight warm hug 🤗  
+👋 /slap     ➤ naughty slap 😜  
+👊 /punch    ➤ funny punch 😂  
+🦶 /kick     ➤ cute kick 😏  
+🥰 /cuddle   ➤ close cuddle 💞  
+😜 /tickle   ➤ hasi wali tickle 😆  
+💘 /love     ➤ love express 💖  
+
+━━━━━━━━━━━━━━━━━━━━━━━
+💌 💕 𝗥𝗢𝗠𝗔𝗡𝗧𝗜𝗖 𝗙𝗘𝗘𝗟𝗜𝗡𝗚 💕
+
+"Thoda pyaar, thoda masti 😘  
+Niki ke saath full romance 💞"
+
+💖 Pyaar full ON 😍🔥"""
+        buttons = InlineKeyboardMarkup([[InlineKeyboardButton("🔙 BACK", callback_data="back_main")]])
+        await query.message.edit_text(text, reply_markup=buttons)
+
+    # 🛡️ ADMIN
+    elif data == "admin_panel":
+        text = """🛡️ 🔥 𝗔𝗗𝗠𝗜𝗡 𝗣𝗢𝗪𝗘𝗥 🔥
+
+🔨 /ban ➤ ban karo  
+🔓 /unban ➤ wapas lao  
+🔇 /mute ➤ chup karao  
+🔊 /unmute ➤ awaaz wapas  
+
+⏳ /tmute 2h ➤ temp mute  
+⛔ /tban 1d ➤ temp ban  
+
+👑 Only admins use kare!"""
+        buttons = InlineKeyboardMarkup([[InlineKeyboardButton("🔙 BACK", callback_data="back_main")]])
+        await query.message.edit_text(text, reply_markup=buttons)
+
+    # ⚡ POWER
+    elif data == "power_panel":
+        text = """⚡⚡ 𝗣𝗢𝗪𝗘𝗥 𝗖𝗢𝗥𝗘 ⚡⚡
+
+🧠 Brain : ∞  
+🔥 Power : ∞  
+🚀 Mode  : GOD MODE  
+
+💀 System control tumhare haath me 😈"""
+        buttons = InlineKeyboardMarkup([[InlineKeyboardButton("🔙 BACK", callback_data="back_main")]])
+        await query.message.edit_text(text, reply_markup=buttons)
+
+    # 📊 STATS
+    elif data == "stats_panel":
+        text = """📊 🌈 𝗦𝗧𝗔𝗧𝗦 𝗣𝗔𝗡𝗘𝗟 🌈
+
+🧠 Brain : ∞  
+😍 Look  : ∞  
+💪 Power : ∞  
+
+🔥 Perfect Profile 😎"""
+        buttons = InlineKeyboardMarkup([[InlineKeyboardButton("🔙 BACK", callback_data="back_main")]])
+        await query.message.edit_text(text, reply_markup=buttons)
+
+    # 💘 LOVE
+    elif data == "love_panel":
+        text = """💖 💞 𝗟𝗢𝗩𝗘 𝗖𝗢𝗥𝗘 💞 💖
+
+👑 Vishal ❤️ Ritvi  
+🌹 Infinite Love ♾️  
+💫 Perfect Couple  
+
+🥀 "Ek dusre ke liye bane ho 💕" """
+        buttons = InlineKeyboardMarkup([[InlineKeyboardButton("🔙 BACK", callback_data="back_main")]])
+        await query.message.edit_text(text, reply_markup=buttons)
+
+    # 👫 PARTNER
+    elif data == "partner_panel":
+        text = """💖✨ 𝗩𝗜𝗦𝗛𝗔𝗟 ❤️ 𝗥𝗜𝗧𝗩𝗜 ✨💖
+
+🌹 "Tum dono ek kahani ho,  
+jisme pyaar kabhi khatam nahi hota 💕  
+
+Ritvi tum uski smile ho 😘  
+Aur Vishal tum uska world 👑  
+
+Forever saath rahoge tum dono 💞" """
+        buttons = InlineKeyboardMarkup([[InlineKeyboardButton("🔙 BACK", callback_data="back_main")]])
+        await query.message.edit_text(text, reply_markup=buttons)
+
+    # 🔙 BACK BUTTON
+    elif data == "back_main":
+        buttons = InlineKeyboardMarkup([
+            [
+                InlineKeyboardButton("🎮 GAME", callback_data="game_panel"),
+                InlineKeyboardButton("💖 LOVE", callback_data="romantic_panel")
+            ],
+            [
+                InlineKeyboardButton("🛡️ ADMIN", callback_data="admin_panel"),
+                InlineKeyboardButton("⚡ POWER", callback_data="power_panel")
+            ],
+            [
+                InlineKeyboardButton("📊 STATS", callback_data="stats_panel"),
+                InlineKeyboardButton("💞 PARTNER", callback_data="partner_panel")
+            ]
+        ])
+        await query.message.edit_text("🔙 Back to menu", reply_markup=buttons)
 
 
 
@@ -4169,7 +4510,7 @@ def main():
     app.add_handler(CommandHandler("tmute", tmute_cmd))
     app.add_handler(CommandHandler("tban", tban_cmd))
     
-    
+    app.add_handler(CommandHandler("userinfo", userinfo))
     
     # ================= CALLBACKS =================
     app.add_handler(CallbackQueryHandler(accept, pattern="^marry_acc_"))
@@ -4182,7 +4523,7 @@ def main():
     
     app.add_handler(CallbackQueryHandler(button, pattern="^(num_|bet_)"))
     
-    
+    app.add_handler(CallbackQueryHandler(userinfo_buttons))
 
     # ================= MESSAGE =================
    
