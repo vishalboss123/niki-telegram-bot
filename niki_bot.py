@@ -4411,6 +4411,293 @@ Forever saath rahoge tum dono 💞" """
 
 
 
+
+#=======================CARD GAME =====================
+import random
+import asyncio
+import time
+
+card_games = {}
+
+cards = {
+    "a": (1, 5),
+    "b": (3, 8),
+    "c": (5, 10),
+    "d": (7, 12)
+}
+
+# ================= START GAME =================
+async def card(update, context):
+    chat_id = update.effective_chat.id
+    user = update.effective_user
+
+    if chat_id in card_games:
+        return await update.message.reply_text("⚠️ 𝐆ᴀᴍᴇ ᴀʟʀᴇᴀᴅʏ ʀᴜɴɴɪɴɢ")
+
+    if not context.args:
+        return await update.message.reply_text("💸 𝐔ꜱᴇ: /card 200")
+
+    bet = int(context.args[0])
+
+    if bet < 200:
+        return await update.message.reply_text("❌ 𝐌ɪɴɪᴍᴜᴍ 𝐁ᴇᴛ ₹200")
+
+    # 💰 CUT STARTER MONEY
+    user_data = get_user(user.id, user.first_name)
+    if user_data["money"] < bet:
+        return await update.message.reply_text("❌ 𝐍ᴏᴛ 𝐞ɴᴏᴜɢʜ 𝐁ᴀʟᴀɴᴄᴇ")
+
+    user_data["money"] -= bet
+    save_data()
+
+    card_games[chat_id] = {
+        "players": [user],
+        "bet": bet,
+        "round": 1,
+        "turn": 0,
+        "scores": {},
+        "round_scores": {},
+    }
+
+    msg = await update.message.reply_text(f"""
+╔═══━━━─── • ───━━━═══╗
+⚡ 𝐁ɪꜱʜᴀʟ 𝐂ᴀʀᴅ 𝐀ʀᴇɴᴀ ⚡
+╚═══━━━─── • ───━━━═══╝
+
+👑 {user.mention_html()} 𝐬ᴛᴀʀᴛᴇᴅ 𝐠ᴀᴍᴇ
+
+💰 𝐁ᴇᴛ: ₹{bet}
+👥 1/2 𝐏ʟᴀʏᴇʀꜱ
+
+👉 𝐓ʏᴘᴇ:
+/join {bet}
+
+⏳ 30 𝐬ᴇᴄ ᴛᴏ ᴊᴏɪɴ...
+""", parse_mode="HTML")
+
+    asyncio.create_task(join_timer(chat_id, msg))
+
+
+# ================= JOIN =================
+async def join(update, context):
+    chat_id = update.effective_chat.id
+    user = update.effective_user
+
+    if chat_id not in card_games:
+        return
+
+    game = card_games[chat_id]
+
+    if len(game["players"]) >= 3:
+        return await update.message.reply_text("❌ 𝐌ᴀx 3 𝐩ʟᴀʏᴇʀꜱ")
+
+    # 💰 CUT JOIN PLAYER MONEY
+    user_data = get_user(user.id, user.first_name)
+    if user_data["money"] < game["bet"]:
+        return await update.message.reply_text("❌ 𝐍ᴏᴛ 𝐞ɴᴏᴜɢʜ 𝐁ᴀʟᴀɴᴄᴇ")
+
+    user_data["money"] -= game["bet"]
+    save_data()
+
+    game["players"].append(user)
+
+    await update.message.reply_text(
+        f"✅ {user.mention_html()} 𝐣ᴏɪɴᴇᴅ 𝐭ʜᴇ 𝐦ᴀᴛᴄʜ!",
+        parse_mode="HTML"
+    )
+
+
+# ================= TIMER =================
+async def join_timer(chat_id, msg):
+    await asyncio.sleep(15)
+
+    if chat_id not in card_games:
+        return
+
+    await msg.reply_text("⏳ 𝐎ɴʟʏ 15 𝐬ᴇᴄ ʟᴇꜰᴛ!")
+
+    await asyncio.sleep(15)
+
+    if chat_id not in card_games:
+        return
+
+    game = card_games[chat_id]
+
+    if len(game["players"]) < 2:
+        starter = game["players"][0]
+
+        # 💰 REFUND
+        user_data = get_user(starter.id, starter.first_name)
+        user_data["money"] += game["bet"]
+        save_data()
+
+        await msg.reply_text(f"""
+    ❌ 𝐍ᴏᴛ 𝐞ɴᴏᴜɢʜ 𝐩ʟᴀʏᴇʀꜱ
+
+    💸 𝐁ᴇᴛ 𝐑ᴇ𝐟𝐮𝐧𝐝𝐞𝐝 → ₹{game['bet']}
+    👤 {starter.mention_html()}
+    """, parse_mode="HTML")
+
+        del card_games[chat_id]
+        return
+
+    await start_match(chat_id)
+
+
+# ================= MATCH =================
+async def start_match(chat_id):
+    game = card_games[chat_id]
+    p1, p2 = game["players"]
+
+    game["scores"][p1.id] = 0
+    game["scores"][p2.id] = 0
+
+    await bot.send_message(chat_id, f"""
+━━━━━━━━━━━━━━━━━━━━━━
+⚡ 𝐌ᴀᴛᴄʜ 𝐅ᴏᴜɴᴅ ⚡
+━━━━━━━━━━━━━━━━━━━━━━
+
+{p1.mention_html()} 🆚 {p2.mention_html()}
+
+⏳ 𝐒ᴛᴀʀᴛɪɴɢ ɪɴ 20 𝐬ᴇᴄ...
+""", parse_mode="HTML")
+
+    await asyncio.sleep(20)
+    await start_round(chat_id)
+
+
+# ================= ROUND =================
+async def start_round(chat_id):
+    game = card_games[chat_id]
+
+    if game["round"] > 3:
+        return await end_game(chat_id)
+
+    game["turn"] = 0
+    game["round_scores"] = {p.id: 0 for p in game["players"]}
+
+    await bot.send_message(chat_id, f"""
+╔═══━━━─── • ───━━━═══╗
+⚡ 𝐑𝐎𝐔𝐍𝐃 {game['round']} ⚡
+╚═══━━━─── • ───━━━═══╝
+
+🎴 𝐂ʜᴏᴏꜱᴇ:
+𝐀 / 𝐁 / 𝐂 / 𝐃
+
+👉 /flip a
+""")
+
+
+# ================= FLIP =================
+async def flip(update, context):
+    chat_id = update.effective_chat.id
+    user = update.effective_user
+
+    if chat_id not in card_games:
+        return
+
+    game = card_games[chat_id]
+    players = game["players"]
+
+    current = players[game["turn"] % 2]
+
+    if user.id != current.id:
+        return
+
+    choice = context.args[0].lower()
+    val = random.randint(*cards[choice])
+
+    game["round_scores"][user.id] += val
+    game["turn"] += 1
+
+    await update.message.reply_text(
+        f"🎴 {user.mention_html()} → {choice.upper()} = {val}",
+        parse_mode="HTML"
+    )
+
+    if game["turn"] >= 4:
+        await end_round(chat_id)
+
+
+# ================= END ROUND =================
+async def end_round(chat_id):
+    game = card_games[chat_id]
+    p1, p2 = game["players"]
+
+    s1 = game["round_scores"][p1.id]
+    s2 = game["round_scores"][p2.id]
+
+    if s1 > s2:
+        game["scores"][p1.id] += 10
+        winner = p1
+    elif s2 > s1:
+        game["scores"][p2.id] += 10
+        winner = p2
+    else:
+        winner = None
+
+    await bot.send_message(chat_id, f"""
+━━━━━━━━━━━━━━━━━━━━━━
+⚡ 𝐑𝐎𝐔𝐍𝐃 𝐑𝐄𝐒𝐔𝐋𝐓 ⚡
+━━━━━━━━━━━━━━━━━━━━━━
+
+{p1.first_name}: {s1}
+{p2.first_name}: {s2}
+
+🏆 𝐖ɪɴɴᴇʀ: {winner.first_name if winner else "Draw"}
++10 𝐗𝐏
+""")
+
+    game["round"] += 1
+    await asyncio.sleep(4)
+    await start_round(chat_id)
+
+
+# ================= FINAL =================
+async def end_game(chat_id):
+    game = card_games[chat_id]
+    p1, p2 = game["players"]
+
+    s1 = game["scores"][p1.id]
+    s2 = game["scores"][p2.id]
+
+    winner = p1 if s1 > s2 else p2
+
+    # 💰 GIVE WINNER MONEY
+    winner_data = get_user(winner.id, winner.first_name)
+    total_pool = game["bet"] * len(game["players"])
+    winner_data["money"] += total_pool
+    save_data()
+
+    # GET DP
+    photos = await bot.get_user_profile_photos(winner.id)
+    photo = photos.photos[0][-1].file_id if photos.total_count > 0 else None
+
+    text = f"""
+╔═══━━━─── • ───━━━═══╗
+🏆 𝐅𝐈𝐍𝐀𝐋 𝐖𝐈𝐍𝐍𝐄𝐑 🏆
+╚═══━━━─── • ───━━━═══╝
+
+👑 {winner.mention_html()}
+
+💎 𝐏ᴏɪɴᴛꜱ: {max(s1,s2)}
+💰 𝐖ᴏɴ: 2x 𝐁ᴇᴛ
+
+🔥 𝐋ᴇɢᴇɴᴅ 𝐏ʟᴀʏᴇʀ!
+"""
+
+    if photo:
+        msg = await bot.send_photo(chat_id, photo, caption=text, parse_mode="HTML")
+    else:
+        msg = await bot.send_message(chat_id, text, parse_mode="HTML")
+
+    try:
+        await bot.pin_chat_message(chat_id, msg.message_id)
+    except:
+        pass
+
+    del card_games[chat_id]
+
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
@@ -4509,6 +4796,9 @@ def main():
 
     app.add_handler(CommandHandler("tmute", tmute_cmd))
     app.add_handler(CommandHandler("tban", tban_cmd))
+    app.add_handler(CommandHandler("card", card))
+    app.add_handler(CommandHandler("join", join))
+    app.add_handler(CommandHandler("flip", flip))
     
     app.add_handler(CommandHandler("userinfo", userinfo))
     
