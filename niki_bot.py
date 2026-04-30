@@ -4602,21 +4602,22 @@ async def start_round(chat_id):
 🎮 𝐒ᴛᴀʀᴛɪɴɢ...
 """)
 
-for i in range(0, 101, 25):
-    bar = "█" * (i//10) + "░" * (10 - i//10)
-    try:
-        await msg.edit_text(f"""
+    # ✅ IMPORTANT: ye sab function ke andar hona chahiye
+    for i in range(0, 101, 25):
+        bar = "█" * (i//10) + "░" * (10 - i//10)
+        try:
+            await msg.edit_text(f"""
 ╔═══━━━─── • ───━━━═══╗
 ⚡ 𝐑𝐎𝐔𝐍𝐃 {game['round']} ⚡
 ╚═══━━━─── • ───━━━═══╝
 
 [{bar}] {i}%
 """)
-        await asyncio.sleep(0.5)
-    except:
-        pass
+            await asyncio.sleep(0.5)
+        except:
+            pass
 
-await msg.edit_text(f"""
+    await msg.edit_text(f"""
 ╔═══━━━─── • ───━━━═══╗
 ⚡ 𝐑𝐎𝐔𝐍𝐃 {game['round']} ⚡
 ╚═══━━━─── • ───━━━═══╝
@@ -4627,7 +4628,6 @@ await msg.edit_text(f"""
 𝐅ʟɪᴘ 𝐊ᴇ 𝐋ɪʏᴇ 𝐘ᴇ 𝐔ꜱᴇ 𝐊ᴀʀᴏ
 👉 /flip a
 """)
-
 # ================= FLIP =================
 async def flip(update, context):
     chat_id = update.effective_chat.id
