@@ -104,13 +104,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🏆 Cʟɪᴍʙ Tʜᴇ Lᴇᴀᴅᴇʀʙᴏᴀʀᴅ\n\n"
         "❗ Nɪᴋɪ Iꜱ Aʟᴡᴀʏꜱ Wᴀᴛᴄʜɪɴɢ Yᴏᴜ 👀🔥\n\n"
         "⚡ Tʏᴘᴇ /economy Tᴏ Sᴇᴇ Aʟʟ Cᴏᴍᴍᴀɴᴅꜱ\n\n"
-        "👑 Oᴡɴᴇʀ: @YT_BISHALL"
+        "👑 Oᴡɴᴇʀ: @YTT_BISHAL"
     )
 
     # ✅ Inline buttons
     keyboard = [
         [
-            InlineKeyboardButton("👑 Owner", url="https://t.me/YT_BISHALL"),
+            InlineKeyboardButton("👑 Owner", url="https://t.me/YTT_BISHAL"),
             InlineKeyboardButton("🎮 Game", callback_data="start_game")
         ],
         [
@@ -182,7 +182,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif data == "start_help":
         help_text = "💡 Help ke liye apna owner dekho 👑"
         keyboard = [
-            [InlineKeyboardButton("👑 Owner", url="https://t.me/YT_BISHALL")],
+            [InlineKeyboardButton("👑 Owner", url="https://t.me/YTT_BISHAL")],
             [InlineKeyboardButton("🔙 Back", callback_data="start_game")]
         ]
 
@@ -206,7 +206,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "🏆 Cʟɪᴍʙ Tʜᴇ Lᴇᴀᴅᴇʀʙᴏᴀʀᴅ\n\n"
             "❗ Nɪᴋɪ Iꜱ Aʟᴡᴀʏꜱ Wᴀᴛᴄʜɪɴɢ Yᴏᴜ 👀🔥\n\n"
             "⚡ Tʏᴘᴇ /economy Tᴏ Sᴇᴇ Aʟʟ Cᴏᴍᴍᴀɴᴅꜱ\n\n"
-            "👑 Oᴡɴᴇʀ: @YT_BISHALL"
+            "👑 Oᴡɴᴇʀ: @YTT_BISHAL"
         )
 
         keyboard = [
@@ -1215,7 +1215,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 OWNER_ID = 6175559434  # Owner numeric ID
-OWNER_USERNAME = "YT_BISHALL"  # Owner Telegram username
+OWNER_USERNAME = "YTT_BISHAL"  # Owner Telegram username
 
 async def show_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -2544,7 +2544,7 @@ async def tickle(update, context):
 
 # ================= SPECIAL USERS =================
 SPECIAL_USERS = [
-    "YT_BISHALL",
+    "YTT_BISHAL",
     "ll_Sassy_Queen_ll",
     "ll_Vishal_Heart_ll"   # <-- yaha apna 3rd username dal dena (without @)
 ]
@@ -2596,7 +2596,7 @@ couple_col = db["groups"]
 
 # ================= SPECIAL USERS (USERNAME YA ID) =================
 SPECIAL_USERS = [
-    "YT_BISHALL",   # username without @
+    "YTT_BISHAL",   # username without @
     "ll_Sassy_Queen_ll",
     "ll_Vishal_Heart_ll",
     "user4",
@@ -2852,7 +2852,7 @@ async def coupleleaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 #=================≠==========propes======================
-SPECIAL_USER = "YT_BISHALL"
+SPECIAL_USER = "YTT_BISHAL"
 MAX_SPECIAL_MARRIAGE = 3
 #==========================❤️❤️❤️=========================
 MONGO_URL = "mongodb+srv://vishal:VISHAL123@vishal07.espy0qo.mongodb.net/?appName=Vishal07"
@@ -3128,7 +3128,7 @@ async def divorce(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # 👉 YAHAPE APNE 5 VIP USERNAME DAL (without @)
 SPECIAL_USERS = [
-    "YT_BISHALL",
+    "YTT_BISHAL",
     "iim_Nikibot",
     "ll_Vishal_Heart_ll",
     "ll_Sassy_Queen_ll",
@@ -3891,7 +3891,7 @@ async def filter_checker(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 
-OWNER_USERNAME = "YT_BISHALL"   # without @
+OWNER_USERNAME = "YTT_BISHAL"   # without @
 
 
 # ================= ADMIN CHECK =================
