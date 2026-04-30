@@ -211,7 +211,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         keyboard = [
             [
-                InlineKeyboardButton("👑 Owner", url="https://t.me/YT_BISHALL"),
+                InlineKeyboardButton("👑 Owner", url="https://t.me/YTT_BISHAL"),
                 InlineKeyboardButton("🎮 Game", callback_data="start_game")
             ],
             [
@@ -734,7 +734,7 @@ async def kill(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"😼 Meri billi mujhe meow?\n"
             f"Mujhe kill karoge? No chalakii 😌\n"
             f"Mere Owner se bol dunga 😏\n"
-            f"👉 https://t.me/YT_BISHALL\n"
+            f"👉 https://t.me/YTT_BISHAL\n"
         )
         return
 
@@ -1843,7 +1843,7 @@ async def track_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # =================== FORWARD COMMAND /fw ===================
 async def forward_msg(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    OWNER_USERNAME = "@YT_BISHALL"  # sirf ye user use kar sake
+    OWNER_USERNAME = "@YTT_BISHAL"  # sirf ye user use kar sake
 
     # check if command from owner
     if update.effective_user.username != OWNER_USERNAME.replace("@", ""):
@@ -4094,7 +4094,7 @@ async def userinfo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     rank = next((i+1 for i,(uid,u) in enumerate(sorted_users) if uid==str(user.id)), "N/A")
 
     # 👑 OWNER CHECK
-    is_owner = user.username and user.username.lower() == "yt_bishall"
+    is_owner = user.username and user.username.lower() == "YTT_BISHAL"
 
     # 🔥 DISPLAY FIX (ONLY HERE CHANGE)
     balance_text = "∞" if is_owner else f"₹{user_data.get('money',0)}"
@@ -4552,17 +4552,35 @@ async def start_match(chat_id):
     game["scores"][p1.id] = 0
     game["scores"][p2.id] = 0
 
-    await bot.send_message(chat_id, f"""
-━━━━━━━━━━━━━━━━━━━━━━
-⚡ 𝐌ᴀᴛᴄʜ 𝐅ᴏᴜɴᴅ ⚡
-━━━━━━━━━━━━━━━━━━━━━━
+    msg = await bot.send_message(chat_id, f"""
+    ━━━━━━━━━━━━━━━━━━━━━━
+    ⚡ 𝐌ᴀᴛᴄʜ 𝐅ᴏᴜ𝐍𝐃 ⚡
+    ━━━━━━━━━━━━━━━━━━━━━━
 
-{p1.mention_html()} 🆚 {p2.mention_html()}
+    {p1.mention_html()} 🆚 {p2.mention_html()}
 
-⏳ 𝐒ᴛᴀʀᴛɪɴɢ ɪɴ 20 𝐬ᴇᴄ...
-""", parse_mode="HTML")
+    ⚡ 𝐋ᴏᴀᴅɪɴɢ...
+    """, parse_mode="HTML")
 
-    await asyncio.sleep(20)
+    # 🔥 loading bar animation
+    for i in range(0, 101, 20):
+        bar = "▓" * (i//10) + "░" * (10 - i//10)
+        try:
+            await msg.edit_text(f"""
+    ━━━━━━━━━━━━━━━━━━━━━━
+    ⚡ 𝐌ᴀᴛᴄʜ 𝐅ᴏ𝐔𝐍𝐃 ⚡
+    ━━━━━━━━━━━━━━━━━━━━━━
+
+    {p1.mention_html()} 🆚 {p2.mention_html()}
+
+    [{bar}] {i}%
+    """, parse_mode="HTML")
+            await asyncio.sleep(0.6)
+        except:
+            pass
+
+    # ✅ IMPORTANT: loop ke baad
+    await asyncio.sleep(1)
     await start_round(chat_id)
 
 
@@ -4576,7 +4594,29 @@ async def start_round(chat_id):
     game["turn"] = 0
     game["round_scores"] = {p.id: 0 for p in game["players"]}
 
-    await bot.send_message(chat_id, f"""
+    msg = await bot.send_message(chat_id, f"""
+╔═══━━━─── • ───━━━═══╗
+⚡ 𝐑𝐎𝐔𝐍𝐃 {game['round']} ⚡
+╚═══━━━─── • ───━━━═══╝
+
+🎮 𝐒ᴛᴀʀᴛɪɴɢ...
+""")
+
+for i in range(0, 101, 25):
+    bar = "█" * (i//10) + "░" * (10 - i//10)
+    try:
+        await msg.edit_text(f"""
+╔═══━━━─── • ───━━━═══╗
+⚡ 𝐑𝐎𝐔𝐍𝐃 {game['round']} ⚡
+╚═══━━━─── • ───━━━═══╝
+
+[{bar}] {i}%
+""")
+        await asyncio.sleep(0.5)
+    except:
+        pass
+
+await msg.edit_text(f"""
 ╔═══━━━─── • ───━━━═══╗
 ⚡ 𝐑𝐎𝐔𝐍𝐃 {game['round']} ⚡
 ╚═══━━━─── • ───━━━═══╝
@@ -4584,11 +4624,9 @@ async def start_round(chat_id):
 🎴 𝐂ʜᴏᴏꜱᴇ:
 🟥 𝐀   🟥 𝐁   🟥 𝐂   🟥 𝐃
 
-
-𝐅ʟɪᴩ 𝐊ᴇ 𝐋ɪʏᴇ 𝐘ᴇ 𝐔ꜱᴇ 𝐊ᴀʀᴏ
+𝐅ʟɪᴘ 𝐊ᴇ 𝐋ɪʏᴇ 𝐘ᴇ 𝐔ꜱᴇ 𝐊ᴀʀᴏ
 👉 /flip a
 """)
-
 
 # ================= FLIP =================
 async def flip(update, context):
@@ -4612,10 +4650,31 @@ async def flip(update, context):
     game["round_scores"][user.id] += val
     game["turn"] += 1
 
-    await update.message.reply_text(
+    msg = await update.message.reply_text(
+        f"🎴 {user.mention_html()} 𝐢𝐬 𝐟𝐥𝐢𝐩𝐩𝐢𝐧𝐠...",
+        parse_mode="HTML"
+    )
+
+    # typing animation
+    await asyncio.sleep(1)
+
+    # flip animation text
+    for x in ["🂠", "🂡", "🂮"]:
+        try:
+            await msg.edit_text(f"{user.mention_html()} {x}", parse_mode="HTML")
+            await asyncio.sleep(0.3)
+        except:
+            pass
+
+    # 🔥 Telegram animated card sticker
+    await update.message.reply_sticker("CAACAgUAAxkBAAIBQmQx")  # random card sticker (replace later)
+
+    # final result
+    await msg.edit_text(
         f"🎴 {user.mention_html()} → {choice.upper()} = {val}",
         parse_mode="HTML"
     )
+    
 
     if game["turn"] >= 4:
         await end_round(chat_id)
@@ -4638,22 +4697,70 @@ async def end_round(chat_id):
     else:
         winner = None
 
-    await bot.send_message(chat_id, f"""
-━━━━━━━━━━━━━━━━━━━━━━
-⚡ 𝐑𝐎𝐔𝐍𝐃 𝐑𝐄𝐒𝐔𝐋𝐓 ⚡
-━━━━━━━━━━━━━━━━━━━━━━
+    msg = await bot.send_message(chat_id, f"""
+    ━━━━━━━━━━━━━━━━━━━━━━
+    ⚡ 𝐑𝐎𝐔𝐍𝐃 𝐑𝐄𝐒𝐔𝐋𝐓 ⚡
+    ━━━━━━━━━━━━━━━━━━━━━━
 
-{p1.first_name}: {s1}
-{p2.first_name}: {s2}
+    ⚡ 𝐂𝐚𝐥𝐜𝐮𝐥𝐚𝐭𝐢𝐧𝐠...
+    """)
 
-🏆 𝐖ɪɴɴᴇʀ: {winner.first_name if winner else "Draw"}
-+10 𝐗𝐏
-""")
+    # 🔥 animated calculating effect
+    for _ in range(3):
+        try:
+            await msg.edit_text(f"""
+    ━━━━━━━━━━━━━━━━━━━━━━
+    ⚡ 𝐑𝐎𝐔𝐍𝐃 𝐑𝐄𝐒𝐔𝐋𝐓 ⚡
+    ━━━━━━━━━━━━━━━━━━━━━━
+
+    ⚡ 𝐂𝐚𝐥𝐜𝐮𝐥𝐚𝐭𝐢𝐧𝐠...
+    """)
+            await asyncio.sleep(0.4)
+
+            await msg.edit_text(f"""
+    ━━━━━━━━━━━━━━━━━━━━━━
+    ⚡ 𝐑𝐎𝐔𝐍𝐃 𝐑𝐄𝐒𝐔𝐋𝐓 ⚡
+    ━━━━━━━━━━━━━━━━━━━━━━
+
+    ⚡ 𝐂𝐚𝐥𝐜𝐮𝐥𝐚𝐭𝐢𝐧𝐠..
+    """)
+            await asyncio.sleep(0.4)
+        except:
+            pass
+
+    # 🔥 NEW: SCORE COUNTER ANIMATION (ADDED ONLY)
+    for i in range(0, s1 + 1, max(1, s1 // 5 if s1 > 0 else 1)):
+        try:
+            await msg.edit_text(f"""
+    ━━━━━━━━━━━━━━━━━━━━━━
+    ⚡ 𝐑𝐎𝐔𝐍𝐃 𝐑𝐄𝐒𝐔𝐋𝐓 ⚡
+    ━━━━━━━━━━━━━━━━━━━━━━
+
+    {p1.first_name}: {i}
+    {p2.first_name}: {s2}
+
+    ⚡ 𝐔𝐩𝐝𝐚𝐭𝐢𝐧𝐠...
+    """)
+            await asyncio.sleep(0.2)
+        except:
+            pass
+
+    # ✅ final result (same tera text)
+    await msg.edit_text(f"""
+    ━━━━━━━━━━━━━━━━━━━━━━
+    ⚡ 𝐑𝐎𝐔𝐍𝐃 𝐑𝐄𝐒𝐔𝐋𝐓 ⚡
+    ━━━━━━━━━━━━━━━━━━━━━━
+
+    {p1.first_name}: {s1}
+    {p2.first_name}: {s2}
+
+    🏆 𝐖ɪɴɴᴇʀ: {winner.first_name if winner else "Draw"}
+    +10 𝐗𝐏
+    """)
 
     game["round"] += 1
     await asyncio.sleep(4)
     await start_round(chat_id)
-
 
 # ================= FINAL =================
 async def end_game(chat_id):
@@ -4671,10 +4778,35 @@ async def end_game(chat_id):
     winner_data["money"] += total_pool
     save_data()
 
+    # 🔥 LOADING MESSAGE
+    msg = await bot.send_message(chat_id, """
+━━━━━━━━━━━━━━━━━━━━━━
+⚡ 𝐂𝐚𝐥𝐜𝐮𝐥𝐚𝐭𝐢𝐧𝐠 𝐖𝐢𝐧𝐧𝐞𝐫...
+━━━━━━━━━━━━━━━━━━━━━━
+""")
+
+    # 🔥 LOADING BAR ANIMATION
+    for i in range(0, 101, 20):
+        bar = "▓" * (i // 10) + "░" * (10 - (i // 10))
+        try:
+            await msg.edit_text(f"""
+━━━━━━━━━━━━━━━━━━━━━━
+🏆 𝐅𝐈𝐍𝐀𝐋 𝐑𝐄𝐒𝐔𝐋𝐓 🏆
+━━━━━━━━━━━━━━━━━━━━━━
+
+[{bar}] {i}%
+
+⚡ 𝐂𝐚𝐥𝐜𝐮𝐥𝐚𝐭𝐢𝐧𝐠...
+""")
+            await asyncio.sleep(0.6)
+        except:
+            pass
+
     # GET DP
     photos = await bot.get_user_profile_photos(winner.id)
     photo = photos.photos[0][-1].file_id if photos.total_count > 0 else None
 
+    # 🔥 FINAL TEXT (WITH BOTH SCORES)
     text = f"""
 ╔═══━━━─── • ───━━━═══╗
 🏆 𝐅𝐈𝐍𝐀𝐋 𝐖𝐈𝐍𝐍𝐄𝐑 🏆
@@ -4682,19 +4814,32 @@ async def end_game(chat_id):
 
 👑 {winner.mention_html()}
 
-💎 𝐏ᴏɪɴᴛꜱ: {max(s1,s2)}
-💰 𝐖ᴏɴ: 2x 𝐁ᴇᴛ
+━━━━━━━━━━━━━━━━━━━━━━
+📊 𝐅𝐈𝐍𝐀𝐋 𝐒𝐂𝐎𝐑𝐄
+━━━━━━━━━━━━━━━━━━━━━━
 
-🔥 𝐋ᴇɢᴇɴᴅ 𝐏ʟᴀʏᴇʀ!
+🔥 {p1.mention_html()} ➤ {s1} 𝐏𝐨𝐢𝐧𝐭𝐬  
+🔥 {p2.mention_html()} ➤ {s2} 𝐏𝐨𝐢𝐧𝐭𝐬  
+
+━━━━━━━━━━━━━━━━━━━━━━
+
+💰 𝐖𝐨𝐧: {total_pool}
+
+🏆 𝐖ɪɴɴᴇʀ: {winner.mention_html()}
+
+🔥 𝐋𝐞𝐠𝐞𝐧𝐝 𝐏𝐥𝐚𝐲𝐞𝐫 😈
+✨ 𝐌𝐚𝐬𝐭𝐞𝐫 𝐎𝐟 𝐂𝐚𝐫𝐝𝐬
 """
 
+    # 🔥 FINAL DISPLAY (DP + TEXT)
     if photo:
-        msg = await bot.send_photo(chat_id, photo, caption=text, parse_mode="HTML")
+        final_msg = await bot.send_photo(chat_id, photo, caption=text, parse_mode="HTML")
     else:
-        msg = await bot.send_message(chat_id, text, parse_mode="HTML")
+        final_msg = await bot.send_message(chat_id, text, parse_mode="HTML")
 
+    # 🔥 AUTO PIN
     try:
-        await bot.pin_chat_message(chat_id, msg.message_id)
+        await bot.pin_chat_message(chat_id, final_msg.message_id)
     except:
         pass
 
