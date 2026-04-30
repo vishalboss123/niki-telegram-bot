@@ -4463,7 +4463,7 @@ async def auto_monitor():
             if game.get("started") and time.time() - game["last_action"] > 20:
                 await auto_play(chat_id)
 
-asyncio.create_task(auto_monitor())
+
 
 
 #================ START GAME =================
@@ -4930,6 +4930,12 @@ def main():
 
 
     print("🔥 Niki Bot started...")
+    
+    async def start_background(app):
+        asyncio.create_task(auto_monitor())
+
+    app.post_init = start_background
+    
     app.run_polling()
 
 if __name__ == "__main__":
