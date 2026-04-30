@@ -4420,13 +4420,54 @@ import time
 card_games = {}
 
 cards = {
-    "a": (1, 5),
-    "b": (3, 8),
-    "c": (5, 10),
-    "d": (7, 12)
+"a": (1, 13),
+"b": (1, 13),
+"c": (1, 13),
+"d": (1, 13)
 }
 
-# ================= START GAME =================
+#================ AUTO SYSTEM =================
+
+async def auto_monitor():
+    while True:
+        await asyncio.sleep(5)
+
+        for chat_id in list(card_games.keys()):
+            game = card_games.get(chat_id)
+            if not game:
+                continue
+
+            # 🟢 1 MIN AUTO START
+            if not game.get("started") and time.time() - game["start_time"] > 60:
+                if len(game["players"]) < 2:
+                    starter = game["players"][0]
+
+                    user_data = get_user(starter.id, starter.first_name)
+                    user_data["money"] += game["bet"]
+                    save_data()
+
+                    await bot.send_message(chat_id, f"""  
+❌ 𝐍ᴏ 𝐏ʟᴀʏᴇʀ  
+
+💸 𝐁ᴇ𝐭 𝐑𝐞𝐟𝐮𝐧𝐝𝐞𝐝 → ₹{game['bet']}  
+👤 {starter.mention_html()}  
+""", parse_mode="HTML")
+
+                    del card_games[chat_id]
+                    continue
+
+                game["started"] = True
+                await start_match(chat_id)
+
+            # 🤖 AUTO PLAY (20 sec idle)
+            if game.get("started") and time.time() - game["last_action"] > 20:
+                await auto_play(chat_id)
+
+asyncio.create_task(auto_monitor())
+
+
+#================ START GAME =================
+
 async def card(update, context):
     chat_id = update.effective_chat.id
     user = update.effective_user
@@ -4442,7 +4483,6 @@ async def card(update, context):
     if bet < 200:
         return await update.message.reply_text("❌ 𝐌ɪɴɪᴍᴜᴍ 𝐁ᴇᴛ ₹200")
 
-    # 💰 CUT STARTER MONEY
     user_data = get_user(user.id, user.first_name)
     if user_data["money"] < bet:
         return await update.message.reply_text("❌ 𝐍ᴏᴛ 𝐞ɴᴏᴜɢʜ 𝐁ᴀʟᴀɴᴄᴇ")
@@ -4457,9 +4497,14 @@ async def card(update, context):
         "turn": 0,
         "scores": {},
         "round_scores": {},
+        "joined": {user.id},
+        "start_time": time.time(),
+        "last_action": time.time(),
+        "started": False
     }
 
     msg = await update.message.reply_text(f"""
+
 ╔═══━━━─── • ───━━━═══╗
 ⚡ 𝐁ɪꜱʜᴀʟ 𝐂ᴀʀᴅ 𝐀ʀᴇɴᴀ ⚡
 ╚═══━━━─── • ───━━━═══╝
@@ -4467,7 +4512,7 @@ async def card(update, context):
 👑 {user.mention_html()} 𝐬ᴛᴀʀᴛᴇᴅ 𝐠ᴀᴍᴇ
 
 💰 𝐁ᴇᴛ: ₹{bet}
-👥 1/2 𝐏ʟᴀʏᴇʀꜱ
+👥 1/5 𝐏ʟᴀʏᴇʀꜱ
 
 👉 𝐓ʏᴘᴇ:
 /join {bet}
@@ -4475,126 +4520,98 @@ async def card(update, context):
 ⏳ 30 𝐬ᴇᴄ ᴛᴏ ᴊᴏɪɴ...
 """, parse_mode="HTML")
 
-    asyncio.create_task(join_timer(chat_id, msg))
 
+#================ JOIN =================
 
-# ================= JOIN =================
 async def join(update, context):
     chat_id = update.effective_chat.id
     user = update.effective_user
 
     if chat_id not in card_games:
+        return  
+
+    game = card_games[chat_id]  
+
+    if len(game["players"]) >= 5:  
+        return await update.message.reply_text("❌ 𝐌ᴀx 5 𝐩ʟᴀʏᴇʀꜱ")  
+
+    if user.id in game["joined"]:
+        return await update.message.reply_text("❌ 𝐀ʟʀᴇᴀᴅʏ 𝐉ᴏɪɴᴇᴅ")
+
+    if not context.args or int(context.args[0]) != game["bet"]:
         return
 
-    game = card_games[chat_id]
+    user_data = get_user(user.id, user.first_name)  
+    if user_data["money"] < game["bet"]:  
+        return await update.message.reply_text("❌ 𝐍ᴏᴛ 𝐞ɴᴏᴜɢʜ 𝐁ᴀʟᴀɴᴄᴇ")  
 
-    if len(game["players"]) >= 3:
-        return await update.message.reply_text("❌ 𝐌ᴀx 3 𝐩ʟᴀʏᴇʀꜱ")
+    user_data["money"] -= game["bet"]  
+    save_data()  
 
-    # 💰 CUT JOIN PLAYER MONEY
-    user_data = get_user(user.id, user.first_name)
-    if user_data["money"] < game["bet"]:
-        return await update.message.reply_text("❌ 𝐍ᴏᴛ 𝐞ɴᴏᴜɢʜ 𝐁ᴀʟᴀɴᴄᴇ")
+    game["players"].append(user)  
+    game["joined"].add(user.id)  
+    game["last_action"] = time.time()
 
-    user_data["money"] -= game["bet"]
-    save_data()
-
-    game["players"].append(user)
-
-    await update.message.reply_text(
-        f"✅ {user.mention_html()} 𝐣ᴏɪɴᴇᴅ 𝐭ʜᴇ 𝐦ᴀᴛᴄʜ!",
-        parse_mode="HTML"
+    await update.message.reply_text(  
+        f"✅ {user.mention_html()} 𝐣ᴏɪɴᴇᴅ 𝐭ʜᴇ 𝐦ᴀᴛᴄʜ!",  
+        parse_mode="HTML"  
     )
 
 
-# ================= TIMER =================
-async def join_timer(chat_id, msg):
-    await asyncio.sleep(15)
+#================ MATCH =================
 
-    if chat_id not in card_games:
-        return
-
-    await msg.reply_text("⏳ 𝐎ɴʟʏ 15 𝐬ᴇᴄ ʟᴇꜰᴛ!")
-
-    await asyncio.sleep(15)
-
-    if chat_id not in card_games:
-        return
-
-    game = card_games[chat_id]
-
-    if len(game["players"]) < 2:
-        starter = game["players"][0]
-
-        # 💰 REFUND
-        user_data = get_user(starter.id, starter.first_name)
-        user_data["money"] += game["bet"]
-        save_data()
-
-        await msg.reply_text(f"""
-    ❌ 𝐍ᴏᴛ 𝐞ɴᴏᴜɢʜ 𝐩ʟᴀʏᴇʀꜱ
-
-    💸 𝐁ᴇᴛ 𝐑ᴇ𝐟𝐮𝐧𝐝𝐞𝐝 → ₹{game['bet']}
-    👤 {starter.mention_html()}
-    """, parse_mode="HTML")
-
-        del card_games[chat_id]
-        return
-
-    await start_match(chat_id)
-
-
-# ================= MATCH =================
 async def start_match(chat_id):
     game = card_games[chat_id]
-    p1, p2 = game["players"]
+    players = game["players"]
 
-    game["scores"][p1.id] = 0
-    game["scores"][p2.id] = 0
+    for p in players:
+        game["scores"][p.id] = 0  
 
-    msg = await bot.send_message(chat_id, f"""
-    ━━━━━━━━━━━━━━━━━━━━━━
-    ⚡ 𝐌ᴀᴛᴄʜ 𝐅ᴏᴜ𝐍𝐃 ⚡
-    ━━━━━━━━━━━━━━━━━━━━━━
+    vs_text = " 🆚 ".join([p.mention_html() for p in players])
 
-    {p1.mention_html()} 🆚 {p2.mention_html()}
+    msg = await bot.send_message(chat_id, f"""  
+━━━━━━━━━━━━━━━━━━━━━━  
+⚡ 𝐌ᴀᴛᴄʜ 𝐅ᴏᴜ𝐍𝐃 ⚡  
+━━━━━━━━━━━━━━━━━━━━━━  
 
-    ⚡ 𝐋ᴏᴀᴅɪɴɢ...
-    """, parse_mode="HTML")
+{vs_text}  
 
-    # 🔥 loading bar animation
-    for i in range(0, 101, 20):
-        bar = "▓" * (i//10) + "░" * (10 - i//10)
-        try:
-            await msg.edit_text(f"""
-    ━━━━━━━━━━━━━━━━━━━━━━
-    ⚡ 𝐌ᴀᴛᴄʜ 𝐅ᴏ𝐔𝐍𝐃 ⚡
-    ━━━━━━━━━━━━━━━━━━━━━━
+⚡ 𝐋ᴏᴀᴅɪɴɢ...  
+""", parse_mode="HTML")  
 
-    {p1.mention_html()} 🆚 {p2.mention_html()}
+    for i in range(0, 101, 20):  
+        bar = "▓" * (i//10) + "░" * (10 - i//10)  
+        try:  
+            await msg.edit_text(f"""  
+━━━━━━━━━━━━━━━━━━━━━━  
+⚡ 𝐌ᴀᴛᴄʜ 𝐅𝐎𝐔𝐍𝐃 ⚡  
+━━━━━━━━━━━━━━━━━━━━━━  
 
-    [{bar}] {i}%
-    """, parse_mode="HTML")
-            await asyncio.sleep(0.6)
-        except:
-            pass
+{vs_text}  
 
-    # ✅ IMPORTANT: loop ke baad
-    await asyncio.sleep(1)
+[{bar}] {i}%  
+""", parse_mode="HTML")  
+            await asyncio.sleep(0.6)  
+        except:  
+            pass  
+
+    await asyncio.sleep(1)  
     await start_round(chat_id)
 
 
-# ================= ROUND =================
+#================ ROUND =================
+
 async def start_round(chat_id):
     game = card_games[chat_id]
 
-    if game["round"] > 3:
-        return await end_game(chat_id)
+    if game["round"] > 3:  
+        return await end_game(chat_id)  
 
-    game["turn"] = 0
-    game["round_scores"] = {p.id: 0 for p in game["players"]}
+    game["turn"] = 0  
+    game["round_scores"] = {p.id: 0 for p in game["players"]}  
 
     msg = await bot.send_message(chat_id, f"""
+
 ╔═══━━━─── • ───━━━═══╗
 ⚡ 𝐑𝐎𝐔𝐍𝐃 {game['round']} ⚡
 ╚═══━━━─── • ───━━━═══╝
@@ -4602,11 +4619,11 @@ async def start_round(chat_id):
 🎮 𝐒ᴛᴀʀᴛɪɴɢ...
 """)
 
-    # ✅ IMPORTANT: ye sab function ke andar hona chahiye
-    for i in range(0, 101, 25):
-        bar = "█" * (i//10) + "░" * (10 - i//10)
-        try:
+    for i in range(0, 101, 25):  
+        bar = "█" * (i//10) + "░" * (10 - i//10)  
+        try:  
             await msg.edit_text(f"""
+
 ╔═══━━━─── • ───━━━═══╗
 ⚡ 𝐑𝐎𝐔𝐍𝐃 {game['round']} ⚡
 ╚═══━━━─── • ───━━━═══╝
@@ -4618,6 +4635,7 @@ async def start_round(chat_id):
             pass
 
     await msg.edit_text(f"""
+
 ╔═══━━━─── • ───━━━═══╗
 ⚡ 𝐑𝐎𝐔𝐍𝐃 {game['round']} ⚡
 ╚═══━━━─── • ───━━━═══╝
@@ -4628,186 +4646,131 @@ async def start_round(chat_id):
 𝐅ʟɪᴘ 𝐊ᴇ 𝐋ɪʏᴇ 𝐘ᴇ 𝐔ꜱᴇ 𝐊ᴀʀᴏ
 👉 /flip a
 """)
-# ================= FLIP =================
+
+
+#================ FLIP =================
+
 async def flip(update, context):
     chat_id = update.effective_chat.id
     user = update.effective_user
 
     if chat_id not in card_games:
-        return
+        return  
 
-    game = card_games[chat_id]
-    players = game["players"]
+    game = card_games[chat_id]  
+    players = game["players"]  
 
-    current = players[game["turn"] % 2]
+    current = players[game["turn"] % len(players)]  
 
-    if user.id != current.id:
-        return
+    if user.id != current.id:  
+        return  
 
-    choice = context.args[0].lower()
-    val = random.randint(*cards[choice])
+    choice = context.args[0].lower()  
+    val = random.randint(1, 13)
 
-    game["round_scores"][user.id] += val
-    game["turn"] += 1
+    game["round_scores"][user.id] += val  
+    game["turn"] += 1  
+    game["last_action"] = time.time()
 
-    msg = await update.message.reply_text(
-        f"🎴 {user.mention_html()} 𝐢𝐬 𝐟𝐥𝐢𝐩𝐩𝐢𝐧𝐠...",
-        parse_mode="HTML"
-    )
+    msg = await update.message.reply_text(  
+        f"🎴 {user.mention_html()} 𝐢𝐬 𝐟𝐥𝐢𝐩𝐩𝐢𝐧𝐠...",  
+        parse_mode="HTML"  
+    )  
 
-    # typing animation
-    await asyncio.sleep(1)
+    await asyncio.sleep(1)  
 
-    # flip animation text
-    for x in ["🂠", "🂡", "🂮"]:
-        try:
-            await msg.edit_text(f"{user.mention_html()} {x}", parse_mode="HTML")
-            await asyncio.sleep(0.3)
-        except:
-            pass
+    await msg.edit_text(  
+        f"🎴 {user.mention_html()} → {choice.upper()} = {val}",  
+        parse_mode="HTML"  
+    )  
 
-    # 🔥 Telegram animated card sticker
-    await update.message.reply_sticker("CAACAgUAAxkBAAIBQmQx")  # random card sticker (replace later)
-
-    # final result
-    await msg.edit_text(
-        f"🎴 {user.mention_html()} → {choice.upper()} = {val}",
-        parse_mode="HTML"
-    )
-    
-
-    if game["turn"] >= 4:
+    if game["turn"] >= len(players) * 2:  
         await end_round(chat_id)
 
 
-# ================= END ROUND =================
+#================ AUTO PLAY =================
+
+async def auto_play(chat_id):
+    game = card_games.get(chat_id)
+    if not game:
+        return
+
+    players = game["players"]
+    current = players[game["turn"] % len(players)]
+
+    val = random.randint(1, 13)
+
+    game["round_scores"][current.id] += val
+    game["turn"] += 1
+    game["last_action"] = time.time()
+
+    await bot.send_message(chat_id,
+        f"🤖 AUTO PLAY → {current.first_name} = {val}"
+    )
+
+    if game["turn"] >= len(players) * 2:
+        await end_round(chat_id)
+
+
+#================ END ROUND =================
+
 async def end_round(chat_id):
     game = card_games[chat_id]
-    p1, p2 = game["players"]
+    players = game["players"]
 
-    s1 = game["round_scores"][p1.id]
-    s2 = game["round_scores"][p2.id]
+    winner = max(players, key=lambda p: game["round_scores"][p.id])
 
-    if s1 > s2:
-        game["scores"][p1.id] += 10
-        winner = p1
-    elif s2 > s1:
-        game["scores"][p2.id] += 10
-        winner = p2
-    else:
-        winner = None
+    game["scores"][winner.id] += 10  
 
-    msg = await bot.send_message(chat_id, f"""
-    ━━━━━━━━━━━━━━━━━━━━━━
-    ⚡ 𝐑𝐎𝐔𝐍𝐃 𝐑𝐄𝐒𝐔𝐋𝐓 ⚡
-    ━━━━━━━━━━━━━━━━━━━━━━
+    msg = await bot.send_message(chat_id, f"""  
+━━━━━━━━━━━━━━━━━━━━━━  
+⚡ 𝐑𝐎𝐔𝐍𝐃 𝐑𝐄𝐒𝐔𝐋𝐓 ⚡  
+━━━━━━━━━━━━━━━━━━━━━━  
 
-    ⚡ 𝐂𝐚𝐥𝐜𝐮𝐥𝐚𝐭𝐢𝐧𝐠...
-    """)
+⚡ 𝐂𝐚𝐥𝐜𝐮𝐥𝐚𝐭𝐢𝐧𝐠...  
+""")  
 
-    # 🔥 animated calculating effect
-    for _ in range(3):
-        try:
-            await msg.edit_text(f"""
-    ━━━━━━━━━━━━━━━━━━━━━━
-    ⚡ 𝐑𝐎𝐔𝐍𝐃 𝐑𝐄𝐒𝐔𝐋𝐓 ⚡
-    ━━━━━━━━━━━━━━━━━━━━━━
+    await asyncio.sleep(1)
 
-    ⚡ 𝐂𝐚𝐥𝐜𝐮𝐥𝐚𝐭𝐢𝐧𝐠...
-    """)
-            await asyncio.sleep(0.4)
+    score_text = "\n".join([f"{p.first_name}: {game['round_scores'][p.id]}" for p in players])
 
-            await msg.edit_text(f"""
-    ━━━━━━━━━━━━━━━━━━━━━━
-    ⚡ 𝐑𝐎𝐔𝐍𝐃 𝐑𝐄𝐒𝐔𝐋𝐓 ⚡
-    ━━━━━━━━━━━━━━━━━━━━━━
+    await msg.edit_text(f"""  
+━━━━━━━━━━━━━━━━━━━━━━  
+⚡ 𝐑𝐎𝐔𝐍𝐃 𝐑𝐄𝐒𝐔𝐋𝐓 ⚡  
+━━━━━━━━━━━━━━━━━━━━━━  
 
-    ⚡ 𝐂𝐚𝐥𝐜𝐮𝐥𝐚𝐭𝐢𝐧𝐠..
-    """)
-            await asyncio.sleep(0.4)
-        except:
-            pass
+{score_text}  
 
-    # 🔥 NEW: SCORE COUNTER ANIMATION (ADDED ONLY)
-    for i in range(0, s1 + 1, max(1, s1 // 5 if s1 > 0 else 1)):
-        try:
-            await msg.edit_text(f"""
-    ━━━━━━━━━━━━━━━━━━━━━━
-    ⚡ 𝐑𝐎𝐔𝐍𝐃 𝐑𝐄𝐒𝐔𝐋𝐓 ⚡
-    ━━━━━━━━━━━━━━━━━━━━━━
+🏆 𝐖ɪɴɴᴇʀ: {winner.first_name}  
++10 𝐗𝐏  
+""")  
 
-    {p1.first_name}: {i}
-    {p2.first_name}: {s2}
-
-    ⚡ 𝐔𝐩𝐝𝐚𝐭𝐢𝐧𝐠...
-    """)
-            await asyncio.sleep(0.2)
-        except:
-            pass
-
-    # ✅ final result (same tera text)
-    await msg.edit_text(f"""
-    ━━━━━━━━━━━━━━━━━━━━━━
-    ⚡ 𝐑𝐎𝐔𝐍𝐃 𝐑𝐄𝐒𝐔𝐋𝐓 ⚡
-    ━━━━━━━━━━━━━━━━━━━━━━
-
-    {p1.first_name}: {s1}
-    {p2.first_name}: {s2}
-
-    🏆 𝐖ɪɴɴᴇʀ: {winner.first_name if winner else "Draw"}
-    +10 𝐗𝐏
-    """)
-
-    game["round"] += 1
-    await asyncio.sleep(4)
+    game["round"] += 1  
+    await asyncio.sleep(4)  
     await start_round(chat_id)
 
-# ================= FINAL =================
+
+#================ FINAL =================
+
 async def end_game(chat_id):
     game = card_games[chat_id]
-    p1, p2 = game["players"]
+    players = game["players"]
 
-    s1 = game["scores"][p1.id]
-    s2 = game["scores"][p2.id]
+    winner = max(players, key=lambda p: game["scores"][p.id])
 
-    winner = p1 if s1 > s2 else p2
+    total_pool = game["bet"] * len(players)
 
-    # 💰 GIVE WINNER MONEY
-    winner_data = get_user(winner.id, winner.first_name)
-    total_pool = game["bet"] * len(game["players"])
-    winner_data["money"] += total_pool
-    save_data()
+    winner_data = get_user(winner.id, winner.first_name)  
+    winner_data["money"] += total_pool  
+    save_data()  
 
-    # 🔥 LOADING MESSAGE
-    msg = await bot.send_message(chat_id, """
-━━━━━━━━━━━━━━━━━━━━━━
-⚡ 𝐂𝐚𝐥𝐜𝐮𝐥𝐚𝐭𝐢𝐧𝐠 𝐖𝐢𝐧𝐧𝐞𝐫...
-━━━━━━━━━━━━━━━━━━━━━━
-""")
+    photos = await bot.get_user_profile_photos(winner.id)  
+    photo = photos.photos[0][-1].file_id if photos.total_count > 0 else None  
 
-    # 🔥 LOADING BAR ANIMATION
-    for i in range(0, 101, 20):
-        bar = "▓" * (i // 10) + "░" * (10 - (i // 10))
-        try:
-            await msg.edit_text(f"""
-━━━━━━━━━━━━━━━━━━━━━━
-🏆 𝐅𝐈𝐍𝐀𝐋 𝐑𝐄𝐒𝐔𝐋𝐓 🏆
-━━━━━━━━━━━━━━━━━━━━━━
+    score_text = "\n".join([f"{p.first_name}: {game['scores'][p.id]}" for p in players])
 
-[{bar}] {i}%
-
-⚡ 𝐂𝐚𝐥𝐜𝐮𝐥𝐚𝐭𝐢𝐧𝐠...
-""")
-            await asyncio.sleep(0.6)
-        except:
-            pass
-
-    # GET DP
-    photos = await bot.get_user_profile_photos(winner.id)
-    photo = photos.photos[0][-1].file_id if photos.total_count > 0 else None
-
-    # 🔥 FINAL TEXT (WITH BOTH SCORES)
     text = f"""
+
 ╔═══━━━─── • ───━━━═══╗
 🏆 𝐅𝐈𝐍𝐀𝐋 𝐖𝐈𝐍𝐍𝐄𝐑 🏆
 ╚═══━━━─── • ───━━━═══╝
@@ -4818,8 +4781,7 @@ async def end_game(chat_id):
 📊 𝐅𝐈𝐍𝐀𝐋 𝐒𝐂𝐎𝐑𝐄
 ━━━━━━━━━━━━━━━━━━━━━━
 
-🔥 {p1.mention_html()} ➤ {s1} 𝐏𝐨𝐢𝐧𝐭𝐬  
-🔥 {p2.mention_html()} ➤ {s2} 𝐏𝐨𝐢𝐧𝐭𝐬  
+{score_text}
 
 ━━━━━━━━━━━━━━━━━━━━━━
 
@@ -4831,19 +4793,7 @@ async def end_game(chat_id):
 ✨ 𝐌𝐚𝐬𝐭𝐞𝐫 𝐎𝐟 𝐂𝐚𝐫𝐝𝐬
 """
 
-    # 🔥 FINAL DISPLAY (DP + TEXT)
-    if photo:
-        final_msg = await bot.send_photo(chat_id, photo, caption=text, parse_mode="HTML")
-    else:
-        final_msg = await bot.send_message(chat_id, text, parse_mode="HTML")
-
-    # 🔥 AUTO PIN
-    try:
-        await bot.pin_chat_message(chat_id, final_msg.message_id)
-    except:
-        pass
-
-    del card_games[chat_id]
+            
 
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
