@@ -1202,7 +1202,7 @@ async def economy_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• /toprich — Top 10 richest users\n"
         "• /topkill — Top 10 killers\n"
         "• /check  — Check protection status (costs ₹1000)\n\n"
-        "⚠️ If you face any problems, contact my owner 👉 @YT_BISHALL"
+        "⚠️ If you face any problems, contact my owner 👉 @YTT_BISHAL"
     )
     await update.message.reply_text(text, parse_mode="Markdown")
 
