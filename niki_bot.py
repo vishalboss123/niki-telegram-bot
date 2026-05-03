@@ -5084,7 +5084,7 @@ async def join(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         return await update.message.reply_text(f"""
 ╔═══━━━─── • ───━━━═══╗
-⚡ 𝐁ɪꜱʜᴀʟ 𝐌ɪɴɪ 𝐆ᴀᴍᴇ ⚡
+  ⚡ 𝐁ɪꜱʜᴀʟ 𝐌ɪɴɪ 𝐆ᴀᴍᴇ ⚡
 ╚═══━━━─── • ───━━━═══╝
 ━━━━━━━━━━━━━━━━━━━━━━
     🤝 𝐓𝐈𝐄 𝐌𝐀𝐓𝐂𝐇 🤝
@@ -5112,7 +5112,7 @@ async def join(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     text = f"""
 ╔═══━━━─── • ───━━━═══╗
-⚡ 𝐁ɪꜱʜᴀʟ 𝐌ɪɴɪ 𝐆ᴀᴍᴇ ⚡
+  ⚡ 𝐁ɪꜱʜᴀʟ 𝐌ɪɴɪ 𝐆ᴀᴍᴇ ⚡
 ╚═══━━━─── • ───━━━═══╝
 ━━━━━━━━━━━━━━━━━━━━━━
     🏆 𝐃𝐔𝐄𝐋 𝐑𝐄𝐒𝐔𝐋𝐓 🏆
@@ -5146,7 +5146,198 @@ async def join(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     del duel_games[chat_id]
 
+#==========================SLOT MACHINE =================
 
+
+reels = ["🍒", "🍋", "7️⃣", "⭐", "💎"]
+slot_stats = {}
+
+# ================= GUIDE =================
+async def slot_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+
+    await update.message.reply_text(f"""
+╔═══━━━─── • ───━━━═══╗
+   ⚡ 𝐁ɪꜱʜᴀʟ 𝐌ɪɴɪ 𝐆ᴀᴍᴇ ⚡
+╚═══━━━─── • ───━━━═══╝
+
+┏━━━━━━━━━━━ 🎰 ━━━━━━━━━━━┓
+       🎰 𝐒𝐋𝐎𝐓 𝐌𝐀𝐂𝐇𝐈𝐍𝐄
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+👤 {user.mention_html()}
+
+┏━━━━━━━━━━━━━━━━━━━━━━┓
+💸 𝐔𝐬𝐞 → /slot 200
+┗━━━━━━━━━━━━━━━━━━━━━━┛
+
+💎 5x Jackpot  
+🔥 3x Big Win  
+✨ 2x Win  
+""", parse_mode="HTML")
+
+
+# ================= SLOT =================
+async def slot(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+
+    if not context.args:
+        return await slot_cmd(update, context)
+
+    bet = int(context.args[0])
+
+    if bet < 200:
+        return await update.message.reply_text("❌ 𝐌𝐢𝐧 ₹200")
+
+    user_data = get_user(user.id, user.first_name)
+
+    if user_data["money"] < bet:
+        return await update.message.reply_text("❌ 𝐍𝐨 𝐁𝐚𝐥𝐚𝐧𝐜𝐞")
+
+    user_data["money"] -= bet
+    save_data()
+
+    # 🎲 Telegram slot
+    dice_msg = await update.message.reply_dice("🎰")
+    value = dice_msg.dice.value
+
+    # 🎯 RESULT DECISION
+    if value == 64:
+        final = ["💎", "💎", "💎"]
+        win = bet * 5
+        result = "💎 𝐌𝐄𝐆𝐀 𝐉𝐀𝐂𝐊𝐏𝐎𝐓"
+    elif value >= 50:
+        final = ["7️⃣", "7️⃣", random.choice(reels)]
+        win = bet * 3
+        result = "🔥 𝐉𝐀𝐂𝐊𝐏𝐎𝐓"
+    elif value >= 30:
+        sym = random.choice(reels)
+        final = [sym, sym, random.choice(reels)]
+        win = bet * 2
+        result = "✨ 𝐖𝐈𝐍"
+    else:
+        final = [random.choice(reels) for _ in range(3)]
+        win = 0
+        result = "💀 𝐋𝐎𝐒𝐓"
+
+    # 🎰 UI START
+    msg = await update.message.reply_text(f"""
+╔═══━━━─── • ───━━━═══╗
+   ⚡ 𝐁ɪꜱʜᴀʟ 𝐌ɪɴɪ 𝐆ᴀᴍᴇ ⚡
+╚═══━━━─── • ───━━━═══╝
+
+┏━━━━━━━━━━━ 🎰 ━━━━━━━━━━━┓
+       🎰 𝐒𝐋𝐎𝐓 𝐌𝐀𝐂𝐇𝐈𝐍𝐄
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+👤 {user.mention_html()}
+💰 ₹{bet}
+
+┏━━━━━━━━━━━━━━━━━━━━━━┓
+      🎰 𝐒𝐏𝐈𝐍𝐍𝐈𝐍𝐆...
+┗━━━━━━━━━━━━━━━━━━━━━━┛
+""", parse_mode="HTML")
+
+    # 🎞️ ULTRA SYNC ANIMATION
+    for i in range(7):
+        if i < 4:
+            spin = [random.choice(reels) for _ in range(3)]
+        else:
+            spin = [
+                final[0] if i >= 4 else random.choice(reels),
+                final[1] if i >= 5 else random.choice(reels),
+                final[2] if i >= 6 else random.choice(reels),
+            ]
+
+        await msg.edit_text(f"""
+╔═══━━━─── • ───━━━═══╗
+   ⚡ 𝐁ɪꜱʜᴀʟ 𝐌ɪɴɪ 𝐆ᴀᴍᴇ ⚡
+╚═══━━━─── • ───━━━═══╝
+
+┏━━━━━━━━━━━ 🎰 ━━━━━━━━━━━┓
+        🎰 𝐒𝐋𝐎𝐓 𝐌𝐀𝐂𝐇𝐈𝐍𝐄
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+👤 {user.mention_html()}
+
+┏━━━━━━━━━━━━━━━━━━━━━━┓
+┃ {' │ '.join(spin)} ┃
+┗━━━━━━━━━━━━━━━━━━━━━━┛
+""", parse_mode="HTML")
+
+        await asyncio.sleep(0.3)
+
+    # 😈 NEAR MISS
+    if 45 <= value < 50:
+        await msg.edit_text(f"""
+╔═══━━━─── • ───━━━═══╗
+  ⚡ 𝐁ɪꜱʜᴀʟ 𝐌ɪɴɪ 𝐆ᴀᴍᴇ ⚡
+╚═══━━━─── • ───━━━═══╝
+
+┏━━━━━━━━━━━ 😮 ━━━━━━━━━━━┓
+        𝐀𝐋𝐌𝐎𝐒𝐓 𝐉𝐀𝐂𝐊𝐏𝐎𝐓
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+😵 𝐒𝐎 𝐂𝐋𝐎𝐒𝐄...
+""", parse_mode="HTML")
+        await asyncio.sleep(1)
+
+    # 💰 ADD WIN
+    user_data["money"] += win
+    save_data()
+
+    slot_stats[user.id] = slot_stats.get(user.id, 0) + win
+
+    # 📢 JACKPOT ALERT
+    if value == 64:
+        await context.bot.send_message(update.effective_chat.id, f"""
+┏━━━━━━━━━━━ 💎 ━━━━━━━━━━━┓
+      🎉 𝐉𝐀𝐂𝐊𝐏𝐎𝐓 𝐀𝐋𝐄𝐑𝐓 🎉
+┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+👑 {user.mention_html()}
+💰 ₹{win}
+""", parse_mode="HTML")
+
+    # 🏁 FINAL RESULT
+    await msg.edit_text(f"""
+╔═══━━━─── • ───━━━═══╗
+  ⚡ 𝐁ɪꜱʜᴀʟ 𝐌ɪɴɪ 𝐆ᴀᴍᴇ ⚡
+╚═══━━━─── • ───━━━═══╝
+
+┏━━━━━━━━━━━ 🏆 ━━━━━━━━━━━┓
+        🎰 𝐒𝐋𝐎𝐓 𝐑𝐄𝐒𝐔𝐋𝐓
+┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+👤 {user.mention_html()}
+
+┏━━━━━━━━━━━━━━━━━━━━━━┓
+┃ {' │ '.join(final)} ┃
+┗━━━━━━━━━━━━━━━━━━━━━━┛
+
+{result}
+💰 𝐖𝐢𝐧 → ₹{win}
+💳 𝐁𝐚𝐥𝐚𝐧𝐜𝐞 → ₹{user_data["money"]}
+
+┏━━━━━━━━━━━━━━━━━━━━━━┓
+⚡ /slot {bet} 𝐏𝐥𝐚𝐲 𝐀𝐠𝐚𝐢𝐧
+┗━━━━━━━━━━━━━━━━━━━━━━┛
+""", parse_mode="HTML")
+
+
+# ================= LEADERBOARD =================
+async def slot_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not slot_stats:
+        return await update.message.reply_text("❌ No Data")
+
+    top = sorted(slot_stats.items(), key=lambda x: x[1], reverse=True)[:10]
+
+    text = "🏆 𝐒𝐋𝐎𝐓 𝐋𝐄𝐀𝐃𝐄𝐑𝐁𝐎𝐀𝐑𝐃\n\n"
+
+    for i, (uid, amt) in enumerate(top, 1):
+        text += f"{i}. ₹{amt}\n"
+
+    await update.message.reply_text(text)
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
@@ -5259,6 +5450,8 @@ def main():
     app.add_handler(CommandHandler("dhead", dhead))
     app.add_handler(CommandHandler("dtail", dtail))
     app.add_handler(CommandHandler("dbet", dbet))
+    app.add_handler(CommandHandler("slot", slot))
+    app.add_handler(CommandHandler("slotlb", slot_leaderboard))
     
     app.add_handler(CommandHandler("userinfo", userinfo))
     
