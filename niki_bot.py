@@ -5570,15 +5570,21 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text.lower()
 
     game = games.find_one({"_id": uid})
+
+    # ❌ GAME NAHI HAI TOH KUCH NAHI KARNA
     if not game:
-        return await update.message.reply_text(f"{FONT}\n❌ /new4 /new5 /new6 start karo")
+        return
+
+    # ❌ agar command ya system text hai
+    if text.startswith("/"):
+        return
 
     secret = game["word"]
-    hint_text = game["hint"]
     size = game["size"]
 
+    # ❌ wrong length ignore
     if len(text) != size:
-        return await update.message.reply_text(f"{FONT}\n⚠️ Wrong word size!")
+        return
 
     games.update_one({"_id": uid}, {"$inc": {"attempts": 1}})
     game["attempts"] += 1
@@ -5596,11 +5602,9 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"{FONT}\n📊 {att}/30\n\n{grid}"
     )
 
-    # ================= HINT (20th attempt) =================
+    # ================= HINT =================
     if att == 20:
-        await update.message.reply_text(
-            f"{FONT}\n💡 HINT:\n{hint_text}"
-        )
+        await update.message.reply_text(f"💡 HINT:\n{game['hint']}")
 
     # ================= WIN =================
     if text == secret:
