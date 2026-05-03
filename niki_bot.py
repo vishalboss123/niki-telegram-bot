@@ -5020,7 +5020,7 @@ async def join(update: Update, context: ContextTypes.DEFAULT_TYPE):
     d2 = await update.message.reply_dice("🪙")
 
     winner = p1 if d1.dice.value > d2.dice.value else user
-    total START* 2
+    total = bet * 2
 
     win_data = get_user(winner.id, winner.first_name)
     win_data["money"] += total
