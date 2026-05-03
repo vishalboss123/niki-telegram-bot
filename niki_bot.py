@@ -4932,13 +4932,45 @@ async def bet(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def dhead(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     duel_choice[user.id] = "heads"
-    await update.message.reply_text("🎯 Heads Selected\n💸 /dbet 200")
+
+    await update.message.reply_text(f"""
+╔═══━━━─── • ───━━━═══╗
+⚡ 𝐁ɪꜱʜᴀʟ 𝐌ɪɴɪ 𝐆ᴀᴍᴇ ⚡
+╚═══━━━─── • ───━━━═══╝
+
+━━━━━━━━━━━━━━━━━━━━━━
+    ⚔️ 𝐃𝐔𝐄𝐋 𝐂𝐇𝐎𝐈𝐂𝐄⚔️
+━━━━━━━━━━━━━━━━━━━━━━
+
+👤 {user.mention_html()}
+🎯 𝐇𝐞𝐚𝐝𝐬 𝐒𝐞𝐥𝐞𝐜𝐭𝐞𝐝
+
+━━━━━━━━━━━━━━━━━━━━━━
+💸 𝐍𝐨𝐰 → /dbet 200
+━━━━━━━━━━━━━━━━━━━━━━
+""", parse_mode="HTML")
 
 
 async def dtail(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     duel_choice[user.id] = "tails"
-    await update.message.reply_text("🎯 Tails Selected\n💸 /dbet 200")
+
+    await update.message.reply_text(f"""
+╔═══━━━─── • ───━━━═══╗
+⚡ 𝐁ɪꜱʜᴀʟ 𝐌ɪɴɪ 𝐆ᴀᴍᴇ ⚡
+╚═══━━━─── • ───━━━═══╝
+
+━━━━━━━━━━━━━━━━━━━━━━
+    ⚔️ 𝐃𝐔𝐄𝐋 𝐂𝐇𝐎𝐈𝐂𝐄⚔️
+━━━━━━━━━━━━━━━━━━━━━━
+
+👤 {user.mention_html()}
+🎯 𝐓𝐚𝐢𝐥𝐬 𝐒𝐞𝐥𝐞𝐜𝐭𝐞𝐝
+
+━━━━━━━━━━━━━━━━━━━━━━
+💸 𝐍𝐨𝐰 → /dbet 200
+━━━━━━━━━━━━━━━━━━━━━━
+""", parse_mode="HTML")
 
 
 async def dbet(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -4951,19 +4983,33 @@ async def dbet(update: Update, context: ContextTypes.DEFAULT_TYPE):
     bet = int(context.args[0])
 
     if chat_id in duel_games:
-        return await update.message.reply_text("⚠️ Running")
+        return await update.message.reply_text("⚠️ 𝐆𝐚𝐦𝐞 𝐀𝐥𝐫𝐞𝐚𝐝𝐲 𝐑𝐮𝐧𝐧𝐢𝐧𝐠")
+
+    user_data = get_user(user.id, user.first_name)
+
+    if user_data["money"] < bet:
+        return await update.message.reply_text("❌ 𝐍𝐨 𝐁𝐚𝐥𝐚𝐧𝐜𝐞")
+
+    # 💸 p1 deduct
+    user_data["money"] -= bet
+    save_data()
 
     duel_games[chat_id] = {"p1": user, "bet": bet}
 
     await update.message.reply_text(f"""
+╔═══━━━─── • ───━━━═══╗
+⚡ 𝐁ɪꜱʜᴀʟ 𝐌ɪɴɪ 𝐆ᴀᴍᴇ ⚡
+╚═══━━━─── • ───━━━═══╝
 ━━━━━━━━━━━━━━━━━━━━━━
-   ⚔️ 𝐃ᴜᴇʟ 𝐂ʀᴇᴀᴛᴇᴅ
+   ⚔️ 𝐃𝐔𝐄𝐋 𝐂𝐑𝐄𝐀𝐓𝐄𝐃⚔️
 ━━━━━━━━━━━━━━━━━━━━━━
 
 👑 {user.mention_html()}
-💰 ₹{bet}
+💰 𝐁𝐞𝐭: ₹{bet}
 
+━━━━━━━━━━━━━━━━━━━━━━
 👉 /join {bet}
+━━━━━━━━━━━━━━━━━━━━━━
 """, parse_mode="HTML")
 
 
@@ -4978,20 +5024,27 @@ async def join(update: Update, context: ContextTypes.DEFAULT_TYPE):
     p1 = game["p1"]
     bet = game["bet"]
 
+    # ❌ self join
+    if user.id == p1.id:
+        return await update.message.reply_text("❌ 𝐘𝐨𝐮 𝐀𝐥𝐫𝐞𝐚𝐝𝐲 𝐉𝐨𝐢𝐧𝐞𝐝")
+
     p1_data = get_user(p1.id, p1.first_name)
     p2_data = get_user(user.id, user.first_name)
 
     if p2_data["money"] < bet:
-        return await update.message.reply_text("❌ No Balance")
+        return await update.message.reply_text("❌ 𝐍𝐨 𝐁𝐚𝐥𝐚𝐧𝐜𝐞")
 
-    p1_data["money"] -= bet
+    # 💸 p2 deduct
     p2_data["money"] -= bet
     save_data()
 
-    # 🔥 MATCH START + BAR
+    # ⚔️ MATCH START
     msg = await update.message.reply_text(f"""
+╔═══━━━─── • ───━━━═══╗
+⚡ 𝐁ɪꜱʜᴀʟ 𝐌ɪɴɪ 𝐆ᴀᴍᴇ ⚡
+╚═══━━━─── • ───━━━═══╝
 ━━━━━━━━━━━━━━━━━━━━━━
-   ⚔️ 𝐌𝐀𝐓𝐂𝐇 𝐒𝐓𝐀𝐑𝐓
+   ⚔️ 𝐌𝐀𝐓𝐂𝐇 𝐒𝐓𝐀𝐑𝐓 ⚔️
 ━━━━━━━━━━━━━━━━━━━━━━
 
 {p1.mention_html()} 🆚 {user.mention_html()}
@@ -4999,12 +5052,16 @@ async def join(update: Update, context: ContextTypes.DEFAULT_TYPE):
 [░░░░░░░░░░] 0%
 """, parse_mode="HTML")
 
+    import asyncio
     for i in range(0, 101, 20):
         bar = "█" * (i//10) + "░" * (10 - i//10)
         try:
             await msg.edit_text(f"""
+╔═══━━━─── • ───━━━═══╗
+⚡ 𝐁ɪꜱʜᴀʟ 𝐌ɪɴɪ 𝐆ᴀᴍᴇ ⚡
+╚═══━━━─── • ───━━━═══╝
 ━━━━━━━━━━━━━━━━━━━━━━
-   ⚔️ 𝐌𝐀𝐓𝐂𝐇 𝐒𝐓𝐀𝐑𝐓
+    ⚔️ 𝐌𝐀𝐓𝐂𝐇 𝐒𝐓𝐀𝐑𝐓 ⚔️
 ━━━━━━━━━━━━━━━━━━━━━━
 
 {p1.mention_html()} 🆚 {user.mention_html()}
@@ -5019,7 +5076,34 @@ async def join(update: Update, context: ContextTypes.DEFAULT_TYPE):
     d1 = await update.message.reply_dice("🪙")
     d2 = await update.message.reply_dice("🪙")
 
-    winner = p1 if d1.dice.value > d2.dice.value else user
+    # 🤝 TIE REFUND
+    if d1.dice.value == d2.dice.value:
+        p1_data["money"] += bet
+        p2_data["money"] += bet
+        save_data()
+
+        return await update.message.reply_text(f"""
+╔═══━━━─── • ───━━━═══╗
+⚡ 𝐁ɪꜱʜᴀʟ 𝐌ɪɴɪ 𝐆ᴀᴍᴇ ⚡
+╚═══━━━─── • ───━━━═══╝
+━━━━━━━━━━━━━━━━━━━━━━
+    🤝 𝐓𝐈𝐄 𝐌𝐀𝐓𝐂𝐇 🤝
+━━━━━━━━━━━━━━━━━━━━━━
+
+{p1.mention_html()} 🎲 {d1.dice.value}
+{user.mention_html()} 🎲 {d2.dice.value}
+
+━━━━━━━━━━━━━━━━━━━━━━
+💸 𝐑𝐞𝐟𝐮𝐧𝐝 𝐓𝐨 𝐁𝐨𝐭𝐡
+━━━━━━━━━━━━━━━━━━━━━━
+""", parse_mode="HTML")
+
+    # 🏆 winner
+    if d1.dice.value > d2.dice.value:
+        winner = p1
+    else:
+        winner = user
+
     total = bet * 2
 
     win_data = get_user(winner.id, winner.first_name)
@@ -5027,22 +5111,31 @@ async def join(update: Update, context: ContextTypes.DEFAULT_TYPE):
     save_data()
 
     text = f"""
+╔═══━━━─── • ───━━━═══╗
+⚡ 𝐁ɪꜱʜᴀʟ 𝐌ɪɴɪ 𝐆ᴀᴍᴇ ⚡
+╚═══━━━─── • ───━━━═══╝
 ━━━━━━━━━━━━━━━━━━━━━━
-   🏆 𝐃𝐔𝐄𝐋 𝐑𝐄𝐒𝐔𝐋𝐓
+    🏆 𝐃𝐔𝐄𝐋 𝐑𝐄𝐒𝐔𝐋𝐓 🏆
 ━━━━━━━━━━━━━━━━━━━━━━
-
 {p1.mention_html()} 🎲 {d1.dice.value}
 {user.mention_html()} 🎲 {d2.dice.value}
 
-🏆 Winner: {winner.mention_html()}
-💰 Win: ₹{total}
-💳 Balance: ₹{win_data["money"]}
+━━━━━━━━━━━━━━━━━━━━━━
+🏆 𝐖𝐢𝐧𝐧𝐞𝐫 → {winner.mention_html()}
+💰 𝐖𝐢𝐧 → ₹{total}
+💳 𝐁𝐚𝐥𝐚𝐧𝐜𝐞 → ₹{win_data["money"]}
+━━━━━━━━━━━━━━━━━━━━━━
 """
 
     photos = await context.bot.get_user_profile_photos(winner.id)
 
     if photos.total_count > 0:
-        msg2 = await context.bot.send_photo(chat_id, photos.photos[0][-1].file_id, caption=text, parse_mode="HTML")
+        msg2 = await context.bot.send_photo(
+            chat_id,
+            photos.photos[0][-1].file_id,
+            caption=text,
+            parse_mode="HTML"
+        )
     else:
         msg2 = await context.bot.send_message(chat_id, text, parse_mode="HTML")
 
