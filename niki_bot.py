@@ -4794,6 +4794,265 @@ async def end_game(chat_id):
 """
 
             
+#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+user_choice = {}
+duel_games = {}
+duel_choice = {}
+
+# ================= START =================
+
+async def coin(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("""
+╔═══━━━─── • ───━━━═══╗
+     🪙 𝐂𝐎𝐈𝐍 𝐆𝐀𝐌𝐄 🪙
+╚═══━━━─── • ───━━━═══╝
+
+👉 𝐂𝐡𝐨𝐨𝐬𝐞:
+/head  
+/tail
+""", parse_mode="HTML")
+
+
+async def cduel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("""
+╔═══━━━─── • ───━━━═══╗
+     ⚔️ 𝐃𝐔𝐄𝐋 𝐆𝐀𝐌𝐄 ⚔️
+╚═══━━━─── • ───━━━═══╝
+
+👉 𝐂𝐡𝐨𝐨𝐬𝐞:
+/dhead  
+/dtail
+""", parse_mode="HTML")
+
+# ================= SINGLE =================
+
+async def head(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    user_choice[user.id] = "heads"
+
+    await update.message.reply_text(f"""
+╔═══━━━─── • ───━━━═══╗
+   ⚡ 𝐁ɪꜱʜᴀʟ 𝐌ɪɴɪ 𝐆ᴀ𝐦𝐞 ⚡
+╚═══━━━─── • ───━━━═══╝
+
+👤 {user.mention_html()}
+🎯 𝐇𝐞𝐚𝐝𝐬 𝐒𝐞𝐥𝐞𝐜𝐭𝐞𝐝
+
+━━━━━━━━━━━━━━━━━━━━━━
+💸 /bet 200
+━━━━━━━━━━━━━━━━━━━━━━
+""", parse_mode="HTML")
+
+
+async def tail(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    user_choice[user.id] = "tails"
+
+    await update.message.reply_text(f"""
+╔═══━━━─── • ───━━━═══╗
+   ⚡ 𝐁ɪꜱʜᴀʟ 𝐌ɪɴɪ 𝐆ᴀ𝐦𝐞 ⚡
+╚═══━━━─── • ───━━━═══╝
+
+👤 {user.mention_html()}
+🎯 𝐓𝐚𝐢𝐥𝐬 𝐒𝐞𝐥𝐞𝐜𝐭𝐞𝐝
+
+━━━━━━━━━━━━━━━━━━━━━━
+💸 /bet 200
+━━━━━━━━━━━━━━━━━━━━━━
+""", parse_mode="HTML")
+
+
+async def bet(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+
+    if user.id not in user_choice:
+        return await update.message.reply_text("❌ /head or /tail first")
+
+    bet = int(context.args[0])
+    if bet < 200:
+        return await update.message.reply_text("❌ Min ₹200")
+
+    user_data = get_user(user.id, user.first_name)
+
+    if user_data["money"] < bet:
+        return await update.message.reply_text("❌ No Balance")
+
+    choice = user_choice[user.id]
+
+    user_data["money"] -= bet
+    save_data()
+
+    msg = await update.message.reply_text(f"""
+╔═══━━━─── • ───━━━═══╗
+     🪙 𝐂𝐎𝐈𝐍 𝐅𝐋𝐈𝐏 🪙
+╚═══━━━─── • ───━━━═══╝
+
+👤 {user.mention_html()}
+🎯 {choice}
+💰 ₹{bet}
+
+━━━━━━━━━━━━━━━━━━━━━━
+🎲 𝐅𝐥𝐢𝐩𝐩𝐢𝐧𝐠...
+━━━━━━━━━━━━━━━━━━━━━━
+""", parse_mode="HTML")
+
+    d = await update.message.reply_dice("🪙")
+    result = "heads" if d.dice.value <= 3 else "tails"
+
+    if result == choice:
+        win = bet * 2
+        user_data["money"] += win
+        status = "🎉 WIN"
+    else:
+        win = 0
+        status = "💀 LOST"
+
+    save_data()
+
+    await msg.edit_text(f"""
+╔═══━━━─── • ───━━━═══╗
+      🏆 𝐑𝐄𝐒𝐔𝐋𝐓 🏆
+╚═══━━━─── • ───━━━═══╝
+
+👤 {user.mention_html()}
+🪙 {result}
+
+━━━━━━━━━━━━━━━━━━━━━━
+{status}
+💰 Win: ₹{win}
+💳 Balance: ₹{user_data["money"]}
+━━━━━━━━━━━━━━━━━━━━━━
+""", parse_mode="HTML")
+
+    del user_choice[user.id]
+
+# ================= DUEL =================
+
+async def dhead(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    duel_choice[user.id] = "heads"
+    await update.message.reply_text("🎯 Heads Selected\n💸 /dbet 200")
+
+
+async def dtail(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    duel_choice[user.id] = "tails"
+    await update.message.reply_text("🎯 Tails Selected\n💸 /dbet 200")
+
+
+async def dbet(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    chat_id = update.effective_chat.id
+
+    if user.id not in duel_choice:
+        return await update.message.reply_text("❌ /dhead or /dtail first")
+
+    bet = int(context.args[0])
+
+    if chat_id in duel_games:
+        return await update.message.reply_text("⚠️ Running")
+
+    duel_games[chat_id] = {"p1": user, "bet": bet}
+
+    await update.message.reply_text(f"""
+━━━━━━━━━━━━━━━━━━━━━━
+   ⚔️ 𝐃ᴜᴇʟ 𝐂ʀᴇᴀᴛᴇᴅ
+━━━━━━━━━━━━━━━━━━━━━━
+
+👑 {user.mention_html()}
+💰 ₹{bet}
+
+👉 /join {bet}
+""", parse_mode="HTML")
+
+
+async def join(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    chat_id = update.effective_chat.id
+
+    if chat_id not in duel_games:
+        return
+
+    game = duel_games[chat_id]
+    p1 = game["p1"]
+    bet = game["bet"]
+
+    p1_data = get_user(p1.id, p1.first_name)
+    p2_data = get_user(user.id, user.first_name)
+
+    if p2_data["money"] < bet:
+        return await update.message.reply_text("❌ No Balance")
+
+    p1_data["money"] -= bet
+    p2_data["money"] -= bet
+    save_data()
+
+    # 🔥 MATCH START + BAR
+    msg = await update.message.reply_text(f"""
+━━━━━━━━━━━━━━━━━━━━━━
+   ⚔️ 𝐌𝐀𝐓𝐂𝐇 𝐒𝐓𝐀𝐑𝐓
+━━━━━━━━━━━━━━━━━━━━━━
+
+{p1.mention_html()} 🆚 {user.mention_html()}
+
+[░░░░░░░░░░] 0%
+""", parse_mode="HTML")
+
+    for i in range(0, 101, 20):
+        bar = "█" * (i//10) + "░" * (10 - i//10)
+        try:
+            await msg.edit_text(f"""
+━━━━━━━━━━━━━━━━━━━━━━
+   ⚔️ 𝐌𝐀𝐓𝐂𝐇 𝐒𝐓𝐀𝐑𝐓
+━━━━━━━━━━━━━━━━━━━━━━
+
+{p1.mention_html()} 🆚 {user.mention_html()}
+
+[{bar}] {i}%
+""", parse_mode="HTML")
+            await asyncio.sleep(0.5)
+        except:
+            pass
+
+    # 🎲 flip
+    d1 = await update.message.reply_dice("🪙")
+    d2 = await update.message.reply_dice("🪙")
+
+    winner = p1 if d1.dice.value > d2.dice.value else user
+    total START* 2
+
+    win_data = get_user(winner.id, winner.first_name)
+    win_data["money"] += total
+    save_data()
+
+    text = f"""
+━━━━━━━━━━━━━━━━━━━━━━
+   🏆 𝐃𝐔𝐄𝐋 𝐑𝐄𝐒𝐔𝐋𝐓
+━━━━━━━━━━━━━━━━━━━━━━
+
+{p1.mention_html()} 🎲 {d1.dice.value}
+{user.mention_html()} 🎲 {d2.dice.value}
+
+🏆 Winner: {winner.mention_html()}
+💰 Win: ₹{total}
+💳 Balance: ₹{win_data["money"]}
+"""
+
+    photos = await context.bot.get_user_profile_photos(winner.id)
+
+    if photos.total_count > 0:
+        msg2 = await context.bot.send_photo(chat_id, photos.photos[0][-1].file_id, caption=text, parse_mode="HTML")
+    else:
+        msg2 = await context.bot.send_message(chat_id, text, parse_mode="HTML")
+
+    try:
+        await context.bot.pin_chat_message(chat_id, msg2.message_id)
+    except:
+        pass
+
+    del duel_games[chat_id]
+
 
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -4894,9 +5153,19 @@ def main():
     app.add_handler(CommandHandler("tmute", tmute_cmd))
     app.add_handler(CommandHandler("tban", tban_cmd))
     app.add_handler(CommandHandler("card", card))
-    app.add_handler(CommandHandler("join", join))
+    app.add_handler(CommandHandler("join", join_bet))
     app.add_handler(CommandHandler("flip", flip))
-    
+    app.add_handler(CommandHandler("coin", coin))
+    app.add_handler(CommandHandler("cduel", cduel))
+
+    app.add_handler(CommandHandler("head", head))
+    app.add_handler(CommandHandler("tail", tail))
+    app.add_handler(CommandHandler("bet", bet))
+
+    app.add_handler(CommandHandler("dhead", dhead))
+    app.add_handler(CommandHandler("dtail", dtail))
+    app.add_handler(CommandHandler("dbet", dbet))
+    app.add_handler(CommandHandler("join", join))
     app.add_handler(CommandHandler("userinfo", userinfo))
     
     # ================= CALLBACKS =================
