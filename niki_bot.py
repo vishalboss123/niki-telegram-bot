@@ -5778,16 +5778,17 @@ def main():
     # ================= MESSAGE =================
    
 
-    # 🔹 2. Filter system (auto reply)
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, filter_checker), group=1)
-
-    # 🔹 3. AI / Niki reply
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, auto_niki_reply), group=2)
-
-    # 🔹 4. Block system (last me hona chahiye)
+    # 1. Block system (first priority)
     app.add_handler(MessageHandler(filters.ALL, block_system), group=3)
 
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle))
+    # 2. Filter system
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, filter_checker), group=1)
+
+    # 3. AI reply
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, auto_niki_reply), group=2)
+
+    # 4. WORD GAME (LAST)
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle), group=0)
 
     # 🔹 5. Welcome system
     app.add_handler(ChatMemberHandler(member_update_welcome, ChatMemberHandler.CHAT_MEMBER))
