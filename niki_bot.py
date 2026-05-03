@@ -5482,6 +5482,159 @@ async def mine_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode="HTML"
     )
 
+#========================WORDSEEK========================
+
+
+# ================= MONGO =================
+client = MongoClient("YOUR_MONGO_URL")
+
+
+users = db["chats"]
+games = db["wordseek"]
+words = db["words"]   # 👈 NEW COLLECTION
+
+WIN_REWARD = 1000
+FONT = "𝐖𝐨𝐫𝐝𝐒𝐞𝐞𝐤 𝐆𝐚𝐦𝐞"
+
+# ================= CHECK =================
+def check(secret, guess):
+    res = []
+    for i in range(len(secret)):
+        if guess[i] == secret[i]:
+            res.append("🟩")
+        elif guess[i] in secret:
+            res.append("🟨")
+        else:
+            res.append("🟥")
+    return res
+
+# ================= ADD WORD SYSTEM =================
+async def add_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    text = update.message.text
+
+    # format: /addword5 apple{a fruit}
+    try:
+        cmd, data = text.split(" ", 1)
+        size = int(cmd.replace("/addword",""))
+        word, hint = data.split("{")
+
+        hint = hint.replace("}", "").strip()
+        word = word.strip().lower()
+
+        words.insert_one({
+            "size": size,
+            "word": word,
+            "hint": hint
+        })
+
+        await update.message.reply_text(
+            f"{FONT}\n✅ Word Saved!\n🔤 {word}\n💡 {hint}"
+        )
+    except:
+        await update.message.reply_text(
+            f"{FONT}\n❌ Format:\n/addword5 apple{{a fruit}}"
+        )
+
+# ================= NEW GAME =================
+async def new_game(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    uid = update.effective_user.id
+    size = int(update.message.text.replace("/new",""))
+
+    doc = words.aggregate([{"$match": {"size": size}}, {"$sample": {"size": 1}}])
+    doc = list(doc)
+
+    if not doc:
+        return await update.message.reply_text("❌ No words found in DB")
+
+    doc = doc[0]
+
+    games.update_one(
+        {"_id": uid},
+        {"$set": {
+            "word": doc["word"],
+            "hint": doc["hint"],
+            "size": size,
+            "attempts": 0,
+            "grid": []
+        }},
+        upsert=True
+    )
+
+    await update.message.reply_text(
+        f"{FONT}\n📊 0/30\n🎮 GAME STARTED"
+    )
+
+# ================= HANDLE =================
+async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    uid = update.effective_user.id
+    text = update.message.text.lower()
+
+    game = games.find_one({"_id": uid})
+    if not game:
+        return await update.message.reply_text(f"{FONT}\n❌ /new4 /new5 /new6 start karo")
+
+    secret = game["word"]
+    hint_text = game["hint"]
+    size = game["size"]
+
+    if len(text) != size:
+        return await update.message.reply_text(f"{FONT}\n⚠️ Wrong word size!")
+
+    games.update_one({"_id": uid}, {"$inc": {"attempts": 1}})
+    game["attempts"] += 1
+    att = game["attempts"]
+
+    colors = check(secret, text)
+    row = f"{' '.join(colors)}  = {text.upper()}"
+
+    games.update_one({"_id": uid}, {"$push": {"grid": row}})
+
+    game = games.find_one({"_id": uid})
+    grid = "\n".join(game["grid"])
+
+    await update.message.reply_text(
+        f"{FONT}\n📊 {att}/30\n\n{grid}"
+    )
+
+    # ================= HINT (20th attempt) =================
+    if att == 20:
+        await update.message.reply_text(
+            f"{FONT}\n💡 HINT:\n{hint_text}"
+        )
+
+    # ================= WIN =================
+    if text == secret:
+        users.update_one(
+            {"_id": uid},
+            {"$inc": {"coins": WIN_REWARD}},
+            upsert=True
+        )
+
+        games.delete_one({"_id": uid})
+
+        user_link = f"<a href='tg://user?id={uid}'>PLAYER</a>"
+
+        await update.message.reply_text(
+            f"""
+{FONT}
+
+🎉 WINNER: {user_link}
+
+💝 WORD: {secret}
+
+💰 +{WIN_REWARD} COINS
+🏆 GG BRO!
+""",
+            parse_mode="HTML"
+        )
+        return
+
+    # ================= LOSE =================
+    if att >= 30:
+        games.delete_one({"_id": uid})
+        await update.message.reply_text(
+            f"{FONT}\n❌ GAME OVER\nWORD WAS: {secret}"
+        )
 
 
 # =================== MAIN FUNCTION ===================
@@ -5599,7 +5752,12 @@ def main():
     app.add_handler(CommandHandler("slot", slot))
     app.add_handler(CommandHandler("slotlb", slot_leaderboard))
     app.add_handler(CommandHandler("mines", mines))
-    
+    app.add_handler(CommandHandler("new4", new_game))
+    app.add_handler(CommandHandler("new5", new_game))
+    app.add_handler(CommandHandler("new6", new_game))
+    app.add_handler(CommandHandler("addword4", add_word))
+    app.add_handler(CommandHandler("addword5", add_word))
+    app.add_handler(CommandHandler("addword6", add_word))
     app.add_handler(CommandHandler("userinfo", userinfo))
     
     # ================= CALLBACKS =================
@@ -5628,6 +5786,8 @@ def main():
 
     # 🔹 4. Block system (last me hona chahiye)
     app.add_handler(MessageHandler(filters.ALL, block_system), group=3)
+
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle))
 
     # 🔹 5. Welcome system
     app.add_handler(ChatMemberHandler(member_update_welcome, ChatMemberHandler.CHAT_MEMBER))
