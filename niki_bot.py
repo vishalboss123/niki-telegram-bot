@@ -5149,6 +5149,9 @@ async def join(update: Update, context: ContextTypes.DEFAULT_TYPE):
 #==========================SLOT MACHINE =================
 
 
+
+#==========================SLOT MACHINE =================
+
 reels = ["🍒", "🍋", "7️⃣", "⭐", "💎"]
 slot_stats = {}
 
@@ -5194,33 +5197,37 @@ async def slot(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user_data["money"] < bet:
         return await update.message.reply_text("❌ 𝐍𝐨 𝐁𝐚𝐥𝐚𝐧𝐜𝐞")
 
+    # 💸 deduct
     user_data["money"] -= bet
     save_data()
 
-    # 🎲 Telegram slot
+    # 🎰 REAL SLOT
     dice_msg = await update.message.reply_dice("🎰")
     value = dice_msg.dice.value
 
-    # 🎯 RESULT DECISION
+    # 🎯 RESULT
     if value == 64:
         final = ["💎", "💎", "💎"]
         win = bet * 5
         result = "💎 𝐌𝐄𝐆𝐀 𝐉𝐀𝐂𝐊𝐏𝐎𝐓"
+
     elif value >= 50:
         final = ["7️⃣", "7️⃣", random.choice(reels)]
         win = bet * 3
         result = "🔥 𝐉𝐀𝐂𝐊𝐏𝐎𝐓"
+
     elif value >= 30:
         sym = random.choice(reels)
         final = [sym, sym, random.choice(reels)]
         win = bet * 2
         result = "✨ 𝐖𝐈𝐍"
+
     else:
         final = [random.choice(reels) for _ in range(3)]
         win = 0
         result = "💀 𝐋𝐎𝐒𝐓"
 
-    # 🎰 UI START
+    # 🎰 START MSG
     msg = await update.message.reply_text(f"""
 ╔═══━━━─── • ───━━━═══╗
    ⚡ 𝐁ɪꜱʜᴀʟ 𝐌ɪɴɪ 𝐆ᴀᴍᴇ ⚡
@@ -5238,51 +5245,7 @@ async def slot(update: Update, context: ContextTypes.DEFAULT_TYPE):
 ┗━━━━━━━━━━━━━━━━━━━━━━┛
 """, parse_mode="HTML")
 
-    # 🎞️ ULTRA SYNC ANIMATION
-    for i in range(7):
-        if i < 4:
-            spin = [random.choice(reels) for _ in range(3)]
-        else:
-            spin = [
-                final[0] if i >= 4 else random.choice(reels),
-                final[1] if i >= 5 else random.choice(reels),
-                final[2] if i >= 6 else random.choice(reels),
-            ]
-
-        await msg.edit_text(f"""
-╔═══━━━─── • ───━━━═══╗
-   ⚡ 𝐁ɪꜱʜᴀʟ 𝐌ɪɴɪ 𝐆ᴀᴍᴇ ⚡
-╚═══━━━─── • ───━━━═══╝
-
-┏━━━━━━━━━━━ 🎰 ━━━━━━━━━━━┓
-        🎰 𝐒𝐋𝐎𝐓 𝐌𝐀𝐂𝐇𝐈𝐍𝐄
-┗━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-
-👤 {user.mention_html()}
-
-┏━━━━━━━━━━━━━━━━━━━━━━┓
-┃ {' │ '.join(spin)} ┃
-┗━━━━━━━━━━━━━━━━━━━━━━┛
-""", parse_mode="HTML")
-
-        await asyncio.sleep(0.3)
-
-    # 😈 NEAR MISS
-    if 45 <= value < 50:
-        await msg.edit_text(f"""
-╔═══━━━─── • ───━━━═══╗
-  ⚡ 𝐁ɪꜱʜᴀʟ 𝐌ɪɴɪ 𝐆ᴀᴍᴇ ⚡
-╚═══━━━─── • ───━━━═══╝
-
-┏━━━━━━━━━━━ 😮 ━━━━━━━━━━━┓
-        𝐀𝐋𝐌𝐎𝐒𝐓 𝐉𝐀𝐂𝐊𝐏𝐎𝐓
-┗━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-
-😵 𝐒𝐎 𝐂𝐋𝐎𝐒𝐄...
-""", parse_mode="HTML")
-        await asyncio.sleep(1)
-
-    # 💰 ADD WIN
+    # 💰 UPDATE BALANCE
     user_data["money"] += win
     save_data()
 
@@ -5299,7 +5262,12 @@ async def slot(update: Update, context: ContextTypes.DEFAULT_TYPE):
 💰 ₹{win}
 """, parse_mode="HTML")
 
-    # 🏁 FINAL RESULT
+    # 🏁 FINAL RESULT (WITH LOSS FIX)
+    if win == 0:
+        extra = "💔 𝐁𝐀𝐃 𝐋𝐔𝐂𝐊 𝐓𝐑𝐘 𝐀𝐆𝐀𝐈𝐍"
+    else:
+        extra = ""
+
     await msg.edit_text(f"""
 ╔═══━━━─── • ───━━━═══╗
   ⚡ 𝐁ɪꜱʜᴀʟ 𝐌ɪɴɪ 𝐆ᴀᴍᴇ ⚡
@@ -5316,6 +5284,7 @@ async def slot(update: Update, context: ContextTypes.DEFAULT_TYPE):
 ┗━━━━━━━━━━━━━━━━━━━━━━┛
 
 {result}
+{extra}
 💰 𝐖𝐢𝐧 → ₹{win}
 💳 𝐁𝐚𝐥𝐚𝐧𝐜𝐞 → ₹{user_data["money"]}
 
@@ -5323,6 +5292,7 @@ async def slot(update: Update, context: ContextTypes.DEFAULT_TYPE):
 ⚡ /slot {bet} 𝐏𝐥𝐚𝐲 𝐀𝐠𝐚𝐢𝐧
 ┗━━━━━━━━━━━━━━━━━━━━━━┛
 """, parse_mode="HTML")
+
 
 
 # ================= LEADERBOARD =================
