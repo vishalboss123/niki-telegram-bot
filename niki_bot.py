@@ -4515,7 +4515,7 @@ async def card(update, context):
 👥 1/5 𝐏ʟᴀʏᴇʀꜱ
 
 👉 𝐓ʏᴘᴇ:
-/join {bet}
+/joinbet {bet}
 
 ⏳ 30 𝐬ᴇᴄ ᴛᴏ ᴊᴏɪɴ...
 """, parse_mode="HTML")
@@ -4523,7 +4523,7 @@ async def card(update, context):
 
 #================ JOIN =================
 
-async def join(update, context):
+async def joinbet(update, context):
     chat_id = update.effective_chat.id
     user = update.effective_user
 
