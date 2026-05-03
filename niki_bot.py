@@ -5338,6 +5338,200 @@ async def slot_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text += f"{i}. ₹{amt}\n"
 
     await update.message.reply_text(text)
+
+
+#======================MINES==========================
+
+
+mines_games = {}
+
+GRID = 25
+
+# ================= START =================
+async def mines(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+
+    if not context.args:
+        return await update.message.reply_text("💸 Use: /mines 200")
+
+    bet = int(context.args[0])
+
+    if bet < 200:
+        return await update.message.reply_text("❌ 𝐌𝐢𝐧 ₹200")
+
+    user_data = get_user(user.id, user.first_name)
+
+    if user_data["money"] < bet:
+        return await update.message.reply_text("❌ 𝐍𝐨 𝐁𝐚𝐥𝐚𝐧𝐜𝐞")
+
+    user_data["money"] -= bet
+    save_data()
+
+    bomb_count = random.randint(1, 10)
+    bombs = random.sample(range(GRID), bomb_count)
+
+    mines_games[user.id] = {
+        "bet": bet,
+        "bombs": bombs,
+        "revealed": [],
+        "multi": 1.0,
+        "bomb_count": bomb_count
+    }
+
+    await update.message.reply_text(
+        ui_text(user, mines_games[user.id]),
+        reply_markup=grid_buttons(user.id),
+        parse_mode="HTML"
+    )
+
+
+# ================= GRID =================
+def grid_buttons(uid):
+    game = mines_games[uid]
+    btns = []
+
+    for i in range(GRID):
+        if i in game["revealed"]:
+            txt = "💣" if i in game["bombs"] else "💎"
+        else:
+            txt = "⬜"
+
+        btns.append(InlineKeyboardButton(txt, callback_data=f"mine_{i}"))
+
+    keyboard = [btns[i:i+5] for i in range(0, GRID, 5)]
+
+    keyboard.append([
+        InlineKeyboardButton("💰 CASHOUT", callback_data="cashout")
+    ])
+
+    return InlineKeyboardMarkup(keyboard)
+
+
+# ================= UI =================
+def ui_text(user, game):
+    return f"""
+╔═══━━━─── • ───━━━═══╗
+   ⚡ 𝐁ɪꜱʜᴀʟ 𝐌𝐢𝐧𝐢 𝐆𝐚𝐦𝐞 ⚡
+╚═══━━━─── • ───━━━═══╝
+
+━━━━━━━━━━━━━━━━━━━━━━
+   💣 𝐌𝐈𝐍𝐄𝐒 𝐏𝐑𝐎 𝐌𝐀𝐗
+━━━━━━━━━━━━━━━━━━━━━━
+
+👤 {user.mention_html()}
+
+━━━━━━━━━━━━━━━━━━━━━━
+💰 𝐁𝐞𝐭 → ₹{game["bet"]}
+📈 𝐌𝐮𝐥𝐭𝐢 → {game["multi"]}x
+━━━━━━━━━━━━━━━━━━━━━━
+
+💎 𝐒𝐚𝐟𝐞 → {len(game["revealed"])}
+💣 𝐁𝐨𝐦𝐛𝐬 → {game["bomb_count"]}
+
+━━━━━━━━━━━━━━━━━━━━━━
+⚠️ 𝐂𝐡𝐨𝐨𝐬𝐞 𝐂𝐚𝐫𝐞𝐟𝐮𝐥𝐥𝐲...
+━━━━━━━━━━━━━━━━━━━━━━
+"""
+
+
+# ================= CLICK =================
+async def mine_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    user = query.from_user
+
+    if user.id not in mines_games:
+        return await query.answer("No Game")
+
+    game = mines_games[user.id]
+
+    # 💰 CASHOUT
+    if query.data == "cashout":
+        win = int(game["bet"] * game["multi"])
+
+        user_data = get_user(user.id, user.first_name)
+        user_data["money"] += win
+        save_data()
+
+        await query.edit_message_text(f"""
+╔═══━━━─── • ───━━━═══╗
+      🏆 𝐂𝐀𝐒𝐇𝐎𝐔𝐓 🏆
+╚═══━━━─── • ───━━━═══╝
+
+━━━━━━━━━━━━━━━━━━━━━━
+👤 {user.mention_html()}
+━━━━━━━━━━━━━━━━━━━━━━
+
+💰 𝐖𝐢𝐧 → ₹{win}
+💳 𝐁𝐚𝐥𝐚𝐧𝐜𝐞 → ₹{user_data["money"]}
+
+━━━━━━━━━━━━━━━━━━━━━━
+""", parse_mode="HTML")
+
+        del mines_games[user.id]
+        return
+
+    idx = int(query.data.split("_")[1])
+
+    if idx in game["revealed"]:
+        return await query.answer("Already opened")
+
+    game["revealed"].append(idx)
+
+    # 💣 BOMB
+    if idx in game["bombs"]:
+
+        for frame in ["💣", "💥", "🔥", "💀"]:
+            await query.edit_message_text(f"""
+━━━━━━━━━━━━━━━━━━━━━━
+     💣 𝐁𝐎𝐌𝐁 𝐇𝐈𝐓
+━━━━━━━━━━━━━━━━━━━━━━
+
+👤 {user.mention_html()}
+
+━━━━━━━━━━━━━━━━━━━━━━
+{frame} {frame} {frame}
+━━━━━━━━━━━━━━━━━━━━━━
+""", parse_mode="HTML")
+            await asyncio.sleep(0.3)
+
+        # full reveal
+        full = []
+        for i in range(GRID):
+            full.append("💣" if i in game["bombs"] else "💎")
+
+        rows = [full[i:i+5] for i in range(0, GRID, 5)]
+        grid_text = "\n".join([" ".join(r) for r in rows])
+
+        await query.edit_message_text(f"""
+╔═══━━━─── • ───━━━═══╗
+    💀 𝐆𝐀𝐌𝐄 𝐎𝐕𝐄𝐑 💀
+╚═══━━━─── • ───━━━═══╝
+
+━━━━━━━━━━━━━━━━━━━━━━
+👤 {user.mention_html()}
+━━━━━━━━━━━━━━━━━━━━━━
+
+{grid_text}
+
+━━━━━━━━━━━━━━━━━━━━━━
+💸 𝐋𝐨𝐬𝐭 → ₹{game["bet"]}
+━━━━━━━━━━━━━━━━━━━━━━
+""", parse_mode="HTML")
+
+        del mines_games[user.id]
+        return
+
+    # 💎 SAFE
+    game["multi"] = round(1 + len(game["revealed"]) * (0.08 + game["bomb_count"] * 0.01), 2)
+
+    await query.edit_message_text(
+        ui_text(user, game),
+        reply_markup=grid_buttons(user.id),
+        parse_mode="HTML"
+    )
+
+
+
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
@@ -5452,6 +5646,7 @@ def main():
     app.add_handler(CommandHandler("dbet", dbet))
     app.add_handler(CommandHandler("slot", slot))
     app.add_handler(CommandHandler("slotlb", slot_leaderboard))
+    app.add_handler(CommandHandler("mines", mines))
     
     app.add_handler(CommandHandler("userinfo", userinfo))
     
@@ -5465,6 +5660,8 @@ def main():
     app.add_handler(CallbackQueryHandler(button_callback, pattern="^start_"))
     
     app.add_handler(CallbackQueryHandler(button, pattern="^(num_|bet_)"))
+    
+    app.add_handler(CallbackQueryHandler(mine_click, pattern="mine_|cashout"))
     
     app.add_handler(CallbackQueryHandler(userinfo_buttons))
 
