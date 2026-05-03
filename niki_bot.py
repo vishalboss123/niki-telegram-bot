@@ -5153,7 +5153,7 @@ def main():
     app.add_handler(CommandHandler("tmute", tmute_cmd))
     app.add_handler(CommandHandler("tban", tban_cmd))
     app.add_handler(CommandHandler("card", card))
-    app.add_handler(CommandHandler("join", join_bet))
+    app.add_handler(CommandHandler("join", joinbet))
     app.add_handler(CommandHandler("flip", flip))
     app.add_handler(CommandHandler("coin", coin))
     app.add_handler(CommandHandler("cduel", cduel))
