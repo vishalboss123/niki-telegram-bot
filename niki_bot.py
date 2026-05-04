@@ -5523,32 +5523,37 @@ async def wordseek(update: Update, context: ContextTypes.DEFAULT_TYPE):
    🎮 𝐖𝐎𝐑𝐃𝐒𝐄𝐄𝐊 𝐆𝐀𝐌𝐄 🎮
 ╚═══━━━─── • ───━━━═══╝
 
-🧠 Guess the hidden English word!
-
+🧠 𝐆ᴜᴇꜱꜱ 𝐓ʜᴇ 𝐇ɪᴅᴅᴇɴ 𝐄ɴɢʟɪꜱʜ 𝐖ᴏʀᴅ!
+━━━━━━━━━━━━━━━━━━━━━━
 🎯 𝐇𝐎𝐖 𝐓𝐎 𝐏𝐋𝐀𝐘:
-• Start game using:
-   /new4  → 4 letter word
-   /new5  → 5 letter word
-   /new6  → 6 letter word
+• 𝐒ᴛᴀʀᴛ 𝐆ᴀᴍᴇ 𝐔ꜱɪɴɢ:
+   /new4  → 4 𝐋ᴇᴛᴛᴇʀ 𝐖ᴏʀᴅ
+   /new5  → 5 𝐋ᴇᴛᴛᴇʀ 𝐖ᴏʀᴅ 
+   /new6  → 6 𝐋ᴇᴛᴛᴇʀ 𝐖ᴏʀᴅ
 
-• Type word to guess ✍️
-• You have 30 chances
+•𝐄ɴᴅ 𝐘ᴏᴜʀ 𝐑ᴜɴɴɪɴɢ 𝐆ᴀᴍᴇ:
+   /end --> 𝐄ɴᴅ 𝐘ᴏᴜʀ 𝐆ᴀᴍᴇ
+   
+• 𝐓ʏᴩᴇ 𝐖ᴏʀᴅ 𝐓ᴏ 𝐆ᴜᴇꜱꜱ ✍️
+• 𝐘ᴏᴜ 𝐇ᴀᴠᴇ 30 𝐂ʜᴀɴᴄᴇꜱ
 
+━━━━━━━━━━━━━━━━━━━━━━
 🎨 𝐂𝐎𝐋𝐎𝐑 𝐒𝐘𝐒𝐓𝐄𝐌:
-🟩 = Correct place  
-🟨 = Wrong place  
-🟥 = Not in word  
-
-💡 Hint available after 20 tries!
-
+🟩 = 𝐂ᴏʀᴇᴇᴄᴛ 𝐏ʟᴀᴄᴇ
+🟨 = 𝐖ʀᴏɴɢ 𝐏ʟᴀᴄᴇ
+🟥 = 𝐍ᴏᴛ 𝐈ɴ 𝐖ᴏʀᴅ 
+━━━━━━━━━━━━━━━━━━━━━━
+💡 🅷︎int 🅰︎vailable 🅰︎fter 20 🆃︎ries!
+━━━━━━━━━━━━━━━━━━━━━━
 🏆 Win = 💰 Coins + 🏅 Badges
-
+━━━━━━━━━━━━━━━━━━━━━━
 📊 Commands:
-• /wordlb → Leaderboard  
-• /wprofile → Your Profile  
-• /wbadges → Your Badges  
-
-🔥 Become the TOP PLAYER 👑
+• /wordlb → 𝐋eaderbord 
+• /wprofile → 𝐘our 𝐏rofile  
+• /wbadges → 𝐘our 𝐁adges
+━━━━━━━━━━━━━━━━━━━━━━
+🔥 𝐁ᴇᴄᴏᴍᴇ 𝐓ʜᴇ 𝐓ᴏᴩ 𝐏ʟᴀʏᴇʀ👑
+━━━━━━━━━━━━━━━━━━━━━━
 """
 
     await update.message.reply_text(text)
@@ -5600,7 +5605,7 @@ async def new_game(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if games.find_one({"_id": chat_id}):
         return await update.message.reply_text(
-            f"{FONT}\n⚠️ Game already running!"
+            f"{FONT}\n⚠️ 𝐆ame 𝐀lready 𝐑unning!"
         )
     doc = words.aggregate([{"$match": {"size": size}}, {"$sample": {"size": 1}}])
     doc = list(doc)
@@ -5657,7 +5662,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if not valid:
          return await update.message.reply_text(
-            f"{FONT}\n❌ Ye valid English word nahi hai!"
+            f"{FONT}\n❌ 𝐘e 𝐕alid 𝐄nglish 𝐖ord 𝐍ehi 𝐇ai!"
         )
 
     games.update_one({"_id": chat_id}, {"$inc": {"attempts": 1}})
