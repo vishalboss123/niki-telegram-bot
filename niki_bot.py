@@ -5484,7 +5484,7 @@ async def mine_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 #========================WORDSEEK========================
 
-import aiohttp
+
 import asyncio
 
 checked_words = {}
