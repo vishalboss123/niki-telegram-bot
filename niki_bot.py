@@ -6138,7 +6138,7 @@ def main():
     app.add_handler(CommandHandler("addword5", add_word))
     app.add_handler(CommandHandler("addword6", add_word))
     app.add_handler(CommandHandler("userinfo", userinfo))
-    app.add_handler(commandHandler("end", end_game))
+    app.add_handler(commandHandler("end", end))
     app.add_handler(CommandHandler("wordlb", word_leaderboard))
     
     # ================= CALLBACKS =================
