@@ -5516,7 +5516,42 @@ words = db["words"]   # 👈 NEW COLLECTION
 
 WIN_REWARD = 1000
 FONT = "𝐖𝐨𝐫𝐝𝐒𝐞𝐞𝐤 𝐆𝐚𝐦𝐞"
+#============WORDSEEK========================
+async def wordseek(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    text = f"""
+╔═══━━━─── • ───━━━═══╗
+   🎮 𝐖𝐎𝐑𝐃𝐒𝐄𝐄𝐊 𝐆𝐀𝐌𝐄 🎮
+╚═══━━━─── • ───━━━═══╝
 
+🧠 Guess the hidden English word!
+
+🎯 𝐇𝐎𝐖 𝐓𝐎 𝐏𝐋𝐀𝐘:
+• Start game using:
+   /new4  → 4 letter word
+   /new5  → 5 letter word
+   /new6  → 6 letter word
+
+• Type word to guess ✍️
+• You have 30 chances
+
+🎨 𝐂𝐎𝐋𝐎𝐑 𝐒𝐘𝐒𝐓𝐄𝐌:
+🟩 = Correct place  
+🟨 = Wrong place  
+🟥 = Not in word  
+
+💡 Hint available after 20 tries!
+
+🏆 Win = 💰 Coins + 🏅 Badges
+
+📊 Commands:
+• /wordlb → Leaderboard  
+• /wprofile → Your Profile  
+• /wbadges → Your Badges  
+
+🔥 Become the TOP PLAYER 👑
+"""
+
+    await update.message.reply_text(text)
 # ================= CHECK =================
 def check(secret, guess):
     res = []
@@ -6088,6 +6123,7 @@ def main():
     app.add_handler(CommandHandler("slot", slot))
     app.add_handler(CommandHandler("slotlb", slot_leaderboard))
     app.add_handler(CommandHandler("mines", mines))
+    app.add_handler(CommandHandler("wordseek", wordseek))
     app.add_handler(CommandHandler("new4", new_game))
     app.add_handler(CommandHandler("new5", new_game))
     app.add_handler(CommandHandler("new6", new_game))
