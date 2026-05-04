@@ -5596,7 +5596,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     games.update_one({"_id": chat_id}, {"$push": {"grid": row}})
 
-    games.update_one({"_id": chat_id}
+    games.update_one({"_id": chat_id})
     grid = "\n".join(game["grid"])
 
     await update.message.reply_text(
