@@ -5484,7 +5484,28 @@ async def mine_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 #========================WORDSEEK========================
 
+import aiohttp
+import asyncio
 
+checked_words = {}
+
+async def is_real_word(word):
+    if word in checked_words:
+        return checked_words[word]
+
+    url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
+
+    try:
+        timeout = aiohttp.ClientTimeout(total=1.5)
+
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.get(url) as res:
+                ok = res.status == 200
+                checked_words[word] = ok
+                return ok
+    except:
+        return True  # API fail → allow
+        
 # ================= MONGO =================
 client = MongoClient("YOUR_MONGO_URL")
 
@@ -5537,9 +5558,15 @@ async def add_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ================= NEW GAME =================
 async def new_game(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
     uid = update.effective_user.id
     size = int(update.message.text.replace("/new",""))
+    
 
+    if games.find_one({"_id": chat_id}):
+        return await update.message.reply_text(
+            f"{FONT}\n⚠️ Game already running!"
+        )
     doc = words.aggregate([{"$match": {"size": size}}, {"$sample": {"size": 1}}])
     doc = list(doc)
 
@@ -5585,7 +5612,18 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # ❌ wrong length ignore
     if len(text) != size:
-        return
+    return
+
+    # 🔥 REAL WORD CHECK (FAST + SAFE)
+    try:
+        valid = await asyncio.wait_for(is_real_word(text), timeout=1)
+    except:
+        valid = True
+
+    if not valid:
+         return await update.message.reply_text(
+            f"{FONT}\n❌ Ye valid English word nahi hai!"
+        )
 
     games.update_one({"_id": chat_id}, {"$inc": {"attempts": 1}})
     game["attempts"] += 1
@@ -5608,34 +5646,64 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"💡 HINT:\n{game['hint']}")
 
     # ================= WIN =================
+    # ================= WIN =================
     if text == secret:
+        user_data = users.find_one({"_id": uid}) or {}
+        old_wins = user_data.get("word_wins", 0)
+
+        # 🔥 UPDATE DATA
         users.update_one(
             {"_id": uid},
-            {"$inc": {"coins": WIN_REWARD}},
+            {
+                "$inc": {
+                    "coins": WIN_REWARD,
+                    "word_wins": 1
+                },
+                "$set": {
+                    "name": update.effective_user.first_name
+                }
+            },
             upsert=True
         )
 
-        games.delete_one({"_id": uid})
+        new_wins = old_wins + 1
 
-        first = update.effective_user.first_name or ""
-        last = update.effective_user.last_name or ""
-        name = (first + " " + last).strip()
+        games.delete_one({"_id": chat_id})
 
+        # 👤 USER LINK
+        name = update.effective_user.first_name
         user_link = f"<a href='tg://user?id={uid}'>{name}</a>"
+
+        # 🎉 WIN MESSAGE
         await update.message.reply_text(
             f"""
-{FONT}
+  ━━━━━━━━━━━━━━━━━━━━━━
+    {FONT}
 
-🎉 WINNER: {user_link}
+    🎉 WINNER: {user_link}
 
-💝 WORD: {secret}
+    💝 WORD: {secret}
 
-💰 +{WIN_REWARD} COINS
-🏆 GG BRO!
-""",
+    💰 +{WIN_REWARD} COINS
+    🏆 GG BRO!
+   ━━━━━━━━━━━━━━━━━━━━━━
+    """,
             parse_mode="HTML"
         )
-        return
+
+        # 🏅 BADGE UNLOCK SYSTEM
+        if new_wins == 5:
+            await update.message.reply_text("🎉 Badge Unlocked: 🥉 Rookie!")
+        elif new_wins == 10:
+            await update.message.reply_text("🎉 Badge Unlocked: 🥈 Skilled!")
+        elif new_wins == 20:
+            await update.message.reply_text("🎉 Badge Unlocked: 🥇 Pro!")
+        elif new_wins == 50:
+            await update.message.reply_text("🎉 Badge Unlocked: 👑 Legend!")
+        elif new_wins == 100:
+            await update.message.reply_text("🎉 Badge Unlocked: 💎 Master!")
+
+         return
 
     # ================= LOSE =================
     if att >= 30:
@@ -5644,7 +5712,267 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"{FONT}\n❌ GAME OVER\nWORD WAS: {secret}"
         )
 
+#=====================END============================
+async def end_game(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
 
+    game = games.find_one({"_id": chat_id})
+    if not game:
+        return await update.message.reply_text(f"{FONT}\n❌ No game running")
+
+    secret = game["word"]
+    games.delete_one({"_id": chat_id})
+
+    await update.message.reply_text(
+        f"{FONT}\n🛑 Game Ended!\n💝 Word was: {secret}"
+)
+
+#=====================WORDSEEKLB======================
+async def word_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    top = users.find().sort("word_wins", -1).limit(10)
+
+    text = f"𝐁ɪꜱʜᴀʟ 𝐌ɪɴɪ 𝐆ᴀᴍᴇ\n🏆 𝐖𝐨𝐫𝐝𝐒𝐞𝐞𝐤 𝐋𝐞𝐚𝐝𝐞𝐫𝐛𝐨𝐚𝐫𝐝\n\n"
+
+    medals = ["🥇", "🥈", "🥉"]
+
+    rank = 1
+    for user in top:
+        uid = user["_id"]
+        name = user.get("name", "Player")
+        wins = user.get("word_wins", 0)
+        coins = user.get("coins", 0)
+
+        user_link = f"<a href='tg://user?id={uid}'>{name}</a>"
+
+        # 🎖 Medal
+        if rank <= 3:
+            prefix = medals[rank-1]
+        else:
+            prefix = f"{rank}."
+
+        # 👑 Title
+        if rank == 1:
+            title = "👑 Word King"
+        elif rank == 2:
+            title = "⚡ Word Master"
+        elif rank == 3:
+            title = "🔥 Word Pro"
+        else:
+            title = "🎮 Player"
+
+        text += f"{prefix} {user_link}\n{title}\n🏆 Wins: {wins} | 💰 Coins: {coins}\n\n"
+
+        rank += 1
+
+    await update.message.reply_text(text, parse_mode="HTML")
+
+#=====================PROFILE=========================
+async def wprofile(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    uid = update.effective_user.id
+    name = update.effective_user.first_name
+
+    user = users.find_one({"_id": uid}) or {}
+
+    coins = user.get("coins", 0)
+    wins = user.get("word_wins", 0)
+
+    # 🎖 TITLE SYSTEM
+    if wins >= 50:
+        title = "👑 Legend"
+    elif wins >= 20:
+        title = "🔥 Pro Player"
+    elif wins >= 10:
+        title = "⚡ Skilled Player"
+    else:
+        title = "🎮 Beginner"
+
+    # 📊 PROGRESS BAR (0–50)
+    max_wins = 50
+    progress_ratio = min(wins / max_wins, 1)  # cap at 1
+    filled = int(progress_ratio * 10)
+    empty = 10 - filled
+    bar = "▓" * filled + "░" * empty
+
+    # 🏅 BADGE SYSTEM
+    badges = []
+
+    if wins >= 5:
+        badges.append("🥉 Rookie")
+    if wins >= 10:
+        badges.append("🥈 Skilled")
+    if wins >= 20:
+        badges.append("🥇 Pro")
+    if wins >= 50:
+        badges.append("👑 Legend")
+    if wins >= 100:
+        badges.append("💎 Master")
+
+    badge_text = " | ".join(badges) if badges else "❌ No badges yet"
+
+    # 🎨 FINAL TEXT UI
+    text = f"""
+╔═══━━━─── • ───━━━═══╗
+ 👤 𝗪𝗢𝗥𝗗 𝐏𝐑𝐎𝐅𝐈𝐋𝐄 𝐂𝐀𝐑𝐃 👤
+╚═══━━━─── • ───━━━═══╝
+
+👤 𝐍𝐚𝐦𝐞:
+<a href='tg://user?id={uid}'>{name}</a>
+
+🎖 𝐓𝐢𝐭𝐥𝐞:
+{title}
+
+╭─〔 📊 𝐒𝐓𝐀𝐓𝐒 〕─╮
+🏆 𝐖𝐢𝐧𝐬   : {wins}
+💰 𝐂𝐨𝐢𝐧𝐬 : {coins}
+╰──────────────╯
+
+📈 𝐏𝐫𝐨𝐠𝐫𝐞𝐬𝐬:
+[{bar}] {wins}/{max_wins}
+
+🏅 𝐁𝐚𝐝𝐠𝐞𝐬:
+{badge_text}
+
+⚡ 𝐊𝐞𝐞𝐩 𝐏𝐥𝐚𝐲𝐢𝐧𝐠!
+🔥 𝐁𝐞𝐜𝐨𝐦𝐞 𝐓𝐨𝐩 𝐏𝐥𝐚𝐲𝐞𝐫
+"""
+
+    await update.message.reply_text(text, parse_mode="HTML")
+
+#======================BADGES=========================
+OWNER_ID = 123456789  # 🔥 yaha apna Telegram user id daalo
+
+async def wbadges(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    # 👇 TARGET USER (reply ya self)
+    if update.message.reply_to_message:
+        target = update.message.reply_to_message.from_user
+    else:
+        target = update.effective_user
+
+    uid = target.id
+    name = target.first_name
+
+    user = users.find_one({"_id": uid}) or {}
+
+    wins = user.get("word_wins", 0)
+    coins = user.get("coins", 0)
+
+    # ================= OWNER SPECIAL =================
+    if uid == OWNER_ID:
+        text = f"""
+╔═══━━━─── • ───━━━═══╗
+  👑 𝐎𝐖𝐍𝐄𝐑 𝐕𝐈𝐏 𝐂𝐀𝐑𝐃 👑
+╚═══━━━─── • ───━━━═══╝
+
+👤 Owner:
+<a href='tg://user?id={uid}'>{name}</a>
+
+💎 𝐕𝐈𝐏 𝐒𝐓𝐀𝐓𝐔𝐒:
+♾️ 𝐈𝐍𝐅𝐈𝐍𝐈𝐓𝐘 𝐑𝐀𝐍𝐊
+
+🌟 Top Badge:
+👑✨ 𝐒𝐔𝐏𝐑𝐄𝐌𝐄 𝐎𝐖𝐍𝐄𝐑 ✨👑
+
+🏅 Badges:
+✨ 💎∞ GOD MODE
+✨ 👑 KING OF ALL
+✨ 🔥 UNSTOPPABLE
+✨ ⚡ SYSTEM MASTER
+
+💰 Coins: ∞
+🏆 Wins: ∞
+
+🔥 Respect the Owner 😎
+"""
+        return await update.message.reply_text(text, parse_mode="HTML")
+     # ================= RANK SYSTEM =================
+    top_users = list(users.find().sort("word_wins", -1))
+    rank = None
+
+    for i, u in enumerate(top_users, start=1):
+        if u["_id"] == uid:
+            rank = i
+            break     
+    # ================= NORMAL USER =================
+
+    # 📊 PROGRESS
+    max_wins = 50
+    progress_ratio = min(wins / max_wins, 1)
+    filled = int(progress_ratio * 10)
+    empty = 10 - filled
+    bar = "▓" * filled + "░" * empty
+    # ================= RANK BADGE =================
+    if rank == 1:
+        top_badge = "🌈✨ 𝐑𝐀𝐈𝐍𝐁𝐎𝐖 𝐊𝐈𝐍𝐆 ✨🌈"
+    elif rank == 2:
+        top_badge = "👑🔥 𝐄𝐋𝐈𝐓𝐄 𝐊𝐈𝐍𝐆 🔥👑"
+    elif rank == 3:
+        top_badge = "🥇⚡ 𝐂𝐇𝐀𝐌𝐏𝐈𝐎𝐍 ⚡🥇"
+    else:
+        top_badge = None
+        
+    # 🏅 BADGES
+    badge_data = []
+
+    if wins >= 100:
+        badge_data.append(("💎 Master", "💎✨ MASTER ✨💎"))
+    if wins >= 50:
+        badge_data.append(("👑 Legend", "👑✨ LEGEND ✨👑"))
+    if wins >= 20:
+        badge_data.append(("🥇 Pro", "🥇🔥 PRO 🔥"))
+    if wins >= 10:
+        badge_data.append(("🥈 Skilled", "🥈⚡ SKILLED ⚡"))
+    if wins >= 5:
+        badge_data.append(("🥉 Rookie", "🥉 Rookie"))
+
+    # 🎖 TITLE
+    if wins >= 50:
+        title = "👑 Legend"
+    elif wins >= 20:
+        title = "🔥 Pro Player"
+    elif wins >= 10:
+        title = "⚡ Skilled Player"
+    else:
+        title = "🎮 Beginner"
+
+    # 🌟 TOP BADGE
+    top_badge = badge_data[0][1] if badge_data else "❌ None"
+
+    # 🎨 UI
+    text = f"""
+╔═══━━━─── • ───━━━═══╗
+      🏅 𝐁𝐀𝐃𝐆𝐄𝐒 𝐏𝐑𝐎 🏅
+╚═══━━━─── • ───━━━═══╝
+
+👤 Player:
+<a href='tg://user?id={uid}'>{name}</a>
+
+🎖 Title:
+{title}
+
+🌟 Top Badge:
+{top_badge}
+
+╭─〔 📊 WORDSEEK 〕─╮
+🏆 Wins   : {wins}
+💰 Coins : {coins}
+╰──────────────╯
+
+📈 Progress:
+[{bar}] {wins}/{max_wins}
+
+🏅 All Badges:
+"""
+
+    if badge_data:
+        for normal, styled in badge_data:
+            text += f"\n✨ {styled}"
+    else:
+        text += "\n❌ No badges unlocked"
+
+    text += "\n\n🔥 Keep grinding & become legend!"
+
+    await update.message.reply_text(text, parse_mode="HTML")
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
@@ -5763,10 +6091,13 @@ def main():
     app.add_handler(CommandHandler("new4", new_game))
     app.add_handler(CommandHandler("new5", new_game))
     app.add_handler(CommandHandler("new6", new_game))
+    app.add_handler(CommandHandler("wprofile", wprofile))
+    app.add_handler(CommandHandler("wbadges", wbadges))
     app.add_handler(CommandHandler("addword4", add_word))
     app.add_handler(CommandHandler("addword5", add_word))
     app.add_handler(CommandHandler("addword6", add_word))
     app.add_handler(CommandHandler("userinfo", userinfo))
+    app.add_handler(CommandHandler("wordlb", word_leaderboard))
     
     # ================= CALLBACKS =================
     app.add_handler(CallbackQueryHandler(accept, pattern="^marry_acc_"))
