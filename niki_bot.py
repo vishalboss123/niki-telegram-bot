@@ -5703,7 +5703,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         elif new_wins == 100:
             await update.message.reply_text("🎉 Badge Unlocked: 💎 Master!")
 
-         return
+             return
 
     # ================= LOSE =================
     if att >= 30:
