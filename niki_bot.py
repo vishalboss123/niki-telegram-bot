@@ -5612,7 +5612,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # ❌ wrong length ignore
     if len(text) != size:
-    return
+        return
 
     # 🔥 REAL WORD CHECK (FAST + SAFE)
     try:
