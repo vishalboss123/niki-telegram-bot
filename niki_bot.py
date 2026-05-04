@@ -5621,7 +5621,8 @@ async def new_game(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     doc = doc[0]
 
-    games.find_one({"_id": chat_id})  
+    games.update_one(
+        {"_id": chat_id},
         {"$set": {
             "word": doc["word"],
             "hint": doc["hint"],
