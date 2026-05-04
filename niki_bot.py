@@ -5753,7 +5753,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
 #=====================END============================
-async def end_game(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def end(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
 
     game = games.find_one({"_id": chat_id})
