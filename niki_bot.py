@@ -5566,10 +5566,11 @@ async def new_game(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ================= HANDLE =================
 async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    uid = update.effective_user.id
-    text = update.message.text.lower()
+    chat_id = update.effective_chat.id
 
-    game = games.find_one({"_id": uid})
+    raw = update.message.text.lower()
+    text = re.sub(r'[^a-z]', '', raw)   # 🔥 only letters allowed
+    game = games.find_one({"_id": chat_id})
 
     # ❌ GAME NAHI HAI TOH KUCH NAHI KARNA
     if not game:
@@ -5586,16 +5587,16 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if len(text) != size:
         return
 
-    games.update_one({"_id": uid}, {"$inc": {"attempts": 1}})
+    games.update_one({"_id": chat_id}, {"$inc": {"attempts": 1}})
     game["attempts"] += 1
     att = game["attempts"]
 
     colors = check(secret, text)
     row = f"{' '.join(colors)}  = {text.upper()}"
 
-    games.update_one({"_id": uid}, {"$push": {"grid": row}})
+    games.update_one({"_id": chat_id}, {"$push": {"grid": row}})
 
-    game = games.find_one({"_id": uid})
+    games.update_one({"_id": chat_id}
     grid = "\n".join(game["grid"])
 
     await update.message.reply_text(
@@ -5616,8 +5617,11 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         games.delete_one({"_id": uid})
 
-        user_link = f"<a href='tg://user?id={uid}'>PLAYER</a>"
+        first = update.effective_user.first_name or ""
+        last = update.effective_user.last_name or ""
+        name = (first + " " + last).strip()
 
+        user_link = f"<a href='tg://user?id={uid}'>{name}</a>"
         await update.message.reply_text(
             f"""
 {FONT}
