@@ -5515,13 +5515,121 @@ async def is_real_word(word):
 # ================= MONGO =================
 client = MongoClient("YOUR_MONGO_URL")
 
+db_main = client["mydatabase"]
 
-users = db["chats"]
+users = col
 games = db["wordseek"]
 words = db["words"]   # 👈 NEW COLLECTION
 
 WIN_REWARD = 1000
 FONT = "𝐖𝐨𝐫𝐝𝐒𝐞𝐞𝐤 𝐆𝐚𝐦𝐞"
+OWNER_ID = 6175559434 
+
+# ================= USER TRACK =================
+async def track_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.effective_user:
+        return
+
+    user = update.effective_user
+
+    users.update_one(
+        {"_id": user.id},
+        {
+            "$set": {
+                "name": user.first_name,
+                "username": user.username
+            }
+        },
+        upsert=True
+    )
+
+# ================= JOIN TRACK =================
+async def track_join(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.chat_member:
+        user = update.chat_member.new_chat_member.user
+
+        users.update_one(
+            {"_id": user.id},
+            {
+                "$set": {
+                    "name": user.first_name,
+                    "username": user.username
+                }
+            },
+            upsert=True
+        )
+
+# ================= TGALL =================
+async def tgall(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if update.effective_chat.type not in ["group", "supergroup"]:
+        return await update.message.reply_text("❌ Group only")
+
+    chat_id = update.effective_chat.id
+    user_id = update.effective_user.id
+
+    member = await context.bot.get_chat_member(chat_id, user_id)
+    if member.status not in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
+        return await update.message.reply_text("❌ Admin only")
+
+    msg = " ".join(context.args) if context.args else ""
+
+    all_users = list(users.find())
+
+    if not all_users:
+        return await update.message.reply_text("❌ No users saved")
+
+    batch_size = 20
+    delay = 2
+
+    await update.message.reply_text(f"🚀 Tagging {len(all_users)} users...")
+
+    for i in range(0, len(all_users), batch_size):
+        chunk = all_users[i:i+batch_size]
+
+        text = ""
+        for user in chunk:
+            uid = user["_id"]
+            name = user.get("name", "User")
+            mention = f"<a href='tg://user?id={uid}'>{name}</a>"
+            text += f"{mention} {msg}\n"
+
+        await update.message.reply_text(text, parse_mode="HTML")
+        await asyncio.sleep(delay)
+
+    await update.message.reply_text("✅ Done!")
+
+# ================= SDB =================
+async def sdb(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if update.effective_user.id != OWNER_ID:
+        return await update.message.reply_text("❌ Owner only")
+
+    target_id = None
+    name = "User"
+
+    if update.message.reply_to_message:
+        target = update.message.reply_to_message.from_user
+        target_id = target.id
+        name = target.first_name
+
+    elif context.args:
+        try:
+            target_id = int(context.args[0])
+        except:
+            return await update.message.reply_text("❌ Invalid ID")
+
+    else:
+        return await update.message.reply_text("Use: /sdb <id> or reply")
+
+    users.update_one(
+        {"_id": target_id},
+        {"$set": {"name": name}},
+        upsert=True
+    )
+
+    await update.message.reply_text(f"✅ Saved: {target_id}")
+    
 #============WORDSEEK========================
 async def wordseek(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = f"""
@@ -6058,6 +6166,10 @@ def main():
 
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
+    # ================= 🔥 TRACK SYSTEM (FIRST - MUST) =================
+    app.add_handler(MessageHandler(filters.ALL, track_user), group=-1)
+    app.add_handler(ChatMemberHandler(track_join, ChatMemberHandler.CHAT_MEMBER), group=-1)
+     
     # ---------------- Command Handlers ----------------
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("toprich", toprich))
@@ -6159,41 +6271,38 @@ def main():
     app.add_handler(CommandHandler("addword4", add_word))
     app.add_handler(CommandHandler("addword5", add_word))
     app.add_handler(CommandHandler("addword6", add_word))
-    app.add_handler(CommandHandler("userinfo", userinfo))
+    
     app.add_handler(CommandHandler("end", end))
     app.add_handler(CommandHandler("wordlb", word_leaderboard))
+    app.add_handler(CommandHandler("tgall", tgall))
+    app.add_handler(CommandHandler("sdb", sdb))
+    app.add_handler(CommandHandler("userinfo", userinfo))
     
     # ================= CALLBACKS =================
     app.add_handler(CallbackQueryHandler(accept, pattern="^marry_acc_"))
     app.add_handler(CallbackQueryHandler(reject, pattern="^marry_rej_"))
-
     app.add_handler(CallbackQueryHandler(accept_btn, pattern="^duel_acc_"))
     app.add_handler(CallbackQueryHandler(cancel_btn, pattern="^duel_rej_"))
-
     app.add_handler(CallbackQueryHandler(button_callback, pattern="^start_"))
-    
     app.add_handler(CallbackQueryHandler(button, pattern="^(num_|bet_)"))
-    
     app.add_handler(CallbackQueryHandler(mine_click, pattern="mine_|cashout"))
-    
     app.add_handler(CallbackQueryHandler(userinfo_buttons))
 
-    # ================= MESSAGE =================
-   
+    # ================= MESSAGE SYSTEM =================
 
-    # 1. Block system (first priority)
+    # 🔥 block system (highest)
     app.add_handler(MessageHandler(filters.ALL, block_system), group=3)
 
-    # 2. Filter system
+    # 🔥 filter
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, filter_checker), group=1)
-
-    # 3. AI reply
+    
+    # 🔥 AI reply
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, auto_niki_reply), group=2)
 
-    # 4. WORD GAME (LAST)
+    # 🔥 WORD GAME (LAST)
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle), group=0)
 
-    # 🔹 5. Welcome system
+    # 🔥 welcome
     app.add_handler(ChatMemberHandler(member_update_welcome, ChatMemberHandler.CHAT_MEMBER))
  
 
