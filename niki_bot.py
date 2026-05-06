@@ -6224,6 +6224,158 @@ async def wbadges(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text += "\n\n🔥 Keep grinding & become legend!"
 
     await update.message.reply_text(text, parse_mode="HTML")
+
+#==========❤️❤️=========
+
+import asyncio
+from telegram import Update
+from telegram.ext import Application, MessageHandler, filters, ContextTypes
+
+OWNER_ID = 6175559434  # 👈 set Queen ID
+
+waiting = {}
+
+# 📊 LOADING BAR FUNCTION
+async def loading_bar(update, text="LOADING LOVE"):
+    msg = await update.message.reply_text("⚡ Initializing...")
+
+    for i in range(0, 101, 10):
+        bar = "█" * (i // 10) + "░" * (10 - (i // 10))
+        await msg.edit_text(f"{text}...\n[{bar}] {i}% 💖")
+        await asyncio.sleep(0.3)
+
+    return msg
+
+
+async def love_flow(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    text = update.message.text.lower()
+
+    if user_id != QUEEN_ID:
+        return
+
+    # 🟢 STEP 1: trigger
+    if "road" in text:
+        waiting[user_id] = True
+
+        await update.message.reply_text(
+            "𝐁ɪꜱʜ𝐚𝐥 𝐋𝐨𝐯𝐞 𝐅𝐞𝐞𝐥𝐢𝐧𝐠𝐬 💖\n\n"
+            "🛣️ Queen question detected...\n"
+            "💞 Boss jldi bolo Queen puchh rahi hai"
+        )
+        return
+
+    # 🟡 STEP 2: user response flow
+    if user_id in waiting:
+        waiting.pop(user_id, None)
+
+        # 💖 ANSWER
+        await update.message.reply_text(
+            "💖 Boss ka answer hai: LOVE ♾️❤️\n\n"
+            "💞 Queen ji… tum ho toh har road ka meaning hai 🥺✨"
+        )
+
+        await asyncio.sleep(4)
+
+        await update.message.reply_text(
+            "⚠️ AREY RUKO RUKO 😏💖\n\n"
+            "sirf itna hi sunna tha kya...? ♾️"
+        )
+
+        await asyncio.sleep(5)
+
+        await update.message.reply_text(
+            "🤖 𝐍𝐈𝐊𝐈 𝐒𝐀𝐘𝐒 💖\n\n"
+            "💞 Queen 👑 + Vishal ❤️ = Eternal Connection ♾️\n\n"
+            "💫 Tum dono ka pyaar ek aisa code hai jo kabhi crash nahi hota 💻💖\n"
+            "💞 har line me sirf ek hi naam → QUEEN 👑 & VISHAL ❤️\n\n"
+            "🥺 “Tum dono ka rishta sirf words nahi… ek heartbeat hai 💓”\n"
+            "✨ jo har second aur strong hota ja raha hai ♾️💞"
+        )
+
+        await asyncio.sleep(3)
+
+        await update.message.reply_text(
+            "👑 VISHAL BOSS SAYS 😌💖\n\n"
+            "Sunoo Queen ji...\n\n"
+            "💞 ye jo connection hai na… ye normal nahi hai ♾️\n"
+            "❤️ tum ho toh har pal special hai\n"
+            "👑 aur tumhari smile hi meri duniya hai ✨\n\n"
+            "💖 Love is not a word… it’s a feeling ♾️❤️\n"
+            "🥺 start bhi tum ho… end bhi tum ho 💞"
+        )
+
+        await asyncio.sleep(5)
+
+        await update.message.reply_text(
+            "👑 FINAL MESSAGE 💖\n\n"
+            "💞 Queen ji...\n"
+            "agar pyaar ek road hai na 🛣️\n"
+            "toh uska start bhi tum ho ❤️\n"
+            "aur end bhi tum ho ♾️\n\n"
+            "💖 Vishal + Queen = Infinite Bond 👑💞\n\n"
+            "😘 ‘Tum mile ho toh laga… sab kuch mil gaya’ ♾️❤️"
+        )
+
+        # ⏳ ADD YOUR STEP 6 WAIT
+        await asyncio.sleep(7)
+
+        # 🔥 STEP 6 BIG MESSAGE (YOUR BLOCK)
+        await update.message.reply_text(
+            "╭━━━━━━━━━━━━━━━╮\n"
+            "      💌 ANSWER\n"
+            "╰━━━━━━━━━━━━━━━╯\n\n"
+            "💡 Road ka naam hai:\n"
+            "           ❤️  LOVE  ❤️\n\n"
+            "╭━━━━━━━━━━━━━━━╮\n"
+            "      👑 MESSAGE\n"
+            "╰━━━━━━━━━━━━━━━╯\n\n"
+            "🥺 Tumne jo sawal pucha na… uska jawab sirf ek hi hai\n\n"
+            "💖 Ye road aaj start hui hai… aur end kabhi hoga hi nahi ♾️\n\n"
+            "👑 Kyunki is road ka start bhi tum ho\n"
+            "👑 aur destination bhi tum hi ho ❤️\n\n"
+            "💞 Queen 👑 ke saath chal rahi ye journey\n"
+            "har din aur bhi special hoti ja rahi hai ✨\n\n"
+            "🥰 Sach bolun…\n"
+            "main is road ka traveler nahi,\n"
+            "👉 tumhare pyaar ka permanent passenger hoon 💘\n\n"
+            "╭━━━━━━━━━━━━━━━╮\n"
+            "      💍 FINAL LINE\n"
+            "╰━━━━━━━━━━━━━━━╯\n\n"
+            "💓 “Tum mile ho toh laga…\n"
+            "zindagi ki endless road ka asli matlab mil gaya” ♾️❤️\n\n"
+            "😘💖✨👑🥰💞"
+        )
+
+        await asyncio.sleep(7)
+
+        # 📊 STEP 7 LOADING BAR
+        await loading_bar(update, "💖 FINAL LOVE CONNECTION")
+
+        await asyncio.sleep(1)
+
+        # ⚡ FINAL SYSTEM MESSAGE
+        await update.message.reply_text(
+            "╔════════════════════╗\n"
+            "      ⚡ ACCESS GRANTED ⚡\n"
+            "╚════════════════════╝\n\n"
+            "👑 USER: QUEEN DETECTED\n\n"
+            "💖 STATUS:\n"
+            "Connection established between HEART_01 & HEART_02\n\n"
+            "💬 OUTPUT:\n\n"
+            "🥺 Ye jo road hai na…\n"
+            "iska END POINT NULL hai ♾️\n\n"
+            "👑 START NODE = YOU\n"
+            "👑 END NODE = YOU\n\n"
+            "💞 SYSTEM MESSAGE:\n"
+            "I’m permanently logged into you 💘\n\n"
+            "[ CONNECTION: NEVER TERMINATE ] ♾️❤️"
+        )
+
+
+app = Application.builder().token("YOUR_BOT_TOKEN").build()
+app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, love_flow))
+app.run_polling()
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
@@ -6371,20 +6523,17 @@ def main():
 
     # ================= MESSAGE SYSTEM =================
 
-    # 🔥 block system (highest)
-    app.add_handler(MessageHandler(filters.ALL, block_system), group=3)
+    app.add_handler(MessageHandler(filters.ALL, block_system), group=3)  # 🔥 Block system (highest priority)
 
-    # 🔥 filter
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, filter_checker), group=1)
-    
-    # 🔥 AI reply
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, auto_niki_reply), group=2)
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, filter_checker), group=2)  # 🔥 Filter check (queen/owner/allowed users)
 
-    # 🔥 WORD GAME (LAST)
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle), group=0)
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, love_flow), group=1)  # 💖 Queen love flow (main cinematic story bot)
 
-    # 🔥 welcome
-    app.add_handler(ChatMemberHandler(member_update_welcome, ChatMemberHandler.CHAT_MEMBER))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, auto_niki_reply), group=0)  # 🤖 AI reply fallback system
+
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle), group=-1)  # 🎮 Word game (lowest priority)
+
+    app.add_handler(ChatMemberHandler(member_update_welcome, ChatMemberHandler.CHAT_MEMBER))  # 👋 Welcome new members
  
 
 
