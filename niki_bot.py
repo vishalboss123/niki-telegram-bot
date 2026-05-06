@@ -318,15 +318,22 @@ def load_from_mongo():
     
 def save_data():
     global data
-    
+
+    # 🔥 CLEAN DATA (only safe types)
+    safe_data = {}
+
+    for k, v in data.items():
+        if isinstance(v, (dict, list, str, int, float, bool)):
+            safe_data[k] = v
+
     # JSON save (optional)
     with open(DATA_FILE, "w") as f:
-        json.dump(data, f, indent=2)
-    
+        json.dump(safe_data, f, indent=2)
+
     # 🔥 MongoDB save
     backup.update_one(
         {"_id": "main_data"},
-        {"$set": {"data": data}},
+        {"$set": {"data": safe_data}},
         upsert=True
     )
 # ------------------ USER HELP ------------------
