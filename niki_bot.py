@@ -3693,7 +3693,8 @@ async def tr(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ================= CONFIG =================
 
-YOUR_OWNER_ID = 6175559434  # 👉 apna Telegram user ID daal
+OWNER_ID = 6175559434
+OWNER_USERNAME = "YTT_BISHAL"# 👉 apna Telegram user ID daal
 
 # ================= STORAGE =================
 BOT_STATUS = {}  # {chat_id: True/False}
@@ -3705,7 +3706,7 @@ async def is_admin_or_owner(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
 
     # 👑 Owner always allowed
-    if user_id == YOUR_OWNER_ID:
+    if user_id == OWNER_ID:
         return True
 
     member = await context.bot.get_chat_member(chat.id, user_id)
@@ -3761,7 +3762,7 @@ async def block_system(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
 
     # 👑 OWNER bypass
-    if user_id == YOUR_OWNER_ID:
+    if user_id == OWNER_ID:
         return
 
     # 👑 ADMIN bypass
@@ -3790,7 +3791,7 @@ async def check_bot_active(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if status:
         return True
 
-    if user_id == YOUR_OWNER_ID:
+    if user_id == OWNER_ID:
         return True
 
     member = await context.bot.get_chat_member(chat.id, user_id)
@@ -5352,7 +5353,7 @@ def grid_buttons(uid):
         if i in game["revealed"]:
             txt = "💣" if i in game["bombs"] else "💎"
         else:
-            txt = "⬜"
+            txt = "💠"
 
         btns.append(InlineKeyboardButton(txt, callback_data=f"mine_{i}"))
 
@@ -5513,26 +5514,45 @@ async def is_real_word(word):
         return True  # API fail → allow
         
 # ================= MONGO =================
-client = MongoClient("YOUR_MONGO_URL")
+client = MongoClient(MONGO_URL)
 
+# ================= MAIN DATABASE =================
 db_main = client["mydatabase"]
 
-users = col
-games = db["wordseek"]
-words = db["words"]   # 👈 NEW COLLECTION
+# ================= COLLECTIONS =================
+# 🎮 WordSeek system
+users = db_main["wordseek"]          # players (wins, name)
+games = db_main["wordseek_games"]    # running games
+words = db_main["words"]             # word list
+
 
 WIN_REWARD = 1000
 FONT = "𝐖𝐨𝐫𝐝𝐒𝐞𝐞𝐤 𝐆𝐚𝐦𝐞"
-OWNER_ID = 6175559434 
 
-# ================= USER TRACK =================
+
+# ================= CONFIG =================
+OWNER_ID = 6175559434
+OWNER_USERNAME = "YTT_BISHAL"   # बिना @
+
+tracker = db_main["tracker"]
+
+
+# ================= OWNER CHECK =================
+def is_owner(user):
+    return (
+        user.id == OWNER_ID or
+        (user.username and user.username.lower() == OWNER_USERNAME.lower())
+    )
+
+
+# ================= AUTO USER TRACK =================
 async def track_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.effective_user:
         return
 
     user = update.effective_user
 
-    users.update_one(
+    tracker.update_one(
         {"_id": user.id},
         {
             "$set": {
@@ -5543,21 +5563,25 @@ async def track_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
         upsert=True
     )
 
-# ================= JOIN TRACK =================
-async def track_join(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.chat_member:
-        user = update.chat_member.new_chat_member.user
 
-        users.update_one(
-            {"_id": user.id},
-            {
-                "$set": {
-                    "name": user.first_name,
-                    "username": user.username
-                }
-            },
-            upsert=True
-        )
+# ================= AUTO JOIN TRACK =================
+async def track_join(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.chat_member:
+        return
+
+    user = update.chat_member.new_chat_member.user
+
+    tracker.update_one(
+        {"_id": user.id},
+        {
+            "$set": {
+                "name": user.first_name,
+                "username": user.username
+            }
+        },
+        upsert=True
+    )
+
 
 # ================= TGALL =================
 async def tgall(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -5565,21 +5589,22 @@ async def tgall(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_chat.type not in ["group", "supergroup"]:
         return await update.message.reply_text("❌ Group only")
 
+    user = update.effective_user
     chat_id = update.effective_chat.id
-    user_id = update.effective_user.id
 
-    member = await context.bot.get_chat_member(chat_id, user_id)
-    if member.status not in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
+    # 👉 Admin check
+    member = await context.bot.get_chat_member(chat_id, user.id)
+    if member.status not in ["administrator", "creator"]:
         return await update.message.reply_text("❌ Admin only")
 
     msg = " ".join(context.args) if context.args else ""
 
-    all_users = list(users.find())
+    all_users = list(tracker.find())
 
     if not all_users:
         return await update.message.reply_text("❌ No users saved")
 
-    batch_size = 20
+    batch_size = 15
     delay = 2
 
     await update.message.reply_text(f"🚀 Tagging {len(all_users)} users...")
@@ -5588,9 +5613,9 @@ async def tgall(update: Update, context: ContextTypes.DEFAULT_TYPE):
         chunk = all_users[i:i+batch_size]
 
         text = ""
-        for user in chunk:
-            uid = user["_id"]
-            name = user.get("name", "User")
+        for u in chunk:
+            uid = u["_id"]
+            name = u.get("name", "User")
             mention = f"<a href='tg://user?id={uid}'>{name}</a>"
             text += f"{mention} {msg}\n"
 
@@ -5598,33 +5623,57 @@ async def tgall(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await asyncio.sleep(delay)
 
     await update.message.reply_text("✅ Done!")
+    
 
 # ================= SDB =================
 async def sdb(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    if update.effective_user.id != OWNER_ID:
+    user = update.effective_user
+
+    # 👉 OWNER CHECK
+    if not is_owner(user):
         return await update.message.reply_text("❌ Owner only")
 
     target_id = None
     name = "User"
 
+    # 👉 reply se save
     if update.message.reply_to_message:
         target = update.message.reply_to_message.from_user
         target_id = target.id
         name = target.first_name
 
+    # 👉 username / id se
     elif context.args:
-        try:
-            target_id = int(context.args[0])
-        except:
-            return await update.message.reply_text("❌ Invalid ID")
+        arg = context.args[0]
+
+        # username
+        if arg.startswith("@"):
+            try:
+                chat = await context.bot.get_chat(arg)
+                target_id = chat.id
+                name = chat.first_name or chat.username
+            except:
+                return await update.message.reply_text("❌ Username not found")
+
+        # numeric id
+        else:
+            try:
+                target_id = int(arg)
+            except:
+                return await update.message.reply_text("❌ Invalid ID")
 
     else:
-        return await update.message.reply_text("Use: /sdb <id> or reply")
+        return await update.message.reply_text("Use:\n/sdb <id>\n/sdb @username\nor reply")
 
-    users.update_one(
+    # 👉 SAVE
+    tracker.update_one(
         {"_id": target_id},
-        {"$set": {"name": name}},
+        {
+            "$set": {
+                "name": name
+            }
+        },
         upsert=True
     )
 
@@ -5713,19 +5762,19 @@ async def add_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ================= NEW GAME =================
 async def new_game(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
-    uid = update.effective_user.id
     size = int(update.message.text.replace("/new",""))
-    
 
-    if games.find_one({"_id": chat_id}):
+    # ❌ already running
+    game = games.find_one({"_id": chat_id})
+    if game:
         return await update.message.reply_text(
-            f"{FONT}\n⚠️ 𝐆ame 𝐀lready 𝐑unning!"
+            f"{FONT}\n⚠️ Game already running!\n🎮 Join karke guess karo!"
         )
-    doc = words.aggregate([{"$match": {"size": size}}, {"$sample": {"size": 1}}])
-    doc = list(doc)
+
+    doc = list(words.aggregate([{"$match": {"size": size}}, {"$sample": {"size": 1}}]))
 
     if not doc:
-        return await update.message.reply_text("❌ No words found in DB")
+        return await update.message.reply_text("❌ No words found")
 
     doc = doc[0]
 
@@ -5742,7 +5791,15 @@ async def new_game(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     await update.message.reply_text(
-        f"{FONT}\n📊 0/30\n🎮 GAME STARTED"
+        f"""
+    🎯 𝐆ᴜᴇꜱꜱ 𝐎ɴʟʏ {size} 𝐋ᴇᴛᴛᴇʀ 𝐖ᴏʀᴅ! 🔤
+
+    {FONT}
+    📊 0/30
+
+    🎮 𝐆𝐀𝐌𝐄 𝐒𝐓𝐀𝐑𝐓𝐄𝐃
+    💡 Sab log guess kar sakte ho 😎
+    """
     )
 
 # ================= HANDLE =================
@@ -5792,20 +5849,31 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     game["attempts"] += 1
     att = game["attempts"]
 
-    # check result
+    # 🔥 result check
     colors = check(secret, text)
-    row = f"{' '.join(colors)}  = {text.upper()}"
 
+    # ✅ NAME ADD (MULTIPLAYER LOOK)
+    name = update.effective_user.first_name
+    row = f"{' '.join(colors)} ➤ {text.upper()} ({name})"
+
+    # save grid
     games.update_one({"_id": chat_id}, {"$push": {"grid": row}})
 
     # fetch updated grid
     game = games.find_one({"_id": chat_id})
     grid = "\n".join(game["grid"])
 
+    # 🔥 FINAL MESSAGE UI
     await update.message.reply_text(
-        f"{FONT}\n📊 {att}/30\n\n{grid}"
-    )
+        f"""
+🎯 𝐆ᴜᴇꜱꜱ 𝐎ɴʟʏ {size} 𝐋ᴇᴛᴛ𝐞𝐫 𝐖𝐨𝐫𝐝! 🔤
 
+{FONT}
+📊 {att}/30
+
+{grid}
+"""
+)
     # ================= HINT =================
     if att == 20:
         await update.message.reply_text(f"💡 HINT:\n{game['hint']}")
@@ -5822,7 +5890,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_data = users.find_one({"_id": uid}) or {}
         old_wins = user_data.get("word_wins", 0)
 
-        # 🔥 UPDATE DATA
+        # 🔥 UPDATE WORDSEEK DATA
         users.update_one(
             {"_id": uid},
             {
@@ -5837,32 +5905,38 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
             upsert=True
         )
 
+    # ================= 💰 REAL BALANCE ADD =================
+        real_user = get_user(uid, name)
+        real_user["money"] += WIN_REWARD
+        save_data()
+    # =====================================================
+
         new_wins = old_wins + 1
 
-        # 🗑 GAME DELETE (IMPORTANT)
+        # 🗑 GAME DELETE
         games.delete_one({"_id": chat_id})
 
         # 👤 CLICKABLE USER
         user_link = f"<a href='tg://user?id={uid}'>{name}</a>"
 
-        # 🎉 WIN MESSAGE
+        # 🎉 WIN MESSAGE (UPDATED UI)
         await update.message.reply_text(
             f"""
-    ━━━━━━━━━━━━━━━━━━━━━━
-    {FONT}
+━━━━━━━━━━━━━━━━━━━━━━
+{FONT}
 
-    🎉 WINNER: {user_link}
+🎉 WINNER: {user_link}
 
-    💝 WORD: {secret}
+💝 WORD: {secret}
 
-    💰 +{WIN_REWARD} COINS
-    🏆 GG BRO!
-    ━━━━━━━━━━━━━━━━━━━━━━
-    """,
-            parse_mode="HTML"
-        )
+💰 +{WIN_REWARD} Coins Added To Real Balance 💎
+🏆 GG BRO!
+━━━━━━━━━━━━━━━━━━━━━━
+""",
+        parse_mode="HTML"
+    )
 
-        # 🏅 BADGE UNLOCK SYSTEM
+        # 🏅 BADGE SYSTEM
         if new_wins == 5:
             await update.message.reply_text("🎉 Badge Unlocked: 🥉 Rookie!")
         elif new_wins == 10:
@@ -5874,7 +5948,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         elif new_wins == 100:
             await update.message.reply_text("🎉 Badge Unlocked: 💎 Master!")
 
-            return
+        return
     # ================= LOSE =================
     if att >= 30:
         games.delete_one({"_id": chat_id}) 
@@ -6009,7 +6083,7 @@ async def wprofile(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(text, parse_mode="HTML")
 
 #======================BADGES=========================
-OWNER_ID = 123456789  # 🔥 yaha apna Telegram user id daalo
+OWNER_ID = 6175559434 # 🔥 yaha apna Telegram user id daalo
 
 async def wbadges(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
