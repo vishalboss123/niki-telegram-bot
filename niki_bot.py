@@ -5873,7 +5873,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # ✅ NAME ADD (MULTIPLAYER LOOK)
     name = update.effective_user.first_name
-    row = f"{' '.join(colors)} ➤ {text.upper()} ({name})"
+    row = f"{' '.join(colors)} ➤ {text.upper()}"
 
     # save grid
     games.update_one({"_id": chat_id}, {"$push": {"grid": row}})
@@ -6410,7 +6410,562 @@ async def love_flow(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
 
+# ============================================================
+#                      💣 BOMB GAME 💣
+# ============================================================
 
+import random
+import asyncio
+import time
+
+bomb_games = {}
+
+# ============================================================
+# /bomb HELP + CREATE
+# ============================================================
+async def bomb_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if context.args:
+        return await bomb(update, context)
+
+    await update.message.reply_text(
+        """
+╔═══━━━─── • ───━━━═══╗
+     💣 𝐁𝐎𝐌𝐁 𝐆𝐀𝐌𝐄 💣
+╚═══━━━─── • ───━━━═══╝
+
+🎮 𝐇ᴏᴡ 𝐓ᴏ 𝐏ʟᴀʏ?
+
+━━━━━━━━━━━━━━━━━━━━━━
+
+💥 𝐒ᴛᴇᴘ 𝟏
+🎯 𝐂ʀᴇᴀᴛᴇ 𝐀 𝐆ᴀᴍᴇ
+
+👉 <code>/bomb 500</code>
+
+💰 𝐌ɪɴɪᴍᴜᴍ 𝐁ᴇᴛ:
+₹500
+
+━━━━━━━━━━━━━━━━━━━━━━
+
+💥 𝐒ᴛᴇᴘ 𝟐
+👥 𝐉ᴏɪɴ 𝐓ʜᴇ 𝐆ᴀᴍᴇ
+
+👉 <code>/bjoin 500</code>
+
+━━━━━━━━━━━━━━━━━━━━━━
+
+💥 𝐒ᴛᴇᴘ 𝟑
+💣 𝐏ᴀꜱꜱ 𝐓ʜᴇ 𝐁ᴏᴍʙ
+
+👉 <code>/pass</code>
+
+━━━━━━━━━━━━━━━━━━━━━━
+
+💥 𝐒ᴛᴇᴘ 𝟒
+🏃 𝐋ᴇᴀᴠᴇ 𝐓ʜᴇ 𝐆ᴀᴍᴇ
+
+👉 <code>/left</code>
+
+━━━━━━━━━━━━━━━━━━━━━━
+
+🏆 𝐋ᴀꜱᴛ 𝐏ʟᴀʏᴇʀ 𝐖ɪɴꜱ!
+
+💰 𝐑ᴇᴀʟ 𝐁ᴀʟᴀɴᴄᴇ 𝐑ᴇᴡᴀʀᴅ
+🔥 𝐀ᴜᴛᴏ 𝐏ɪɴ 𝐖ɪɴ
+🖼 𝐃𝐏 𝐖ɪɴ 𝐂ᴀʀᴅ
+👑 𝐂ʟɪᴄᴋᴀʙʟᴇ 𝐔ꜱᴇʀꜱ
+
+━━━━━━━━━━━━━━━━━━━━━━
+
+💣 𝐑ᴇᴀᴅʏ 𝐓ᴏ 𝐏ʟᴀʏ?
+""",
+        parse_mode="HTML"
+    )
+
+
+# ============================================================
+# CREATE GAME
+# ============================================================
+async def bomb(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    chat_id = update.effective_chat.id
+
+    if chat_id in bomb_games:
+        return await update.message.reply_text(
+            """
+╔═══━━━─── • ───━━━═══╗
+    💣 𝐁𝐎𝐌𝐁 𝐀𝐋𝐄𝐑𝐓 💣
+╚═══━━━─── • ───━━━═══╝
+
+⚠️ 𝐆ᴀᴍᴇ 𝐀ʟʀᴇᴀᴅʏ
+𝐑ᴜɴɴɪɴɢ!
+"""
+        )
+
+    try:
+        amount = int(context.args[0])
+    except:
+        return await update.message.reply_text(
+            """
+❌ 𝐔ꜱᴇ:
+<code>/bomb 500</code>
+""",
+            parse_mode="HTML"
+        )
+
+    if amount < 500:
+        return await update.message.reply_text(
+            """
+💰 𝐌ɪɴɪᴍᴜᴍ 𝐁ᴇᴛ:
+₹500
+"""
+        )
+
+    creator = update.effective_user
+
+    bomb_games[chat_id] = {
+        "amount": amount,
+        "players": {},
+        "started": False,
+        "allow_left": False
+    }
+
+    user_link = f"<a href='tg://user?id={creator.id}'>{creator.first_name}</a>"
+
+    await update.message.reply_text(
+        f"""
+╔═══━━━─── • ───━━━═══╗
+     💣 𝐁𝐎𝐌𝐁 𝐋𝐎𝐁𝐁𝐘 💣
+╚═══━━━─── • ───━━━═══╝
+
+👑 𝐂ʀᴇᴀᴛᴏʀ:
+{user_link}
+
+💰 𝐁ᴇᴛ:
+₹{amount}
+
+━━━━━━━━━━━━━━━━━━━━━━
+
+⚡ 𝐉ᴏɪɴ:
+<code>/bjoin {amount}</code>
+
+⏳ 𝐆ᴀᴍᴇ 𝐒ᴛᴀʀᴛ𝐬
+𝐈ɴ 1 𝐌ɪɴᴜᴛᴇ...
+""",
+        parse_mode="HTML"
+    )
+
+    await asyncio.sleep(60)
+
+    game = bomb_games.get(chat_id)
+
+    if not game:
+        return
+
+    if len(game["players"]) < 2:
+
+        del bomb_games[chat_id]
+
+        return await context.bot.send_message(
+            chat_id,
+            """
+❌ 𝐍ᴏᴛ 𝐄ɴᴏᴜɢʜ
+𝐏ʟᴀʏᴇʀꜱ!
+"""
+        )
+
+    await start_bomb_round(chat_id, context)
+
+
+# ============================================================
+# JOIN GAME
+# ============================================================
+async def bjoin(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    chat_id = update.effective_chat.id
+
+    if chat_id not in bomb_games:
+        return await update.message.reply_text(
+            "❌ 𝐍ᴏ 𝐁ᴏᴍʙ 𝐆ᴀᴍᴇ!"
+        )
+
+    game = bomb_games[chat_id]
+
+    if game["started"]:
+        return await update.message.reply_text(
+            "⚠️ 𝐆ᴀᴍᴇ 𝐀ʟʀᴇᴀᴅʏ 𝐒ᴛᴀʀᴛᴇᴅ!"
+        )
+
+    try:
+        amount = int(context.args[0])
+    except:
+        return await update.message.reply_text(
+            f"⚠️ 𝐔ꜱᴇ:\n/bjoin {game['amount']}"
+        )
+
+    user = update.effective_user
+
+    if user.id in game["players"]:
+        return await update.message.reply_text(
+            "⚠️ 𝐘ᴏᴜ 𝐀ʟʀᴇᴀᴅʏ 𝐉ᴏɪɴᴇᴅ!"
+        )
+
+    pdata = get_user(user.id, user.first_name)
+
+    if pdata["money"] < amount:
+        return await update.message.reply_text(
+            "❌ 𝐍ᴏᴛ 𝐄ɴᴏᴜɢʜ 𝐁ᴀʟᴀɴᴄᴇ!"
+        )
+
+    # 💸 CUT REAL BALANCE
+    pdata["money"] -= amount
+    save_data()
+
+    game["players"][user.id] = {
+        "name": user.first_name,
+        "bet": amount
+    }
+
+    user_link = f"<a href='tg://user?id={user.id}'>{user.first_name}</a>"
+
+    await update.message.reply_text(
+        f"""
+╔═══━━━─── • ───━━━═══╗
+       🎉 𝐉𝐎𝐈𝐍𝐄𝐃 🎉
+╚═══━━━─── • ───━━━═══╝
+
+👤 {user_link}
+
+💰 ₹{amount}
+𝐃ᴇᴘᴏꜱɪᴛᴇᴅ!
+
+👥 𝐏ʟᴀʏᴇʀꜱ:
+{len(game['players'])}
+""",
+        parse_mode="HTML"
+    )
+
+
+# ============================================================
+# START ROUND
+# ============================================================
+async def start_bomb_round(chat_id, context):
+
+    game = bomb_games[chat_id]
+
+    game["started"] = True
+
+    players = list(game["players"].keys())
+
+    holder = random.choice(players)
+
+    game["holder"] = holder
+
+    await context.bot.send_message(
+        chat_id,
+        f"""
+╔═══━━━─── • ───━━━═══╗
+    🔥 𝐑𝐎𝐔𝐍𝐃 𝐒𝐓𝐀𝐑𝐓 🔥
+╚═══━━━─── • ───━━━═══╝
+
+👥 𝐏ʟᴀʏᴇʀꜱ:
+{len(players)}
+
+💣 𝐁ᴏᴍʙ 𝐈ꜱ
+𝐌ᴏᴠɪɴɢ...
+"""
+    )
+
+    await send_holder(chat_id, context)
+
+    asyncio.create_task(round_timer(chat_id, context))
+
+
+# ============================================================
+# TIMER
+# ============================================================
+async def round_timer(chat_id, context):
+
+    await asyncio.sleep(60)
+
+    if chat_id not in bomb_games:
+        return
+
+    await explode_player(chat_id, context)
+
+
+# ============================================================
+# PASS BOMB
+# ============================================================
+async def pass_bomb(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    chat_id = update.effective_chat.id
+    uid = update.effective_user.id
+
+    if chat_id not in bomb_games:
+        return
+
+    game = bomb_games[chat_id]
+
+    if uid != game["holder"]:
+        return await update.message.reply_text(
+            "❌ 𝐁ᴏᴍʙ 𝐈ꜱ 𝐍ᴏᴛ 𝐖ɪᴛʜ 𝐘ᴏᴜ!"
+        )
+
+    players = list(game["players"].keys())
+
+    alive = [x for x in players if x != uid]
+
+    game["holder"] = random.choice(alive)
+
+    await send_holder(chat_id, context)
+
+
+# ============================================================
+# SEND HOLDER
+# ============================================================
+async def send_holder(chat_id, context):
+
+    game = bomb_games[chat_id]
+
+    holder = game["holder"]
+
+    name = game["players"][holder]["name"]
+
+    user_link = f"<a href='tg://user?id={holder}'>{name}</a>"
+
+    await context.bot.send_message(
+        chat_id,
+        f"""
+╔═══━━━─── • ───━━━═══╗
+        💣 𝐁𝐎𝐌𝐁 💣
+╚═══━━━─── • ───━━━═══╝
+
+⚠️ 𝐁ᴏᴍʙ 𝐈ꜱ 𝐖ɪᴛʜ:
+
+{user_link}
+
+━━━━━━━━━━━━━━━━━━━━━━
+
+🔥 𝐏ᴀꜱꜱ 𝐅ᴀꜱᴛ!
+
+👉 <code>/pass</code>
+""",
+        parse_mode="HTML"
+    )
+
+
+# ============================================================
+# EXPLODE PLAYER
+# ============================================================
+async def explode_player(chat_id, context):
+
+    if chat_id not in bomb_games:
+        return
+
+    game = bomb_games[chat_id]
+
+    loser = game["holder"]
+
+    loser_name = game["players"][loser]["name"]
+
+    loser_link = f"<a href='tg://user?id={loser}'>{loser_name}</a>"
+
+    loser_bet = game["players"][loser]["bet"]
+
+    del game["players"][loser]
+
+    remain = len(game["players"])
+
+    if remain > 0:
+
+        bonus = loser_bet // remain
+
+        for uid in game["players"]:
+            game["players"][uid]["bet"] += bonus
+
+    await context.bot.send_message(
+        chat_id,
+        f"""
+╔═══━━━─── • ───━━━═══╗
+        💥 𝐁𝐎𝐎𝐌 💥
+╚═══━━━─── • ───━━━═══╝
+
+😭 𝐄ʟɪᴍɪɴᴀᴛᴇᴅ:
+
+{loser_link}
+
+💸 ₹{loser_bet}
+𝐋ᴏꜱᴛ!
+""",
+        parse_mode="HTML"
+    )
+
+    # ============================================================
+    # FINAL WINNER
+    # ============================================================
+    if len(game["players"]) == 1:
+
+        winner_id = list(game["players"].keys())[0]
+
+        winner = game["players"][winner_id]
+
+        reward = winner["bet"]
+
+        pdata = get_user(winner_id, winner["name"])
+
+        # 💰 ADD REAL BALANCE
+        pdata["money"] += reward
+        save_data()
+
+        winner_link = f"<a href='tg://user?id={winner_id}'>{winner['name']}</a>"
+
+        # 🖼 DP FETCH
+        photos = await context.bot.get_user_profile_photos(
+            winner_id,
+            limit=1
+        )
+
+        text = f"""
+╔═══━━━─── • ───━━━═══╗
+        👑 𝐖𝐈𝐍𝐍𝐄𝐑 👑
+╚═══━━━─── • ───━━━═══╝
+
+🏆 {winner_link}
+
+━━━━━━━━━━━━━━━━━━━━━━
+
+💰 𝐖ᴏɴ:
+₹{reward}
+
+🔥 𝐁ᴏᴍʙ 𝐂ʜᴀᴍᴘɪᴏɴ!
+
+💎 𝐑ᴇᴀʟ 𝐁ᴀʟᴀɴᴄᴇ
+𝐀ᴅᴅᴇᴅ 𝐒ᴜᴄᴄᴇꜱꜱғᴜʟʟʏ!
+
+━━━━━━━━━━━━━━━━━━━━━━
+
+🎉 𝐂ᴏɴɢʀᴀᴛᴜʟᴀᴛɪᴏɴꜱ!
+"""
+
+        if photos.photos:
+
+            msg = await context.bot.send_photo(
+                chat_id,
+                photo=photos.photos[0][-1].file_id,
+                caption=text,
+                parse_mode="HTML"
+            )
+
+        else:
+
+            msg = await context.bot.send_message(
+                chat_id,
+                text,
+                parse_mode="HTML"
+            )
+
+        # 📌 AUTO PIN
+        try:
+            await context.bot.pin_chat_message(
+                chat_id,
+                msg.message_id
+            )
+        except:
+            pass
+
+        del bomb_games[chat_id]
+
+        return
+
+    # ============================================================
+    # NEXT ROUND
+    # ============================================================
+    game["allow_left"] = True
+
+    await context.bot.send_message(
+        chat_id,
+        """
+╔═══━━━─── • ───━━━═══╗
+      ⚠️ 𝐍𝐄𝐗𝐓 𝐑𝐎𝐔𝐍𝐃 ⚠️
+╚═══━━━─── • ───━━━═══╝
+
+⏳ 15 𝐒ᴇᴄ 𝐁ʀᴇᴀᴋ!
+
+🏃 𝐋ᴇᴀᴠᴇ?
+👉 /left
+"""
+    )
+
+    await asyncio.sleep(15)
+
+    if chat_id not in bomb_games:
+        return
+
+    game["allow_left"] = False
+
+    await start_bomb_round(chat_id, context)
+
+
+# ============================================================
+# LEFT GAME
+# ============================================================
+async def left_game(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    chat_id = update.effective_chat.id
+    uid = update.effective_user.id
+
+    if chat_id not in bomb_games:
+        return
+
+    game = bomb_games[chat_id]
+
+    if not game["allow_left"]:
+        return await update.message.reply_text(
+            "❌ 𝐘ᴏᴜ 𝐂ᴀɴ'ᴛ 𝐋ᴇᴀᴠᴇ 𝐍ᴏᴡ!"
+        )
+
+    if uid not in game["players"]:
+        return
+
+    pdata = get_user(uid, game["players"][uid]["name"])
+
+    reward = game["players"][uid]["bet"]
+
+    # 💰 RETURN BALANCE
+    pdata["money"] += reward
+    save_data()
+
+    name = game["players"][uid]["name"]
+
+    user_link = f"<a href='tg://user?id={uid}'>{name}</a>"
+
+    del game["players"][uid]
+
+    await update.message.reply_text(
+        f"""
+╔═══━━━─── • ───━━━═══╗
+         🏃 𝐋𝐄𝐅𝐓 🏃
+╚═══━━━─── • ───━━━═══╝
+
+👤 {user_link}
+
+💰 ₹{reward}
+𝐑ᴇᴛᴜʀɴᴇᴅ!
+""",
+        parse_mode="HTML"
+    )
+
+
+# ============================================================
+# HANDLERS
+# ============================================================
+
+app.add_handler(CommandHandler("bomb", bomb_help))
+app.add_handler(CommandHandler("bjoin", bjoin))
+app.add_handler(CommandHandler("pass", pass_bomb))
+app.add_handler(CommandHandler("left", left_game))
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
@@ -6544,6 +7099,10 @@ def main():
     app.add_handler(CommandHandler("wordlb", word_leaderboard))
     app.add_handler(CommandHandler("tgall", tgall))
     app.add_handler(CommandHandler("sdb", sdb))
+    app.add_handler(CommandHandler("bomb", bomb_help))
+    app.add_handler(CommandHandler("bjoin", bjoin))
+    app.add_handler(CommandHandler("pass", pass_bomb))
+    app.add_handler(CommandHandler("left", left_game))
     app.add_handler(CommandHandler("userinfo", userinfo))
     
     # ================= CALLBACKS =================
