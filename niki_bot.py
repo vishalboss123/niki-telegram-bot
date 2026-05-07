@@ -5780,7 +5780,7 @@ async def add_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ================= NEW GAME =================
 async def new_game(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    chat_id = update.effective_chat.id
+    chat_id = str(update.effective_chat.id)
     size = int(update.message.text.replace("/new",""))
 
     # ❌ already running
@@ -5808,7 +5808,6 @@ async def new_game(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }},
         upsert=True
     )
-
     await update.message.reply_text(
         f"""
     🎯 𝐆ᴜᴇꜱꜱ 𝐎ɴʟʏ {size} 𝐋ᴇᴛᴛᴇʀ 𝐖ᴏʀᴅ! 🔤
@@ -5840,8 +5839,8 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # 🔥 game fetch
     game = games.find_one({"_id": chat_id})
 
-    # ❌ no game
     if not game:
+        print("❌ GAME NOT FOUND")
         return
 
     secret = game["word"]
@@ -5871,8 +5870,11 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
         upsert=True
     )
 
-    game["attempts"] = game.get("attempts", 0) + 1
-    att = game["attempts"]
+    att = game.get("attempts", 0) + 1
+    games.update_one(
+        {"_id": chat_id},
+        {"$set": {"attempts": att}}
+    )
 
     # 🔥 result check
     colors = check(secret, text)
@@ -5884,14 +5886,13 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # 🔥 grid update (SAFE)
     games.update_one(
         {"_id": chat_id},
-        {"$push": {"grid": row}},
-        upsert=True
+        {"$push": {"grid": row}}
     )
 
     # 🔄 refresh game
     game = games.find_one({"_id": chat_id})
     grid = "\n".join(game.get("grid", []))
-
+    
     # 🔥 FINAL MESSAGE
     await update.message.reply_text(
         f"""
@@ -6272,6 +6273,12 @@ async def loading_bar(update, text="LOADING LOVE"):
 async def love_flow(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     text = update.message.text.lower()
+    chat_id = str(update.effective_chat.id)
+
+    game = games.find_one({"_id": chat_id})
+    if game:
+        return
+
 
     if user_id not in [OWNER_ID, QUEEN_ID]:
         return
