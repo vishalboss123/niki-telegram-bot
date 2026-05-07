@@ -5823,7 +5823,7 @@ async def new_game(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ================= HANDLE =================
 async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    chat_id = update.effective_chat.id
+    chat_id = str(update.effective_chat.id)   # 🔥 FIX: ALWAYS STRING
     uid = update.effective_user.id
 
     if not update.message or not update.message.text:
@@ -5837,6 +5837,7 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     text = re.sub(r'[^a-z]', '', raw)
 
+    # 🔥 game fetch
     game = games.find_one({"_id": chat_id})
 
     # ❌ no game
@@ -5863,36 +5864,45 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"{FONT}\n❌ Valid English word nahi hai!"
         )
 
-    # attempts
-    games.update_one({"_id": chat_id}, {"$inc": {"attempts": 1}})
-    game["attempts"] += 1
+    # 🔥 attempts update
+    games.update_one(
+        {"_id": chat_id},
+        {"$inc": {"attempts": 1}},
+        upsert=True
+    )
+
+    game["attempts"] = game.get("attempts", 0) + 1
     att = game["attempts"]
 
     # 🔥 result check
     colors = check(secret, text)
 
-    # ✅ NAME ADD (MULTIPLAYER LOOK)
-    name = update.effective_user.first_name
+    # 👤 user name
+    name = update.effective_user.first_name or "Player"
     row = f"{' '.join(colors)} ➤ {text.upper()}"
 
-    # save grid
-    games.update_one({"_id": chat_id}, {"$push": {"grid": row}})
+    # 🔥 grid update (SAFE)
+    games.update_one(
+        {"_id": chat_id},
+        {"$push": {"grid": row}},
+        upsert=True
+    )
 
-    # fetch updated grid
+    # 🔄 refresh game
     game = games.find_one({"_id": chat_id})
-    grid = "\n".join(game["grid"])
+    grid = "\n".join(game.get("grid", []))
 
-    # 🔥 FINAL MESSAGE UI
+    # 🔥 FINAL MESSAGE
     await update.message.reply_text(
         f"""
-🎯 𝐆ᴜᴇꜱꜱ 𝐎ɴʟʏ {size} 𝐋ᴇᴛᴛ𝐞𝐫 𝐖𝐨𝐫𝐝! 🔤
+🎯 𝐆ᴜᴇꜱꜱ 𝐖𝐎𝐑𝐃 𝐆𝐀𝐌𝐄 🔤
 
 {FONT}
-📊 {att}/30
+📊 Attempts: {att}/30
 
 {grid}
 """
-)
+    )
     # ================= HINT =================
     if att == 20:
         await update.message.reply_text(f"💡 HINT:\n{game['hint']}")
