@@ -6279,7 +6279,7 @@ async def love_flow(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "💘 𝐁ᴏꜱꜱ 𝐊ᴇ 𝐃ɪʟ 𝐊ɪ 𝐅ᴇᴇʟɪɴɢ 𝐇ᴀɪ 𝐐ᴜᴇᴇɴ 𝐊ᴇ 𝐋ɪʏᴇ ♾️👑"
         )
 
-        await asyncio.sleep(4)
+        await asyncio.sleep(10)
 
         await update.message.reply_text(
             "𝐋ᴏᴠᴇ 𝐑ᴏᴀᴅ 𝐀ɴꜱᴡᴇʀ 💖\n\n"
@@ -6287,7 +6287,7 @@ async def love_flow(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "𝐒ɪʀꜰ 𝐈ᴛɴᴀ 𝐇ɪ 𝐒ᴜɴɴᴀ 𝐓ʜᴀ 𝐊ʏᴀ...? ♾️"
         )
 
-        await asyncio.sleep(5)
+        await asyncio.sleep(14)
 
         await update.message.reply_text(
             "𝐋ᴏᴠᴇ 𝐑ᴏᴀᴅ 𝐀ɴꜱᴡᴇʀ 💖\n\n"
@@ -6299,7 +6299,7 @@ async def love_flow(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "✨ 𝐉ᴏ 𝐇ᴀʀ 𝐒ᴇᴄᴏɴᴅ 𝐀ᴜʀ 𝐒ᴛʀᴏɴɢ 𝐇ᴏᴛᴀ 𝐉ᴀ 𝐑ᴀʜᴀ 𝐇ᴀɪ ♾️💞"
         )
 
-        await asyncio.sleep(3)
+        await asyncio.sleep(19)
 
         await update.message.reply_text(
             "𝐋ᴏᴠᴇ 𝐑ᴏᴀᴅ 𝐀ɴꜱᴡᴇʀ 💖\n\n"
@@ -6312,7 +6312,7 @@ async def love_flow(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "🥺 𝐒ᴛᴀʀᴛ 𝐁ʜɪ 𝐓ᴜᴍ 𝐇ᴏ… 𝐄ɴᴅ 𝐁ʜɪ 𝐓ᴜᴍ 𝐇ᴏ 💞"
         )
 
-        await asyncio.sleep(5)
+        await asyncio.sleep(17)
 
         await update.message.reply_text(
             "𝐋ᴏᴠᴇ 𝐑ᴏᴀᴅ 𝐀ɴꜱᴡᴇʀ 💖\n\n"
@@ -6326,7 +6326,7 @@ async def love_flow(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
         # ⏳ ADD YOUR STEP 6 WAIT
-        await asyncio.sleep(7)
+        await asyncio.sleep(35)
 
         # 🔥 STEP 6 BIG MESSAGE (YOUR BLOCK)
         await update.message.reply_text(
@@ -6355,7 +6355,7 @@ async def love_flow(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "😘💖✨👑🥰💞"
         )
 
-        await asyncio.sleep(7)
+        await asyncio.sleep(35)
 
         # 📊 STEP 7 LOADING BAR
         await loading_bar(update, "💖 FINAL LOVE CONNECTION")
@@ -6380,7 +6380,7 @@ async def love_flow(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "[ 𝐂𝐎𝐍𝐍𝐄𝐂𝐓𝐈𝐎𝐍: 𝐍𝐄𝐕𝐄𝐑 𝐓𝐄𝐑𝐌𝐈𝐍𝐀𝐓𝐄 ] ♾️❤️"
         )
 
-        await asyncio.sleep(4)
+        await asyncio.sleep(20)
 
         # 💖 FINAL BABY MESSAGE
         await update.message.reply_text(
