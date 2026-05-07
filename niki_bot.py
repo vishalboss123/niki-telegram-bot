@@ -6958,7 +6958,362 @@ async def left_game(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
+# ================= GUN DUEL =================
 
+gun_games = {}
+
+# ================= /GUN =================
+async def gun(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    chat_id = update.effective_chat.id
+    user = update.effective_user
+
+    if chat_id in gun_games:
+        return await update.message.reply_text(
+            """
+╔═══━━━─── • ───━━━═══╗
+    ⚠️ 𝐆𝐀𝐌𝐄 𝐀𝐋𝐑𝐄𝐀𝐃𝐘 ⚠️
+╚═══━━━─── • ───━━━═══╝
+
+🔫 𝐀 𝐆ᴜɴ 𝐃ᴜᴇʟ 𝐈ꜱ 𝐀ʟʀᴇᴀᴅʏ 𝐑ᴜɴɴɪɴɢ!
+
+⏳ 𝐖ᴀɪᴛ 𝐅ᴏʀ 𝐈ᴛ 𝐓ᴏ 𝐅ɪɴɪꜱʜ...
+"""
+        )
+
+    if not context.args:
+        return await update.message.reply_text(
+            """
+╔═══━━━─── • ───━━━═══╗
+        💰 𝐔𝐒𝐄 💰
+╚═══━━━─── • ───━━━═══╝
+
+🔫 𝐒ᴛᴀʀᴛ 𝐀 𝐆ᴜɴ 𝐃ᴜᴇʟ!
+
+✍ 𝐄xᴀᴍᴘʟᴇ:
+ /gun 500
+"""
+        )
+
+    try:
+        amount = int(context.args[0])
+
+        if amount <= 0:
+            return
+
+    except:
+        return await update.message.reply_text(
+            """
+╔═══━━━─── • ───━━━═══╗
+       ❌ 𝐈𝐍𝐕𝐀𝐋𝐈𝐃 ❌
+╚═══━━━─── • ───━━━═══╝
+
+💸 𝐈ɴᴠᴀʟɪᴅ 𝐁ᴇᴛ 𝐀ᴍᴏᴜɴᴛ!
+"""
+        )
+
+    pdata = get_user(user.id, user.first_name)
+
+    if pdata["money"] < amount:
+        return await update.message.reply_text(
+            """
+╔═══━━━─── • ───━━━═══╗
+      💸 𝐍𝐎 𝐌𝐎𝐍𝐄𝐘 💸
+╚═══━━━─── • ───━━━═══╝
+
+❌ 𝐘ᴏᴜ 𝐃ᴏɴ'ᴛ 𝐇ᴀᴠᴇ 𝐄ɴᴏᴜɢʜ 𝐁ᴀʟᴀɴᴄᴇ!
+"""
+        )
+
+    gun_games[chat_id] = {
+        "creator": user.id,
+        "creator_name": user.first_name,
+        "amount": amount,
+        "players": [],
+        "started": False
+    }
+
+    await update.message.reply_text(
+        f"""
+╔═══━━━─── • ───━━━═══╗
+      🔫 𝐆𝐔𝐍 𝐃𝐔𝐄𝐋 🔫
+╚═══━━━─── • ───━━━═══╝
+
+👑 𝐂ʀᴇᴀᴛᴏʀ:
+{user.first_name}
+
+💰 𝐁ᴇᴛ:
+₹{amount}
+
+⚡ 𝐉ᴏɪɴ 𝐔ꜱɪɴɢ:
+ /gjoin {amount}
+
+⏳ 𝐎ɴʟʏ 𝟐 𝐏ʟᴀʏᴇʀꜱ 𝐂ᴀɴ 𝐏ʟᴀʏ!
+"""
+    )
+
+
+# ================= /GJOIN =================
+async def gjoin(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    chat_id = update.effective_chat.id
+    user = update.effective_user
+
+    if chat_id not in gun_games:
+        return
+
+    game = gun_games[chat_id]
+
+    if game["started"]:
+        return
+
+    if user.id == game["creator"]:
+        return
+
+    if len(game["players"]) >= 1:
+        return await update.message.reply_text(
+            """
+╔═══━━━─── • ───━━━═══╗
+        ⚠️ 𝐅𝐔𝐋𝐋 ⚠️
+╚═══━━━─── • ───━━━═══╝
+
+🔫 𝐓ʜɪꜱ 𝐃ᴜᴇʟ 𝐈ꜱ 𝐀ʟʀᴇᴀᴅʏ 𝐅ᴜʟʟ!
+"""
+        )
+
+    if not context.args:
+        return await update.message.reply_text(
+            f"""
+╔═══━━━─── • ───━━━═══╗
+        💰 𝐔𝐒𝐄 💰
+╚═══━━━─── • ───━━━═══╝
+
+✍ 𝐓ʏᴘᴇ:
+
+/gjoin {game['amount']}
+"""
+        )
+
+    try:
+        amount = int(context.args[0])
+
+    except:
+        return
+
+    if amount != game["amount"]:
+        return await update.message.reply_text(
+            """
+╔═══━━━─── • ───━━━═══╗
+       ❌ 𝐖𝐑𝐎𝐍𝐆 ❌
+╚═══━━━─── • ───━━━═══╝
+
+💰 𝐁ᴇᴛ 𝐀ᴍᴏᴜɴᴛ 𝐃ᴏᴇꜱɴ'ᴛ 𝐌ᴀᴛᴄʜ!
+"""
+        )
+
+    pdata = get_user(user.id, user.first_name)
+
+    if pdata["money"] < amount:
+        return await update.message.reply_text(
+            """
+╔═══━━━─── • ───━━━═══╗
+      💸 𝐍𝐎 𝐌𝐎𝐍𝐄𝐘 💸
+╚═══━━━─── • ───━━━═══╝
+
+❌ 𝐍ᴏᴛ 𝐄ɴᴏᴜɢʜ 𝐁ᴀʟᴀɴᴄᴇ!
+"""
+        )
+
+    creator_data = get_user(
+        game["creator"],
+        game["creator_name"]
+    )
+
+    creator_data["money"] -= amount
+    pdata["money"] -= amount
+
+    save_data()
+
+    game["players"].append(user.id)
+
+    game["player2"] = user.id
+    game["player2_name"] = user.first_name
+    game["started"] = True
+
+    game["shots"] = {
+        game["creator"]: 0,
+        user.id: 0
+    }
+
+    await update.message.reply_text(
+        f"""
+╔═══━━━─── • ───━━━═══╗
+     🔥 𝐃𝐔𝐄𝐋 𝐒𝐓𝐀𝐑𝐓 🔥
+╚═══━━━─── • ───━━━═══╝
+
+⚔️ 𝐏ʟᴀʏᴇʀ𝐬:
+
+👤 {game['creator_name']}
+🆚
+👤 {user.first_name}
+
+🔫 𝐒ᴘᴀᴍ:
+/shoot
+
+⏰ 𝐓ɪᴍᴇ:
+1 𝐌ɪɴᴜᴛᴇ
+
+💥 𝐖ʜᴏ 𝐒ʜᴏᴏᴛ𝐬 𝐌ᴏʀᴇ = 𝐖ɪɴ!
+"""
+    )
+
+    asyncio.create_task(
+        gun_timer(chat_id, context)
+    )
+
+
+# ================= /SHOOT =================
+async def shoot(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    chat_id = update.effective_chat.id
+    user = update.effective_user
+
+    if chat_id not in gun_games:
+        return
+
+    game = gun_games[chat_id]
+
+    if not game["started"]:
+        return
+
+    if user.id not in [
+        game["creator"],
+        game["player2"]
+    ]:
+        return
+
+    game["shots"][user.id] += 1
+
+
+# ================= TIMER =================
+async def gun_timer(chat_id, context):
+
+    await asyncio.sleep(60)
+
+    if chat_id not in gun_games:
+        return
+
+    game = gun_games[chat_id]
+
+    p1 = game["creator"]
+    p2 = game["player2"]
+
+    s1 = game["shots"][p1]
+    s2 = game["shots"][p2]
+
+    if s1 > s2:
+        winner = p1
+        winner_name = game["creator_name"]
+
+    elif s2 > s1:
+        winner = p2
+        winner_name = game["player2_name"]
+
+    else:
+
+        pdata1 = get_user(p1, game["creator_name"])
+        pdata2 = get_user(p2, game["player2_name"])
+
+        pdata1["money"] += game["amount"]
+        pdata2["money"] += game["amount"]
+
+        save_data()
+
+        del gun_games[chat_id]
+
+        return await context.bot.send_message(
+            chat_id,
+            """
+╔═══━━━─── • ───━━━═══╗
+        🤝 𝐃𝐑𝐀𝐖 🤝
+╚═══━━━─── • ───━━━═══╝
+
+⚔️ 𝐁ᴏᴛʜ 𝐏ʟᴀʏᴇʀꜱ 𝐅ɪʀᴇᴅ 𝐄Qᴜᴀʟ 𝐒ʜᴏᴛꜱ!
+
+💰 𝐁ᴇᴛ 𝐑ᴇꜰᴜɴᴅᴇᴅ.
+"""
+        )
+
+    reward = game["amount"] * 2
+
+    wdata = get_user(winner, winner_name)
+    wdata["money"] += reward
+
+    save_data()
+
+    photos = await context.bot.get_user_profile_photos(
+        winner,
+        limit=1
+    )
+
+    winner_link = (
+        f"<a href='tg://user?id={winner}'>"
+        f"{winner_name}</a>"
+    )
+
+    caption = f"""
+╔═══━━━─── • ───━━━═══╗
+       👑 𝐖𝐈𝐍𝐍𝐄𝐑 👑
+╚═══━━━─── • ───━━━═══╝
+
+🏆 𝐂ʜᴀᴍᴘɪᴏɴ:
+{winner_link}
+
+━━━━━━━━━━━━━━━━━━
+
+🔫 𝐒ʜᴏᴛ 𝐂ᴏᴜɴᴛ:
+
+⚔️ {game['creator_name']} ➜ {s1}
+⚔️ {game['player2_name']} ➜ {s2}
+
+━━━━━━━━━━━━━━━━━━
+
+💰 𝐖ᴏɴ:
+₹{reward}
+
+💎 𝐀ᴅᴅᴇᴅ 𝐓ᴏ 𝐑ᴇᴀʟ 𝐁ᴀʟᴀɴᴄᴇ!
+
+🔥 𝐆ᴜɴ 𝐊ɪɴɢ!
+"""
+
+    if photos.total_count > 0:
+
+        file_id = photos.photos[0][-1].file_id
+
+        msg = await context.bot.send_photo(
+            chat_id,
+            photo=file_id,
+            caption=caption,
+            parse_mode="HTML"
+        )
+
+    else:
+
+        msg = await context.bot.send_message(
+            chat_id,
+            caption,
+            parse_mode="HTML"
+        )
+
+    try:
+        await context.bot.pin_chat_message(
+            chat_id,
+            msg.message_id
+        )
+    except:
+        pass
+
+    del gun_games[chat_id]
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
@@ -7096,6 +7451,9 @@ def main():
     app.add_handler(CommandHandler("bjoin", bjoin))
     app.add_handler(CommandHandler("pass", pass_bomb))
     app.add_handler(CommandHandler("left", left_game))
+    app.add_handler(CommandHandler("gun", gun))
+    app.add_handler(CommandHandler("gjoin", gjoin))
+    app.add_handler(CommandHandler("shoot", shoot))
     app.add_handler(CommandHandler("userinfo", userinfo))
     
     # ================= CALLBACKS =================
