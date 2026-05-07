@@ -6958,14 +6958,7 @@ async def left_game(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
-# ============================================================
-# HANDLERS
-# ============================================================
 
-app.add_handler(CommandHandler("bomb", bomb_help))
-app.add_handler(CommandHandler("bjoin", bjoin))
-app.add_handler(CommandHandler("pass", pass_bomb))
-app.add_handler(CommandHandler("left", left_game))
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
