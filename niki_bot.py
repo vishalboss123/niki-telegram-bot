@@ -14,22 +14,34 @@ filters_col = db_main["filters"]
 
 
 # =================== WEB SERVER (RENDER FIX) ===================
+
 import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import os
 
 class Handler(BaseHTTPRequestHandler):
+
+    # ✅ GET request
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
         self.wfile.write(b"Bot is running!")
 
+    # ✅ HEAD request FIX (UptimeRobot)
+    def do_HEAD(self):
+        self.send_response(200)
+        self.end_headers()
+
 def run_web():
     port = int(os.environ.get("PORT", 10000))
     server = HTTPServer(("0.0.0.0", port), Handler)
+
+    print(f"🌐 Web server running on port {port}")
+
     server.serve_forever()
 
-threading.Thread(target=run_web).start()
+# ✅ Daemon thread
+threading.Thread(target=run_web, daemon=True).start()
 
 
 # =================== IMPORTS ===================
