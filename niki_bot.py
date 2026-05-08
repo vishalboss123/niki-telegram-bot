@@ -5604,45 +5604,92 @@ async def track_join(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # ================= TGALL =================
+import asyncio
+import html
+
 async def tgall(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
+    # ✅ GROUP ONLY
     if update.effective_chat.type not in ["group", "supergroup"]:
-        return await update.message.reply_text("❌ Group only")
+        return await update.message.reply_text(
+            "❌ Group only"
+        )
 
     user = update.effective_user
     chat_id = update.effective_chat.id
 
-    # 👉 Admin check
-    member = await context.bot.get_chat_member(chat_id, user.id)
+    # ✅ ADMIN CHECK
+    member = await context.bot.get_chat_member(
+        chat_id,
+        user.id
+    )
+
     if member.status not in ["administrator", "creator"]:
-        return await update.message.reply_text("❌ Admin only")
+        return await update.message.reply_text(
+            "❌ Admin only"
+        )
 
-    msg = " ".join(context.args) if context.args else ""
+    # ✅ MESSAGE
+    msg = " ".join(context.args)
 
+    if not msg:
+        return await update.message.reply_text(
+            "❌ Use:\n/tgall goodnight"
+        )
+
+    # ✅ FETCH USERS
     all_users = list(tracker.find())
 
     if not all_users:
-        return await update.message.reply_text("❌ No users saved")
+        return await update.message.reply_text(
+            "❌ No users saved"
+        )
 
-    batch_size = 15
-    delay = 2
+    # ✅ START MESSAGE
+    await update.message.reply_text(
+        f"🚀 Sending tags to {len(all_users)} users..."
+    )
 
-    await update.message.reply_text(f"🚀 Tagging {len(all_users)} users...")
+    # ✅ DELAY (ANTI FLOOD)
+    delay = 3
 
-    for i in range(0, len(all_users), batch_size):
-        chunk = all_users[i:i+batch_size]
+    # ✅ SEND ONE BY ONE
+    for u in all_users:
 
-        text = ""
-        for u in chunk:
+        try:
             uid = u["_id"]
-            name = u.get("name", "User")
-            mention = f"<a href='tg://user?id={uid}'>{name}</a>"
-            text += f"{mention} {msg}\n"
 
-        await update.message.reply_text(text, parse_mode="HTML")
-        await asyncio.sleep(delay)
+            # ✅ SAFE NAME
+            safe_name = html.escape(
+                str(u.get("name", "User"))[:25]
+            )
 
-    await update.message.reply_text("✅ Done!")
+            # ✅ CLICKABLE TAG
+            mention = (
+                f"<a href='tg://user?id={uid}'>"
+                f"{safe_name}</a>"
+            )
+
+            # ✅ FINAL TEXT
+            text = f"{mention} {msg}"
+
+            # ✅ SEND
+            await update.message.reply_text(
+                text,
+                parse_mode="HTML",
+                disable_web_page_preview=True
+            )
+
+            # ✅ ANTI FLOOD DELAY
+            await asyncio.sleep(delay)
+
+        except Exception as e:
+            print(f"TGALL ERROR: {e}")
+
+    # ✅ DONE
+    await update.message.reply_text(
+        "✅ TGALL Completed!"
+    )
     
 
 # ================= SDB =================
