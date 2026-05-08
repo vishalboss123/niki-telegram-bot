@@ -1461,8 +1461,9 @@ async def items(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def auto_niki_reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
 
-    if games.find_one({"_id": chat_id}):
+    if games.find_one({"_id": str(update.effective_chat.id)}):
         return
+        
     if not update.message or not update.message.text:
         return
 
@@ -6275,8 +6276,7 @@ async def love_flow(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text.lower()
     chat_id = str(update.effective_chat.id)
 
-    game = games.find_one({"_id": chat_id})
-    if game:
+    if games.find_one({"_id": str(update.effective_chat.id)}):
         return
 
 
@@ -6548,8 +6548,25 @@ async def bomb(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "allow_left": False
     }
 
-    user_link = f"<a href='tg://user?id={creator.id}'>{creator.first_name}</a>"
+    # 💰 CHECK BALANCE
+    pdata = get_user(creator.id, creator.first_name)
 
+    if pdata["money"] < amount:
+        return await update.message.reply_text(
+            "❌ 𝐍ᴏᴛ 𝐄ɴᴏᴜɢʜ 𝐁ᴀʟᴀɴᴄᴇ!"
+        )
+
+    # 💸 CUT BALANCE
+    pdata["money"] -= amount
+    save_data()
+
+    # 👑 AUTO JOIN CREATOR
+    bomb_games[chat_id]["players"][creator.id] = {
+        "name": creator.first_name,
+        "bet": amount
+    }
+
+    user_link = f"<a href='tg://user?id={creator.id}'>{creator.first_name}</a>"
     await update.message.reply_text(
         f"""
 ╔═══━━━─── • ───━━━═══╗
@@ -7485,17 +7502,27 @@ def main():
 
     # ================= MESSAGE SYSTEM =================
 
-    app.add_handler(MessageHandler(filters.ALL, block_system), group=3)  # 🔥 Block system (highest priority)
+    app.add_handler(MessageHandler(filters.ALL, block_system), group=3)  
+    # 🔥 Block system
 
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, filter_checker), group=2)  # 🔥 Filter check (queen/owner/allowed users)
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, filter_checker), group=2)  
+    # 🔥 Filter system
 
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, love_flow), group=1)  # 💖 Queen love flow (main cinematic story bot)
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle), group=1)  
+    # 🎮 WORD GAME (IMPORTANT → upar lao)
 
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, auto_niki_reply), group=0)  # 🤖 AI reply fallback system
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, love_flow), group=0)  
+    # 💖 Love flow
 
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle), group=-1)  # 🎮 Word game (lowest priority)
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, auto_niki_reply), group=-1)  
+    # 🤖 AI fallback LAST
 
-    app.add_handler(ChatMemberHandler(member_update_welcome, ChatMemberHandler.CHAT_MEMBER))  # 👋 Welcome new members
+    app.add_handler(
+        ChatMemberHandler(
+            member_update_welcome,
+            ChatMemberHandler.CHAT_MEMBER
+        )
+    )
  
 
 
