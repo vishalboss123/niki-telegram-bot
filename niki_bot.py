@@ -7395,6 +7395,210 @@ async def gun_timer(chat_id, context):
         pass
 
     del gun_games[chat_id]
+
+# ================= GN TAG SYSTEM =================
+import asyncio
+import random
+import html
+
+# ❤️ 100 RANDOM GOOD NIGHT MESSAGES
+GN_MESSAGES = [
+    "🌙 arey babu shona 😴 ab so bhi jao warna sapne me bhoot aa jayega 👻",
+    "💖 oye hero ab mobile rakho aur araam se so jao 😌",
+    "🌌 itni raat tak jagoge toh chand bhi complain karega 😭",
+    "😴 jao jaake kambal odho aur pyara sa dream dekho 💞",
+    "🛌 arey jaan ab good night bolo aur aankh band karo 🌙",
+    "💘 tum online ho isliye neend bhi online hi reh gayi 😭",
+    "🌙 babu so jao warna morning me zombie lagoge 🧟",
+    "💖 ek pyari si jhappi lo aur so jao 🤗",
+    "😌 chalo ab sapno ki duniya me entry maro ✨",
+    "🌃 itni raat me jagna health ke liye illegal hai 🚨",
+    "💤 oye cutie phone charge pe lagao aur khud bhi charge ho jao 😴",
+    "🌙 good night hero 😎 kal fir bakchodi karenge 😂",
+    "💞 arey meri jaan ab neend ko ignore mat karo 😭",
+    "✨ chand bhi bol raha hai ab so ja pagle 🌙",
+    "😴 so ja warna takiya naraz ho jayega 😭",
+    "💖 pyari si neend tumhara wait kar rahi hai 😌",
+    "🌌 jao babu dream me pizza kha lena 🍕😂",
+    "😌 good night shona 🌙 sapne me milte hain 💘",
+    "💤 ab aur kitna scroll karoge 😭 so bhi jao",
+    "🌙 oye sleepy panda 🐼 ab aankh band karo 😴",
+    "💞 good night meri online duniya ke superstar ⭐",
+    "😌 jao warna mummy aa jayegi phone lene 😭",
+    "🌃 ab so jao warna morning me uth nahi paoge 😂",
+    "💖 ek flying kiss 😘 aur seedha sleep mode on",
+    "😴 babu neend ka recharge pending hai 😭",
+    "🌙 arey cutie pie ab good night bolo 💘",
+    "✨ kal subah fir hero banna abhi so jao 😌",
+    "💤 mobile se shaadi mat karo ab so bhi jao 😂",
+    "🌌 chand mama attendance le rahe hain 🌙",
+    "💞 tumhare bina neend bhi lonely feel kar rahi hai 😭",
+    "😴 arey babu aankhon ko bhi rest do 😌",
+    "🌙 sapno me VIP entry milne wali hai 😂",
+    "💖 so jao warna dark circles free milenge 😭",
+    "✨ good night champion 🏆",
+    "😌 duniya so gayi sirf tum online ho 😂",
+    "💞 jao pyari si neend pakdo 😴",
+    "🌙 oye drama king/queen ab so jao 😭",
+    "💤 neend waiting list me hai 😌",
+    "💖 arey meri jaan phone rakho 🥺",
+    "🌃 raat ho gayi babu ab rest karo 😴",
+    "😌 good night sunshine 🌙",
+    "💞 sapne me ice cream khana mat bhoolna 🍦😂",
+    "🌙 chalo ab aankhon ko airplane mode pe daalo ✈️",
+    "😴 so jao warna alarm bhi gussa karega 😂",
+    "💖 tumhari neend tumse milna chahti hai 😌",
+    "🌌 ab good night bolkar chup chaap so jao 😂",
+    "💤 hero ji sleep mode activate karo 😴",
+    "🌙 cutie ab moon ko company mat do 😂",
+    "💞 pyari si smile ke saath so jao 😌",
+    "😴 sapno me party karna 🎉",
+    "🌃 babu online class band karo aur so jao 😂",
+    "💖 tumhara takiya tumhe miss kar raha hai 😭",
+    "🌙 oye sleepyhead ab rest lo 😌",
+    "✨ good night future billionaire 💸",
+    "💤 arey pagle/pagli ab neend ko haan bol do 😂",
+    "🌌 moonlight bhi tumhe sleep wish kar rahi hai 🌙",
+    "💞 pyari si raat aur pyara sa tum 😌",
+    "😴 kal fir group me dhamal machayenge 😂",
+    "🌙 ab chup chap kambal me ghus jao 😭",
+    "💖 tumhari neend buffering me hai 😂",
+    "✨ good night lovely human 💘",
+    "💤 phone ko bhi rest chahiye 😌",
+    "🌌 ab bas bhi karo aur so jao 😂",
+    "😴 sapne me chocolate factory jaana 🍫",
+    "💞 jao babu dreamland wait kar raha hai 🌙",
+    "🌃 ab aankhon ka shutter down karo 😂",
+    "💖 good night sweet potato 😭😂",
+    "🌙 tumhare sapne HD quality me aaye 😌",
+    "💤 arey jaan ab good night mandatory hai 😂",
+    "✨ neend ka OTP aa gaya hai 😭",
+    "💞 pyari si neend aur pyare se tum 💘",
+    "😴 so jao warna battery low ho jaoge 🔋",
+    "🌌 chand bhi so gaya tum kab soge 😂",
+    "💖 babu sleep karo warna panda bana dunga 🐼",
+    "🌙 pyari si hug 🤗 aur good night",
+    "😌 jao kal ka din conquer karna hai 😎",
+    "💤 ab mobile ko bye bolo 😂",
+    "💞 sapne me unicorn mil sakta hai 🦄",
+    "🌃 good night meri jaaneman 😭💘",
+    "😴 arey cutie ab toh so jao 😌",
+    "💖 moon bhi tumhe dekhke smile kar raha hai 🌙",
+    "✨ sleepy vibes incoming 😂",
+    "💤 jaake takiye ko hug karo 🤗",
+    "🌌 pyari si raat mubarak 😌",
+    "💞 good night superstar 🌟",
+    "😴 ab aur kitna online rahoge 😭",
+    "🌙 hero ji sleep ka mission complete karo 😂",
+    "💖 sapne me maggi khana 🍜",
+    "✨ pyari si good night from bot 💘",
+    "💤 ab neend ko seen mat karo 😂",
+    "🌃 tumhara bed tumhe yaad kar raha hai 😭",
+    "😌 sweet dreams cutie 🌙",
+    "💞 mobile rakho aur pyari si neend lo 😴",
+    "🌌 dream mode activated ✨",
+    "💖 arey babu ab aankh band karo 😂",
+    "🌙 sleep like a king 👑",
+    "😴 good night meri pyari duniya 💘",
+    "💤 ab so jao warna rooster bula lunga 🐓😂",
+    "✨ pyari si raat aur pyari si vibe 😌",
+    "💞 sapno me milte hain hero 😎",
+    "🌃 good night and take care 💖",
+    "😴 neend ka invitation accept karo 😂",
+    "🌙 ab phone ko bhi sula do 😌"
+]
+
+# ================= GNTAG COMMAND =================
+async def gntag(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    # ✅ GROUP ONLY
+    if update.effective_chat.type not in ["group", "supergroup"]:
+        return await update.message.reply_text("❌ Group only")
+
+    user = update.effective_user
+    chat_id = update.effective_chat.id
+
+    # ✅ ADMIN CHECK
+    member = await context.bot.get_chat_member(chat_id, user.id)
+
+    if member.status not in ["administrator", "creator"]:
+        return await update.message.reply_text("❌ Admin only")
+
+    # ✅ FETCH USERS
+    all_users = list(tracker.find())
+
+    if not all_users:
+        return await update.message.reply_text("❌ No users saved")
+
+    await update.message.reply_text(
+        f"🌙 Sending Good Night wishes to {len(all_users)} users..."
+    )
+
+    # ✅ ANTI FLOOD DELAY
+    delay = 3
+
+    # ✅ SEND ONE BY ONE
+    for u in all_users:
+
+        try:
+            uid = u["_id"]
+
+            # ✅ SAFE NAME
+            safe_name = html.escape(
+                str(u.get("name", "User"))[:25]
+            )
+
+            # ✅ CLICKABLE USER
+            mention = (
+                f"<a href='tg://user?id={uid}'>"
+                f"{safe_name}</a>"
+            )
+
+            # ✅ RANDOM MESSAGE
+            random_msg = random.choice(GN_MESSAGES)
+
+            # ✅ FINAL TEXT
+            text = f"{mention} ➤ {random_msg}"
+
+            # ✅ SEND
+            await update.message.reply_text(
+                text,
+                parse_mode="HTML",
+                disable_web_page_preview=True
+            )
+
+            # ✅ WAIT
+            await asyncio.sleep(delay)
+
+        except Exception as e:
+            print(f"GNTAG ERROR: {e}")
+
+    # ✅ DONE
+    await update.message.reply_text(
+        "✅ Good Night tagging completed 🌙"
+    )    
+
+# ================= AUTO SAVE USERS =================
+async def save_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not update.effective_user:
+        return
+
+    user = update.effective_user
+
+    try:
+        tracker.update_one(
+            {"_id": user.id},
+            {
+                "$set": {
+                    "name": user.first_name
+                }
+            },
+            upsert=True
+        )
+
+    except Exception as e:
+        print(f"SAVE USER ERROR: {e}")
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
@@ -7527,6 +7731,7 @@ def main():
     app.add_handler(CommandHandler("end", end))
     app.add_handler(CommandHandler("wordlb", word_leaderboard))
     app.add_handler(CommandHandler("tgall", tgall))
+    app.add_handler(CommandHandler("gntag", gntag))
     app.add_handler(CommandHandler("sdb", sdb))
     app.add_handler(CommandHandler("bomb", bomb_help))
     app.add_handler(CommandHandler("bjoin", bjoin))
@@ -7547,22 +7752,50 @@ def main():
     app.add_handler(CallbackQueryHandler(mine_click, pattern="mine_|cashout"))
     app.add_handler(CallbackQueryHandler(userinfo_buttons))
 
-    # ================= MESSAGE SYSTEM =================
+    # ================= HANDLERS =================
 
-    app.add_handler(MessageHandler(filters.ALL, block_system), group=3)  
+    app.add_handler(
+        MessageHandler(filters.ALL, block_system),
+        group=3
+    )
     # 🔥 Block system
 
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, filter_checker), group=2)  
+
+    app.add_handler(
+        MessageHandler(filters.TEXT & ~filters.COMMAND, filter_checker),
+        group=2
+    )
     # 🔥 Filter system
 
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle), group=1)  
-    # 🎮 WORD GAME (IMPORTANT → upar lao)
 
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, love_flow), group=0)  
+    app.add_handler(
+        MessageHandler(filters.TEXT & ~filters.COMMAND, handle),
+        group=1
+    )
+    # 🎮 WORD GAME
+
+
+    app.add_handler(
+        MessageHandler(filters.TEXT & ~filters.COMMAND, love_flow),
+        group=0
+    )
     # 💖 Love flow
 
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, auto_niki_reply), group=-1)  
+
+    app.add_handler(
+        MessageHandler(filters.TEXT & ~filters.COMMAND, auto_niki_reply),
+        group=-1
+    )
     # 🤖 AI fallback LAST
+
+
+    # ✅ AUTO SAVE USERS (SAFE)
+    app.add_handler(
+        MessageHandler(filters.ALL, save_users),
+        group=-999
+    )
+    # 💾 Auto save users silently
+
 
     app.add_handler(
         ChatMemberHandler(
@@ -7570,6 +7803,7 @@ def main():
             ChatMemberHandler.CHAT_MEMBER
         )
     )
+    # 👋 Welcome
  
 
 
