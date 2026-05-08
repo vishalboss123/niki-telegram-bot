@@ -5812,6 +5812,17 @@ async def add_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
         hint = hint.replace("}", "").strip()
         word = word.strip().lower()
 
+        # ❌ duplicate stop
+        old = words.find_one({
+            "size": size,
+            "word": word
+        })
+
+        if old:
+            return await update.message.reply_text(
+                f"{FONT}\n⚠️ Word already exists!"
+            )
+
         words.insert_one({
             "size": size,
             "word": word,
@@ -5827,50 +5838,67 @@ async def add_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
 # ================= NEW GAME =================
+# ================= NEW GAME =================
 async def new_game(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    chat_id = str(update.effective_chat.id)
+
+    # ✅ FIXED
+    chat_id = update.effective_chat.id
+
     size = int(update.message.text.replace("/new",""))
 
     # ❌ already running
     game = games.find_one({"_id": chat_id})
+
     if game:
         return await update.message.reply_text(
             f"{FONT}\n⚠️ Game already running!\n🎮 Join karke guess karo!"
         )
 
-    doc = list(words.aggregate([{"$match": {"size": size}}, {"$sample": {"size": 1}}]))
+    doc = list(
+        words.aggregate([
+            {"$match": {"size": size}},
+            {"$sample": {"size": 1}}
+        ])
+    )
 
     if not doc:
-        return await update.message.reply_text("❌ No words found")
+        return await update.message.reply_text(
+            "❌ No words found"
+        )
 
     doc = doc[0]
 
     games.update_one(
         {"_id": chat_id},
-        {"$set": {
-            "word": doc["word"],
-            "hint": doc["hint"],
-            "size": size,
-            "attempts": 0,
-            "grid": []
-        }},
+        {
+            "$set": {
+                "word": doc["word"],
+                "hint": doc["hint"],
+                "size": size,
+                "attempts": 0,
+                "grid": []
+            }
+        },
         upsert=True
     )
+
     await update.message.reply_text(
         f"""
-    🎯 𝐆ᴜᴇꜱꜱ 𝐎ɴʟʏ {size} 𝐋ᴇᴛᴛᴇʀ 𝐖ᴏʀᴅ! 🔤
+🎯 𝐆ᴜᴇꜱꜱ 𝐎ɴʟʏ {size} 𝐋ᴇᴛᴛᴇʀ 𝐖ᴏʀᴅ! 🔤
 
-    {FONT}
-    📊 0/30
+{FONT}
+📊 0/30
 
-    🎮 𝐆𝐀𝐌𝐄 𝐒𝐓𝐀𝐑𝐓𝐄𝐃
-    💡 Sab log guess kar sakte ho 😎
-    """
+🎮 𝐆𝐀𝐌𝐄 𝐒𝐓𝐀𝐑𝐓𝐄𝐃
+💡 Sab log guess kar sakte ho 😎
+"""
     )
 
 # ================= HANDLE =================
 async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    chat_id = str(update.effective_chat.id)   # 🔥 FIX: ALWAYS STRING
+
+    # ✅ FIXED (NO STRING)
+    chat_id = update.effective_chat.id
     uid = update.effective_user.id
 
     if not update.message or not update.message.text:
@@ -5902,7 +5930,10 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # 🔥 dictionary check
     try:
-        valid = await asyncio.wait_for(is_real_word(text), timeout=1)
+        valid = await asyncio.wait_for(
+            is_real_word(text),
+            timeout=1
+        )
     except:
         valid = True
 
@@ -5911,36 +5942,34 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"{FONT}\n❌ Valid English word nahi hai!"
         )
 
-    # 🔥 attempts update
+    # ✅ FIXED ATTEMPTS
     games.update_one(
         {"_id": chat_id},
-        {"$inc": {"attempts": 1}},
-        upsert=True
+        {"$inc": {"attempts": 1}}
     )
 
-    att = game.get("attempts", 0) + 1
-    games.update_one(
-        {"_id": chat_id},
-        {"$set": {"attempts": att}}
-    )
+    # ✅ REFRESH GAME
+    game = games.find_one({"_id": chat_id})
+    att = game["attempts"]
 
     # 🔥 result check
     colors = check(secret, text)
 
     # 👤 user name
     name = update.effective_user.first_name or "Player"
+
     row = f"{' '.join(colors)} ➤ {text.upper()}"
 
-    # 🔥 grid update (SAFE)
+    # 🔥 grid update
     games.update_one(
         {"_id": chat_id},
         {"$push": {"grid": row}}
     )
 
-    # 🔄 refresh game
+    # 🔄 refresh grid
     game = games.find_one({"_id": chat_id})
     grid = "\n".join(game.get("grid", []))
-    
+
     # 🔥 FINAL MESSAGE
     await update.message.reply_text(
         f"""
@@ -5952,23 +5981,25 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 {grid}
 """
     )
+
     # ================= HINT =================
     if att == 20:
-        await update.message.reply_text(f"💡 HINT:\n{game['hint']}")
+        await update.message.reply_text(
+            f"💡 HINT:\n{game['hint']}"
+        )
 
     # ================= WIN =================
-    # ================= WIN =================
-    # ================= WIN =================
     if text == secret:
+
         uid = update.effective_user.id
-        chat_id = update.effective_chat.id
         name = update.effective_user.first_name
 
         # 🔍 OLD DATA
         user_data = users.find_one({"_id": uid}) or {}
+
         old_wins = user_data.get("word_wins", 0)
 
-        # 🔥 UPDATE WORDSEEK DATA
+        # 🔥 UPDATE USER DATA
         users.update_one(
             {"_id": uid},
             {
@@ -5983,21 +6014,25 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
             upsert=True
         )
 
-    # ================= 💰 REAL BALANCE ADD =================
+        # 💰 REAL BALANCE
         real_user = get_user(uid, name)
+
         real_user["money"] += WIN_REWARD
+
         save_data()
-    # =====================================================
 
         new_wins = old_wins + 1
 
-        # 🗑 GAME DELETE
+        # ✅ DELETE GAME
         games.delete_one({"_id": chat_id})
 
         # 👤 CLICKABLE USER
-        user_link = f"<a href='tg://user?id={uid}'>{name}</a>"
+        user_link = (
+            f"<a href='tg://user?id={uid}'>"
+            f"{name}</a>"
+        )
 
-        # 🎉 WIN MESSAGE (UPDATED UI)
+        # 🎉 WIN MESSAGE
         await update.message.reply_text(
             f"""
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -6011,29 +6046,45 @@ async def handle(update: Update, context: ContextTypes.DEFAULT_TYPE):
 🏆 GG BRO!
 ━━━━━━━━━━━━━━━━━━━━━━
 """,
-        parse_mode="HTML"
-    )
+            parse_mode="HTML"
+        )
 
-        # 🏅 BADGE SYSTEM
+        # 🏅 BADGES
         if new_wins == 5:
-            await update.message.reply_text("🎉 Badge Unlocked: 🥉 Rookie!")
+            await update.message.reply_text(
+                "🎉 Badge Unlocked: 🥉 Rookie!"
+            )
+
         elif new_wins == 10:
-            await update.message.reply_text("🎉 Badge Unlocked: 🥈 Skilled!")
+            await update.message.reply_text(
+                "🎉 Badge Unlocked: 🥈 Skilled!"
+            )
+
         elif new_wins == 20:
-            await update.message.reply_text("🎉 Badge Unlocked: 🥇 Pro!")
+            await update.message.reply_text(
+                "🎉 Badge Unlocked: 🥇 Pro!"
+            )
+
         elif new_wins == 50:
-            await update.message.reply_text("🎉 Badge Unlocked: 👑 Legend!")
+            await update.message.reply_text(
+                "🎉 Badge Unlocked: 👑 Legend!"
+            )
+
         elif new_wins == 100:
-            await update.message.reply_text("🎉 Badge Unlocked: 💎 Master!")
+            await update.message.reply_text(
+                "🎉 Badge Unlocked: 💎 Master!"
+            )
 
         return
+
     # ================= LOSE =================
     if att >= 30:
-        games.delete_one({"_id": chat_id}) 
+
+        games.delete_one({"_id": chat_id})
+
         await update.message.reply_text(
             f"{FONT}\n❌ GAME OVER\nWORD WAS: {secret}"
         )
-
 #=====================END============================
 async def end(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
