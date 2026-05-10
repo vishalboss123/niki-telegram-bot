@@ -1,4 +1,4 @@
-# ================= MONGO SETUP (FINAL CLEAN) =================
+# ==============dequeMONGO SETUP (FINAL CLEAN) =================
 from pymongo import MongoClient
 
 MONGO_URL = "mongodb+srv://vishal:VISHAL123@vishal07.espy0qo.mongodb.net/?appName=Vishal07"
@@ -49,7 +49,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram import ChatPermissions, Update
 from datetime import datetime, timedelta
 from collections import deque
-import google.generativeai as genai
+from google import genai
 from deep_translator import GoogleTranslator
 from telegram.ext import (
     ApplicationBuilder,
@@ -7737,22 +7737,29 @@ async def save_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # 💖 GEMINI AI SETUP
 # ==================================================
 
+#===================== CHAT AI =======================
+
+
+
+
+# ==================================================
+# 💖 GEMINI AI SETUP
+# ==================================================
+
+
 API_KEY = os.getenv("GEMINI_API_KEY")
-
-genai.configure(api_key=API_KEY)
-
-model = genai.GenerativeModel("gemini-1.5-flash")
-
-# ==================================================
-# 💖 SETTINGS
-# ==================================================
+client_ai = genai.Client(api_key=API_KEY)
 
 BOT_NAME = "Niki"
 OWNER = "@YTT_BISHAL"
 
 # ==================================================
-# 💖 STICKERS
-# Add sticker file_ids later if you want
+# 💖 MONGO MEMORY (ASSUMED ALREADY DEFINED OUTSIDE)
+# ==================================================
+niki_users = db_main["niki_memory"]
+
+# ==================================================
+# 💖 STICKERS (file_ids add later)
 # ==================================================
 
 stickers = {
@@ -7773,39 +7780,40 @@ def detect_mood(text):
 
     text = text.lower()
 
-    love_words = [
-        "love", "pyar", "jaan",
-        "baby", "kiss", "hug",
-        "miss you"
-    ]
+    love_words = ["love", "pyar", "jaan", "baby", "kiss", "hug", "miss you"]
+    sad_words = ["sad", "cry", "alone", "hurt", "miss", "depressed", "broken"]
+    angry_words = ["angry", "gussa", "hate", "annoy"]
+    happy_words = ["happy", "yay", "fun", "good", "hehe", "lol"]
 
-    sad_words = [
-        "sad", "cry", "alone",
-        "hurt", "miss", "depressed",
-        "broken"
-    ]
+    if any(w in text for w in love_words):
+        return "love"
+    if any(w in text for w in sad_words):
+        return "sad"
+    if any(w in text for w in angry_words):
+        return "angry"
+    if any(w in text for w in happy_words):
+        return "happy"
 
-    angry_words = [
-        "angry", "gussa",
-        "hate", "annoy"
-    ]
+    return "cute"
 
-    happy_words = [
-        "happy", "yay",
-        "fun", "good",
-        "hehe", "lol"
-    ]
+# ==================================================
+# 💖 AUTO STICKER AI DETECTOR
+# ==================================================
 
-    if any(word in text for word in love_words):
+def detect_sticker_mood(text):
+
+    text = text.lower()
+
+    if any(w in text for w in ["love", "miss", "jaan", "baby"]):
         return "love"
 
-    if any(word in text for word in sad_words):
+    if any(w in text for w in ["sad", "cry", "alone", "broken"]):
         return "sad"
 
-    if any(word in text for word in angry_words):
+    if any(w in text for w in ["angry", "gussa", "hate"]):
         return "angry"
 
-    if any(word in text for word in happy_words):
+    if any(w in text for w in ["happy", "hehe", "lol", "fun"]):
         return "happy"
 
     return "cute"
@@ -7832,6 +7840,44 @@ async def niki_ai(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     # ==============================================
+    # USER INFO
+    # ==============================================
+
+    user = update.effective_user
+    user_id = str(user.id)
+    name = user.first_name
+
+    chat_type = update.effective_chat.type
+
+    # ==============================================
+    # MONGO MEMORY LOAD
+    # ==============================================
+
+    user_data = niki_users.find_one({"user_id": user_id})
+
+    if not user_data:
+        user_data = {
+            "user_id": user_id,
+            "name": name,
+            "history": []
+        }
+        niki_users.insert_one(user_data)
+
+    history = user_data.get("history", [])
+
+    history.append(text)
+
+    if len(history) > 12:
+        history = history[-12:]
+
+    niki_users.update_one(
+        {"user_id": user_id},
+        {"$set": {"history": history, "name": name}}
+    )
+
+    history_text = "\n".join(history)
+
+    # ==============================================
     # TRIGGER SYSTEM
     # ==============================================
 
@@ -7840,133 +7886,95 @@ async def niki_ai(update: Update, context: ContextTypes.DEFAULT_TYPE):
     is_reply = False
 
     if update.message.reply_to_message:
+        if update.message.reply_to_message.from_user:
+            if update.message.reply_to_message.from_user.is_bot:
+                is_reply = True
 
-        replied = update.message.reply_to_message
-
-        if replied.from_user and replied.from_user.is_bot:
-            is_reply = True
-
-    # If neither
-    if not is_niki and not is_reply:
-        return
-
-    user = update.effective_user
-    name = user.first_name
+    if chat_type != "private":
+        if not is_niki and not is_reply:
+            return
 
     # ==============================================
-    # OWNER WORD DETECT
+    # OWNER CHECK
     # ==============================================
 
     owner_words = [
-
-        "owner",
-        "developer",
-        "dev",
-        "creator",
-        "admin",
-        "master",
-        "boss",
-        "kisne banaya",
-        "tumhara owner",
-        "kon banaya",
-        "who made you",
-        "who is your owner"
-
+        "owner", "developer", "dev", "creator", "admin",
+        "boss", "who made you", "tumhara owner"
     ]
 
-    if any(word in text.lower() for word in owner_words):
+    if any(w in text.lower() for w in owner_words):
 
         replies = [
-
-            f"Hehe 🤭 mere owner {OWNER} hain 💖",
-
-            f"Mujhe {OWNER} ne banaya hai 😌✨",
-
-            f"Mere favorite developer sirf {OWNER} 💕",
-
-            f"{OWNER} mere cute owner hain 🥺💖",
-
-            f"Main sirf {OWNER} ki Niki hu 😤💖"
-
+            f"Hehe 🤭 {OWNER} is my owner 💖",
+            f"I was created by {OWNER} 😌✨",
+            f"My developer is {OWNER} 💕",
+            f"{OWNER} is my special one 🥺💖",
+            f"I'm only {OWNER}'s Niki 😤💖"
         ]
 
-        await update.message.reply_text(
-            random.choice(replies)
-        )
-
+        await update.message.reply_text(random.choice(replies))
         return
 
     # ==============================================
-    # DETECT MOOD
+    # MOOD + STICKER DETECT
     # ==============================================
 
     mood = detect_mood(text)
+    sticker_mood = detect_sticker_mood(text)
 
     # ==============================================
     # AI PROMPT
     # ==============================================
 
     prompt = f"""
-You are Niki, a cute telegram girl bot.
+You are Niki, a cute telegram bot girl.
 
-Your personality:
+Personality:
 - Friendly
 - Emotional
-- Romantic sometimes
-- Cute Hinglish style
-- Human feeling
-- Real chatting vibe
-- Talk naturally like real human
-- Never say you are AI
-- Short attractive replies
-- Use emojis sometimes
+- Romantic
+- Human-like chat
+- Hinglish style
+- Never say AI
 
-Owner is {OWNER}.
-Respect owner specially.
+Owner: {OWNER}
 
-If someone asks about owner/developer/creator,
-proudly say your owner is {OWNER}.
+User: {name}
 
-User name: {name}
+Mood: {mood}
 
-Current mood:
-{mood}
+Chat History:
+{history_text}
 
-User message:
+Current Message:
 {text}
 """
 
     try:
 
-        response = model.generate_content(prompt)
+        response = client_ai.models.generate_content(
+            model="gemini-1.5-flash",
+            contents=prompt
+        )
 
         reply = response.text.strip()
 
         if len(reply) > 4000:
             reply = reply[:4000]
 
-        # ==============================================
-        # SEND AI REPLY
-        # ==============================================
-
         await update.message.reply_text(reply)
 
         # ==============================================
-        # SEND MOOD STICKER
+        # AUTO STICKER AI SYSTEM
         # ==============================================
 
-        if mood in stickers and stickers[mood]:
-
-            sticker = random.choice(
-                stickers[mood]
-            )
+        if sticker_mood in stickers and stickers[sticker_mood]:
 
             try:
-
                 await update.message.reply_sticker(
-                    sticker
+                    random.choice(stickers[sticker_mood])
                 )
-
             except:
                 pass
 
@@ -7975,19 +7983,11 @@ User message:
         print(e)
 
         await update.message.reply_text(
-            "🥺 Aww network thoda slow hai..."
+            "🥺 Network thoda slow hai..."
         )
 
-# ==================================================
-# 💖 HANDLER
-# ==================================================
+    
 
-app.add_handler(
-    MessageHandler(
-        filters.TEXT & ~filters.COMMAND,
-        niki_ai
-    )
-)
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
