@@ -8011,6 +8011,11 @@ def main():
 
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
+    async def post_init(app):
+        await app.bot.delete_webhook(drop_pending_updates=True)
+
+    app.post_init = post_init
+
     # ================= 🔥 TRACK SYSTEM (FIRST - MUST) =================
     app.add_handler(MessageHandler(filters.ALL, track_user), group=-1)
     app.add_handler(ChatMemberHandler(track_join, ChatMemberHandler.CHAT_MEMBER), group=-1)
