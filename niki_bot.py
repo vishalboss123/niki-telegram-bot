@@ -49,6 +49,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram import ChatPermissions, Update
 from datetime import datetime, timedelta
 from collections import deque
+import google.generativeai as genai
 from deep_translator import GoogleTranslator
 from telegram.ext import (
     ApplicationBuilder,
@@ -7730,11 +7731,7 @@ async def save_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 #=====================CHAT AI =======================
-from telegram import Update
-from telegram.ext import ContextTypes, MessageHandler, filters
-import google.generativeai as genai
-import random
-import os
+
 
 # ==================================================
 # 💖 GEMINI AI SETUP
@@ -7751,7 +7748,7 @@ model = genai.GenerativeModel("gemini-1.5-flash")
 # ==================================================
 
 BOT_NAME = "Niki"
-OWNER = "@YT_BISHALL"
+OWNER = "@YTT_BISHAL"
 
 # ==================================================
 # 💖 STICKERS
