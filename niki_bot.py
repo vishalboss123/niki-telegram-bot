@@ -7628,6 +7628,83 @@ async def gntag(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "✅ Good Night tagging completed 🌙"
     )    
+#===================ADMIN LIST======================
+
+from telegram.constants import ParseMode
+import asyncio
+import html
+
+#================ ADMIN LIST =================#
+
+async def admin_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat = update.effective_chat
+
+    # ⚡ Loading Message
+    loading = await update.message.reply_text(
+        "╭━━〔 ⚡ 𝐋ᴏᴀᴅɪɴɢ 𝐀ᴅᴍɪɴ 𝐋ɪsᴛ ⚡ 〕━━╮\n"
+        "┃ 🔍 Collecting Admin Energy...\n"
+        "┃ ⏳ Please Wait...\n"
+        "╰━━━━━━━━━━━━━━━━━━━━╯"
+    )
+
+    # ⏳ Loading vibe
+    await asyncio.sleep(2)
+
+    # 👑 Get Admins
+    admins = await context.bot.get_chat_administrators(chat.id)
+
+    owner_text = "👑 None"
+    admin_list_text = ""
+
+    for admin in admins:
+        user = admin.user
+
+        # Clickable Name
+        name = html.escape(user.first_name or "Admin")
+
+        clickable_name = (
+            f'<a href="tg://user?id={user.id}">{name}</a>'
+        )
+
+        # 👑 Owner
+        if admin.status == "creator":
+            owner_text = (
+                f"╭─❖ 👑 𝐆ʀᴏᴜᴘ 𝐎ᴡɴᴇʀ 👑 ❖─╮\n"
+                f"     {clickable_name}\n"
+                f"╰──────────────────╯"
+            )
+
+        # ❤️ Admins
+        else:
+            admin_list_text += (
+                f"➤ {clickable_name}  ❤️\n"
+            )
+
+    if not admin_list_text:
+        admin_list_text = "➤ None ❤️"
+
+    # ✨ Final Attractive Message
+    text = (
+        "╔══❖•ೋ° 🌸 °ೋ•❖══╗\n"
+        "      ✨ 𝐀𝐃𝐌𝐈𝐍 𝐏𝐀𝐍𝐄𝐋 ✨\n"
+        "╚══❖•ೋ° 🌸 °ೋ•❖══╝\n\n"
+
+        f"{owner_text}\n\n"
+
+        "╭━━━〔 💎 𝐀ᴅᴍɪɴ 𝐓ᴇᴀᴍ 💎 〕━━━╮\n"
+        f"{admin_list_text}"
+        "╰━━━━━━━━━━━━━━━━━━━━━━╯\n\n"
+
+        "⚡ 𝐑ᴇsᴘᴇᴄᴛ 𝐓ʜᴇ 𝐀ᴅᴍɪɴ𝐬 ⚡"
+    )
+
+    # 🔄 Edit Loading Message
+    await loading.edit_text(
+        text,
+        parse_mode=ParseMode.HTML,
+        disable_web_page_preview=True
+    )
+
 
 # ================= AUTO SAVE USERS =================
 async def save_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -7650,6 +7727,270 @@ async def save_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     except Exception as e:
         print(f"SAVE USER ERROR: {e}")
+
+
+#=====================CHAT AI =======================
+from telegram import Update
+from telegram.ext import ContextTypes, MessageHandler, filters
+import google.generativeai as genai
+import random
+import os
+
+# ==================================================
+# 💖 GEMINI AI SETUP
+# ==================================================
+
+API_KEY = os.getenv("GEMINI_API_KEY")
+
+genai.configure(api_key=API_KEY)
+
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+# ==================================================
+# 💖 SETTINGS
+# ==================================================
+
+BOT_NAME = "Niki"
+OWNER = "@YT_BISHALL"
+
+# ==================================================
+# 💖 STICKERS
+# Add sticker file_ids later if you want
+# ==================================================
+
+stickers = {
+
+    "love": [],
+    "sad": [],
+    "cute": [],
+    "happy": [],
+    "angry": []
+
+}
+
+# ==================================================
+# 💖 MOOD DETECT
+# ==================================================
+
+def detect_mood(text):
+
+    text = text.lower()
+
+    love_words = [
+        "love", "pyar", "jaan",
+        "baby", "kiss", "hug",
+        "miss you"
+    ]
+
+    sad_words = [
+        "sad", "cry", "alone",
+        "hurt", "miss", "depressed",
+        "broken"
+    ]
+
+    angry_words = [
+        "angry", "gussa",
+        "hate", "annoy"
+    ]
+
+    happy_words = [
+        "happy", "yay",
+        "fun", "good",
+        "hehe", "lol"
+    ]
+
+    if any(word in text for word in love_words):
+        return "love"
+
+    if any(word in text for word in sad_words):
+        return "sad"
+
+    if any(word in text for word in angry_words):
+        return "angry"
+
+    if any(word in text for word in happy_words):
+        return "happy"
+
+    return "cute"
+
+# ==================================================
+# 💖 AI CHAT FUNCTION
+# ==================================================
+
+async def niki_ai(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not update.message:
+        return
+
+    text = update.message.text
+
+    if not text:
+        return
+
+    # ==============================================
+    # IGNORE COMMANDS
+    # ==============================================
+
+    if text.startswith("/"):
+        return
+
+    # ==============================================
+    # TRIGGER SYSTEM
+    # ==============================================
+
+    is_niki = "niki" in text.lower()
+
+    is_reply = False
+
+    if update.message.reply_to_message:
+
+        replied = update.message.reply_to_message
+
+        if replied.from_user and replied.from_user.is_bot:
+            is_reply = True
+
+    # If neither
+    if not is_niki and not is_reply:
+        return
+
+    user = update.effective_user
+    name = user.first_name
+
+    # ==============================================
+    # OWNER WORD DETECT
+    # ==============================================
+
+    owner_words = [
+
+        "owner",
+        "developer",
+        "dev",
+        "creator",
+        "admin",
+        "master",
+        "boss",
+        "kisne banaya",
+        "tumhara owner",
+        "kon banaya",
+        "who made you",
+        "who is your owner"
+
+    ]
+
+    if any(word in text.lower() for word in owner_words):
+
+        replies = [
+
+            f"Hehe 🤭 mere owner {OWNER} hain 💖",
+
+            f"Mujhe {OWNER} ne banaya hai 😌✨",
+
+            f"Mere favorite developer sirf {OWNER} 💕",
+
+            f"{OWNER} mere cute owner hain 🥺💖",
+
+            f"Main sirf {OWNER} ki Niki hu 😤💖"
+
+        ]
+
+        await update.message.reply_text(
+            random.choice(replies)
+        )
+
+        return
+
+    # ==============================================
+    # DETECT MOOD
+    # ==============================================
+
+    mood = detect_mood(text)
+
+    # ==============================================
+    # AI PROMPT
+    # ==============================================
+
+    prompt = f"""
+You are Niki, a cute telegram girl bot.
+
+Your personality:
+- Friendly
+- Emotional
+- Romantic sometimes
+- Cute Hinglish style
+- Human feeling
+- Real chatting vibe
+- Talk naturally like real human
+- Never say you are AI
+- Short attractive replies
+- Use emojis sometimes
+
+Owner is {OWNER}.
+Respect owner specially.
+
+If someone asks about owner/developer/creator,
+proudly say your owner is {OWNER}.
+
+User name: {name}
+
+Current mood:
+{mood}
+
+User message:
+{text}
+"""
+
+    try:
+
+        response = model.generate_content(prompt)
+
+        reply = response.text.strip()
+
+        if len(reply) > 4000:
+            reply = reply[:4000]
+
+        # ==============================================
+        # SEND AI REPLY
+        # ==============================================
+
+        await update.message.reply_text(reply)
+
+        # ==============================================
+        # SEND MOOD STICKER
+        # ==============================================
+
+        if mood in stickers and stickers[mood]:
+
+            sticker = random.choice(
+                stickers[mood]
+            )
+
+            try:
+
+                await update.message.reply_sticker(
+                    sticker
+                )
+
+            except:
+                pass
+
+    except Exception as e:
+
+        print(e)
+
+        await update.message.reply_text(
+            "🥺 Aww network thoda slow hai..."
+        )
+
+# ==================================================
+# 💖 HANDLER
+# ==================================================
+
+app.add_handler(
+    MessageHandler(
+        filters.TEXT & ~filters.COMMAND,
+        niki_ai
+    )
+)
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
@@ -7791,6 +8132,7 @@ def main():
     app.add_handler(CommandHandler("gun", gun))
     app.add_handler(CommandHandler("gjoin", gjoin))
     app.add_handler(CommandHandler("shoot", shoot))
+    app.add_handler(CommandHandler("admin", admin_list))
     app.add_handler(CommandHandler("userinfo", userinfo))
     
     # ================= CALLBACKS =================
@@ -7831,6 +8173,16 @@ def main():
         group=0
     )
     # 💖 Love flow
+
+
+    app.add_handler(
+        MessageHandler(
+            filters.TEXT & ~filters.COMMAND,
+            niki_ai
+        ),
+        group=-2
+    )
+    # 💖 Niki AI Chat
 
 
     app.add_handler(
