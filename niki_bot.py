@@ -7980,10 +7980,10 @@ Current Message:
 
     except Exception as e:
 
-        print(e)
+        print("🔥 GEMINI ERROR:", e)
 
         await update.message.reply_text(
-            "🥺 Network thoda slow hai..."
+            "⚠️ sorry me abhi thoda busy hu"
         )
 
     
