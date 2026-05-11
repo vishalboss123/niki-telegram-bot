@@ -8161,29 +8161,7 @@ def main():
 
     # ================= 🔥 HANDLERS (CLEAN PRIORITY ORDER) =================
 
-    # 🛑 BLOCK SYSTEM (TOP PRIORITY)
-    app.add_handler(
-        MessageHandler(filters.ALL, block_system),
-        group=3
-    )
-
-    # 🔥 FILTER SYSTEM
-    app.add_handler(
-        MessageHandler(filters.TEXT & ~filters.COMMAND, filter_checker),
-        group=2
-    )
-
-    # 🎮 GAME SYSTEM
-    app.add_handler(
-        MessageHandler(filters.TEXT & ~filters.COMMAND, handle),
-        group=1
-    )
-
-    # 💖 LOVE FLOW
-    app.add_handler(
-        MessageHandler(filters.TEXT & ~filters.COMMAND, love_flow),
-        group=0
-    )
+    
 
     # 💖 MAIN AI (PRIMARY RESPONSE)
     app.add_handler(
@@ -8191,22 +8169,9 @@ def main():
         group=-1
     )
 
-    # 🤖 FALLBACK AI (SECONDARY)
-    app.add_handler(
-        MessageHandler(filters.TEXT & ~filters.COMMAND, auto_niki_reply),
-        group=-2
-    )
+    
 
-    # 💾 SAVE USERS (LOWEST PRIORITY)
-    app.add_handler(
-        MessageHandler(filters.ALL, save_users),
-        group=-999
-    )
-
-    # 👋 WELCOME SYSTEM
-    app.add_handler(
-        ChatMemberHandler(member_update_welcome, ChatMemberHandler.CHAT_MEMBER)
-    )
+    
 
  
 
