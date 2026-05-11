@@ -8106,7 +8106,7 @@ Current Message:
         print("🔥 OPENROUTER AI ERROR:", e)
 
         await update.message.reply_text(
-            f"⚠️ ERROR:\n{str(e)[:150]}"
+            f"𝐓ᴀᴋᴇ 𝐂ᴀʀᴇ 𝐁𝐚𝐛𝐲 🥰"
         )
 
         return
