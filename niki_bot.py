@@ -7682,7 +7682,7 @@ async def admin_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
 
     if not admin_list_text:
-        admin_list_random "➤ None ❤️"
+        admin_list_random = "➤ None ❤️"
 
     # ✨ Final Attractive Message
     text = (
