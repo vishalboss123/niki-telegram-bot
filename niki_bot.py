@@ -8009,12 +8009,24 @@ def main():
     if mongo_data:
         data = mongo_data
 
+    # ================= APP BUILD =================
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
+    # ================= 🔥 SAFE POST INIT =================
     async def post_init(app):
         await app.bot.delete_webhook(drop_pending_updates=True)
+        print("💖 Bot started clean (no conflict mode)")
+
+        # 🔥 SAFE MONITOR START (NO DUPLICATE TASK)
+        if not hasattr(app, "monitor_started"):
+            asyncio.create_task(auto_monitor())
+            app.monitor_started = True
 
     app.post_init = post_init
+
+    # ================= 🚀 RENDER SAFETY =================
+    if os.getenv("RENDER"):
+        print("🚀 Running on Render - single instance mode")
 
     # ================= 🔥 TRACK SYSTEM (FIRST - MUST) =================
     app.add_handler(MessageHandler(filters.ALL, track_user), group=-1)
@@ -8147,78 +8159,61 @@ def main():
     app.add_handler(CallbackQueryHandler(mine_click, pattern="mine_|cashout"))
     app.add_handler(CallbackQueryHandler(userinfo_buttons))
 
-    # ================= HANDLERS =================
+    # ================= 🔥 HANDLERS (CLEAN PRIORITY ORDER) =================
 
+    # 🛑 BLOCK SYSTEM (TOP PRIORITY)
     app.add_handler(
         MessageHandler(filters.ALL, block_system),
         group=3
     )
-    # 🔥 Block system
 
-
+    # 🔥 FILTER SYSTEM
     app.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, filter_checker),
         group=2
     )
-    # 🔥 Filter system
 
-
+    # 🎮 GAME SYSTEM
     app.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, handle),
         group=1
     )
-    # 🎮 WORD GAME
 
-
+    # 💖 LOVE FLOW
     app.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, love_flow),
         group=0
     )
-    # 💖 Love flow
 
-
+    # 💖 MAIN AI (PRIMARY RESPONSE)
     app.add_handler(
-        MessageHandler(
-            filters.TEXT & ~filters.COMMAND,
-            niki_ai
-        ),
-        group=-2
-    )
-    # 💖 Niki AI Chat
-
-
-    app.add_handler(
-        MessageHandler(filters.TEXT & ~filters.COMMAND, auto_niki_reply),
+        MessageHandler(filters.TEXT & ~filters.COMMAND, niki_ai),
         group=-1
     )
-    # 🤖 AI fallback LAST
 
+    # 🤖 FALLBACK AI (SECONDARY)
+    app.add_handler(
+        MessageHandler(filters.TEXT & ~filters.COMMAND, auto_niki_reply),
+        group=-2
+    )
 
-    # ✅ AUTO SAVE USERS (SAFE)
+    # 💾 SAVE USERS (LOWEST PRIORITY)
     app.add_handler(
         MessageHandler(filters.ALL, save_users),
         group=-999
     )
-    # 💾 Auto save users silently
 
-
+    # 👋 WELCOME SYSTEM
     app.add_handler(
-        ChatMemberHandler(
-            member_update_welcome,
-            ChatMemberHandler.CHAT_MEMBER
-        )
+        ChatMemberHandler(member_update_welcome, ChatMemberHandler.CHAT_MEMBER)
     )
-    # 👋 Welcome
+
  
 
 
     print("🔥 Niki Bot started...")
-    
-    async def start_background(app):
-        asyncio.create_task(auto_monitor())
 
-    app.post_init = start_background
-    
+    # ================= RUN BOT =================
     app.run_polling()
 
 if __name__ == "__main__":
