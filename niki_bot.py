@@ -7924,8 +7924,13 @@ Current Message:
                 pass
 
     except Exception as e:
-        print("AI ERROR:", e)
-        await update.message.reply_text("⚠️ AI temporarily unavailable 💔")
+        print("🔥 FULL AI ERROR:", e)
+
+        await update.message.reply_text(
+            f"⚠️ ERROR:\n{str(e)}"
+        )
+
+        return
         
 
         
