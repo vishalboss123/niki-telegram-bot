@@ -7747,8 +7747,9 @@ async def save_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # 💖 OPENROUTER AI CLIENT
 # ==================================================
 
+
 client_ai = OpenAI(
-    api_key=os.getenv("OPENROUTER_API_KEY"),
+    api_key="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",
     base_url="https://openrouter.ai/api/v1"
 )
 
