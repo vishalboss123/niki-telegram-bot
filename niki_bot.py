@@ -7958,8 +7958,13 @@ Current Message:
             contents=prompt
         )
 
-        reply = response.text.strip()
+        reply = getattr(response, "text", None)
 
+        if not reply:
+            await update.message.reply_text("⚠️ AI temporarily unavailable, try again later")
+            return
+
+        reply = reply.strip()
         if len(reply) > 4000:
             reply = reply[:4000]
 
@@ -7982,9 +7987,8 @@ Current Message:
 
         print("🔥 GEMINI ERROR:", e)
 
-        await update.message.reply_text(
-            "⚠️ sorry me abhi thoda busy hu"
-        )
+        await update.message.reply_text("⚠️ AI temporarily unavailable, try again later")
+        return
 
     
 
