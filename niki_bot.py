@@ -7927,7 +7927,7 @@ Current Message:
         print("🔥 FULL AI ERROR:", e)
 
         await update.message.reply_text(
-            f"⚠️ ERROR:\n{str(e)}"
+            f"⚠️ 𝐍ᴇᴛᴡᴏʀᴋ 𝐒ʟᴏᴡ 𝐇ᴇ 𝐁ᴀʙʏ 𝐓ʜᴏᴅᴀ 𝐖ᴀɪᴛ 𝐊ᴀʀᴏɴᴀ 🥲"
         )
 
         return
