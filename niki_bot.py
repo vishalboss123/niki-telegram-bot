@@ -7748,6 +7748,10 @@ async def save_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ==================================================
 
 
+import os
+
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+
 client_ai = OpenAI(
     api_key=OPENROUTER_API_KEY,
     base_url="https://openrouter.ai/api/v1"
