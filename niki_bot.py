@@ -8179,32 +8179,50 @@ def main():
 
     # ================= 🔥 HANDLERS (CLEAN PRIORITY ORDER) =================
 
-    # 🛑 BLOCK (SAFE - DON'T BLOCK FLOW)
-    app.add_handler(MessageHandler(filters.ALL, block_system), group=10)
+    # 🛑 BLOCK
+    app.add_handler(
+        MessageHandler(filters.ALL, block_system),
+        group=10
+    )
 
     # 💾 SAVE USERS
-    app.add_handler(MessageHandler(filters.ALL, save_users), group=9)
+    app.add_handler(
+        MessageHandler(filters.ALL, save_users),
+        group=9
+    )
 
     # 🔥 FILTER SYSTEM
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, filter_checker), group=5)
+    app.add_handler(
+        MessageHandler(
+            filters.TEXT & ~filters.COMMAND,
+            filter_checker
+        ),
+        group=5
+    )
 
     # 🎮 GAME SYSTEM
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle), group=4)
+    app.add_handler(
+        MessageHandler(
+            filters.TEXT & ~filters.COMMAND,
+            handle
+        ),
+        group=4
+    )
 
     # 💖 LOVE FLOW
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, love_flow), group=3)
+    app.add_handler(
+        MessageHandler(
+            filters.TEXT & ~filters.COMMAND,
+            love_flow
+        ),
+        group=3
+    )
 
-    # 🤖 MAIN AI (ONLY ONE AI HANDLER)
-    app.add_handler(MessageHandler(filters.TEXT, niki_ai), group=1)
-
-    # 👋 WELCOME
-    app.add_handler(ChatMemberHandler(member_update_welcome, ChatMemberHandler.CHAT_MEMBER))
-    
-
-    
-
- 
-
+    # 🤖 MAIN AI (LAST)
+    app.add_handler(
+        MessageHandler(
+            filters.TEXT & ~filters.COM
+   
 
     print("🔥 Niki Bot started...")
 
