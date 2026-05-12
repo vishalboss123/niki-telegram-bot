@@ -8218,10 +8218,22 @@ def main():
         group=3
     )
 
-    # 🤖 MAIN AI (LAST)
+    # 🤖 MAIN AI
     app.add_handler(
         MessageHandler(
-            filters.TEXT & ~filters.COM
+            filters.TEXT & ~filters.COMMAND,
+            niki_ai
+        ),
+        group=20
+    )
+
+    # 👋 WELCOME
+    app.add_handler(
+        ChatMemberHandler(
+            member_update_welcome,
+            ChatMemberHandler.CHAT_MEMBER
+        )
+    )
    
 
     print("🔥 Niki Bot started...")
