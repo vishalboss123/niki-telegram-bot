@@ -8044,7 +8044,7 @@ Current Message:
 
         response = client_ai.chat.completions.create(
 
-            model="mistralai/mistral-7b-instruct:free",
+            model="meta-llama/llama-3-8b-instruct:free",
 
             messages=[
                 {
