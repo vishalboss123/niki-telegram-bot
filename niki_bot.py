@@ -7749,6 +7749,13 @@ async def save_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 import os
+import random
+import asyncio
+from openai import OpenAI
+
+# ==================================================
+# 💖 OPENROUTER CLIENT
+# ==================================================
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
@@ -7757,19 +7764,21 @@ client_ai = OpenAI(
     base_url="https://openrouter.ai/api/v1"
 )
 
+# ==================================================
+# 💖 BASIC INFO
+# ==================================================
+
 BOT_USERNAME = "@iim_nikibot"
 OWNER = "@YTT_BISHAL"
 
 # ==================================================
-# 💖 MONGO MEMORY
+# 💖 MONGO COLLECTION (YOUR SAME)
 # ==================================================
 
 niki_users = db_main["niki_memory"]
-import random
-import asyncio
 
 # ==================================================
-# 💖 MODELS (FALLBACK)
+# 💖 MODELS (FALLBACK SYSTEM)
 # ==================================================
 
 MODELS = [
@@ -7779,31 +7788,26 @@ MODELS = [
 ]
 
 # ==================================================
-# 💖 MOOD DETECT
+# 💖 MOOD DETECTION
 # ==================================================
 
 def detect_mood(text):
 
     text = text.lower()
 
-    love_words = ["love", "pyar", "jaan", "baby", "kiss", "hug"]
-    sad_words = ["sad", "cry", "alone", "broken"]
-    angry_words = ["angry", "gussa", "hate"]
-    happy_words = ["happy", "lol", "hehe"]
-
-    if any(w in text for w in love_words):
+    if any(w in text for w in ["love", "pyar", "jaan", "baby", "kiss"]):
         return "love"
-    if any(w in text for w in sad_words):
+    if any(w in text for w in ["sad", "cry", "alone", "broken"]):
         return "sad"
-    if any(w in text for w in angry_words):
+    if any(w in text for w in ["angry", "gussa", "hate"]):
         return "angry"
-    if any(w in text for w in happy_words):
+    if any(w in text for w in ["happy", "lol", "hehe"]):
         return "happy"
 
     return "cute"
 
 # ==================================================
-# 💖 TYPING DELAY
+# 💖 TYPING DELAY (HUMAN FEEL)
 # ==================================================
 
 async def typing_delay(update, text):
@@ -7811,7 +7815,7 @@ async def typing_delay(update, text):
     await asyncio.sleep(delay)
 
 # ==================================================
-# 💖 AI ENGINE (FALLBACK)
+# 💖 AI ENGINE (FALLBACK SYSTEM)
 # ==================================================
 
 def get_ai_reply(prompt, text, chat_type):
@@ -7850,7 +7854,7 @@ def get_ai_reply(prompt, text, chat_type):
     return "🥺 sorry baby, abhi thoda busy hu..."
 
 # ==================================================
-# 💖 MAIN HANDLER (OWNER SYSTEM INCLUDED)
+# 💖 MAIN AI HANDLER
 # ==================================================
 
 async def niki_ai(update, context):
@@ -7863,19 +7867,27 @@ async def niki_ai(update, context):
     if not text or text.startswith("/"):
         return
 
+    # ==================================================
+    # 💖 USER INFO
+    # ==================================================
+
     user = update.effective_user
     user_id = str(user.id)
     name = user.first_name
     chat_type = update.effective_chat.type
 
     # ==================================================
-    # 💖 MEMORY SYSTEM
+    # 💖 MONGO MEMORY
     # ==================================================
 
     user_data = niki_users.find_one({"user_id": user_id})
 
     if not user_data:
-        user_data = {"user_id": user_id, "history": []}
+        user_data = {
+            "user_id": user_id,
+            "name": name,
+            "history": []
+        }
         niki_users.insert_one(user_data)
 
     history = user_data.get("history", [])
@@ -7886,7 +7898,7 @@ async def niki_ai(update, context):
 
     niki_users.update_one(
         {"user_id": user_id},
-        {"$set": {"history": history}}
+        {"$set": {"history": history, "name": name}}
     )
 
     history_text = "\n".join(history)
@@ -7908,12 +7920,12 @@ async def niki_ai(update, context):
             return
 
     # ==================================================
-    # 💖 OWNER SYSTEM (FULL RESTORED)
+    # 💖 OWNER SYSTEM
     # ==================================================
 
     owner_words = [
         "owner", "developer", "dev", "creator",
-        "who made you", "tumhara owner", "boss"
+        "who made you", "boss", "tumhara owner"
     ]
 
     if any(w in text.lower() for w in owner_words):
@@ -7946,7 +7958,7 @@ Personality:
 - Friendly
 - Emotional
 - Romantic
-- Hinglish
+- Hinglish style
 - Never say AI
 
 Owner: {OWNER}
@@ -7980,8 +7992,9 @@ Message:
 
         print("ERROR:", e)
 
-        await update.message.reply_text("⚠️ ERROR:\n{str(e)[:200]}")
-async def niki_ai(update, context):
+        await update.message.reply_text(
+            f"⚠️ ERROR:\n{str(e)[:200]}"
+        )
 
     
 
