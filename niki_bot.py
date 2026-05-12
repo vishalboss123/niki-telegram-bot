@@ -7765,24 +7765,18 @@ OWNER = "@YTT_BISHAL"
 # ==================================================
 
 niki_users = db_main["niki_memory"]
+import random
+import asyncio
 
 # ==================================================
-# 💖 SMART USER COOLDOWN
+# 💖 MODELS (FALLBACK)
 # ==================================================
 
-user_cooldown = {}
-
-# ==================================================
-# 💖 STICKERS
-# ==================================================
-
-stickers = {
-    "love": [],
-    "sad": [],
-    "happy": [],
-    "angry": [],
-    "cute": []
-}
+MODELS = [
+    "meta-llama/llama-3.1-8b-instruct",
+    "openchat/openchat-7b",
+    "mistralai/mistral-7b-instruct"
+]
 
 # ==================================================
 # 💖 MOOD DETECT
@@ -7792,68 +7786,71 @@ def detect_mood(text):
 
     text = text.lower()
 
-    if any(w in text for w in ["love", "pyar", "jaan", "baby", "kiss", "hug", "miss"]):
+    love_words = ["love", "pyar", "jaan", "baby", "kiss", "hug"]
+    sad_words = ["sad", "cry", "alone", "broken"]
+    angry_words = ["angry", "gussa", "hate"]
+    happy_words = ["happy", "lol", "hehe"]
+
+    if any(w in text for w in love_words):
         return "love"
-
-    if any(w in text for w in ["sad", "cry", "alone", "broken", "hurt"]):
+    if any(w in text for w in sad_words):
         return "sad"
-
-    if any(w in text for w in ["angry", "gussa", "hate", "annoy"]):
+    if any(w in text for w in angry_words):
         return "angry"
-
-    if any(w in text for w in ["happy", "lol", "hehe", "fun", "yay"]):
+    if any(w in text for w in happy_words):
         return "happy"
 
     return "cute"
 
 # ==================================================
-# 💖 VIBE REACTION
+# 💖 TYPING DELAY
 # ==================================================
 
-def vibe_reaction(mood):
-
-    vibes = {
-
-        "love": [
-            "🥺💖",
-            "aww 😳",
-            "hehe cutie 💕",
-            "💋"
-        ],
-
-        "sad": [
-            "🫂",
-            "don't be sad 🥺",
-            "I'm here 💖",
-            "💔"
-        ],
-
-        "happy": [
-            "hehe 😆",
-            "💃",
-            "yayyy 💖",
-            "😚"
-        ],
-
-        "angry": [
-            "😤",
-            "calm down baby 😌",
-            "gussa cute lagta 😭",
-            "💢"
-        ],
-
-        "cute": [
-            "😚",
-            "✨",
-            "💫",
-            "🤍"
-        ]
-    }
-
-    return random.choice(vibes.get(mood, ["💖"]))
+async def typing_delay(update, text):
+    delay = min(len(text) * 0.02, 2.5)
+    await asyncio.sleep(delay)
 
 # ==================================================
-# 💖 MAIN AI CHAT
+# 💖 AI ENGINE (FALLBACK)
+# ==================================================
+
+def get_ai_reply(prompt, text, chat_type):
+
+    style = ""
+
+    if chat_type == "private":
+        style = "You are romantic emotional girlfriend AI."
+    else:
+        style = "You are cute short group chatbot."
+
+    final_prompt = prompt + "\nStyle:\n" + style
+
+    for model in MODELS:
+
+        try:
+            response = client_ai.chat.completions.create(
+                model=model,
+                messages=[
+                    {"role": "system", "content": final_prompt},
+                    {"role": "user", "content": text}
+                ],
+                temperature=0.9,
+                max_tokens=300
+            )
+
+            reply = response.choices[0].message.content
+
+            if reply:
+                return reply.strip()
+
+        except Exception as e:
+            print("MODEL FAIL:", model, e)
+            continue
+
+    return "🥺 sorry baby, abhi thoda busy hu..."
+
+# ==================================================
+# 💖 MAIN HANDLER (OWNER SYSTEM INCLUDED)
 # ==================================================
 
 async def niki_ai(update, context):
@@ -7863,147 +7860,84 @@ async def niki_ai(update, context):
 
     text = update.message.text
 
-    if not text:
+    if not text or text.startswith("/"):
         return
-
-    # ==============================================
-    # IGNORE COMMANDS
-    # ==============================================
-
-    if text.startswith("/"):
-        return
-
-    # ==============================================
-    # USER INFO
-    # ==============================================
 
     user = update.effective_user
     user_id = str(user.id)
     name = user.first_name
-
     chat_type = update.effective_chat.type
 
-    # ==============================================
-    # 💖 SMART COOLDOWN SYSTEM
-    # ==============================================
-
-    current_time = time.time()
-
-    if user_id in user_cooldown:
-
-        if current_time - user_cooldown[user_id] < 3:
-            return
-
-    user_cooldown[user_id] = current_time
-
-    # ==============================================
+    # ==================================================
     # 💖 MEMORY SYSTEM
-    # ==============================================
+    # ==================================================
 
     user_data = niki_users.find_one({"user_id": user_id})
 
     if not user_data:
-
-        user_data = {
-            "user_id": user_id,
-            "name": name,
-            "history": []
-        }
-
+        user_data = {"user_id": user_id, "history": []}
         niki_users.insert_one(user_data)
 
     history = user_data.get("history", [])
-
-    history.append(f"{name}: {text}")
+    history.append(text)
 
     if len(history) > 15:
         history = history[-15:]
 
     niki_users.update_one(
         {"user_id": user_id},
-        {"$set": {
-            "history": history,
-            "name": name
-        }}
+        {"$set": {"history": history}}
     )
 
     history_text = "\n".join(history)
 
-    # ==============================================
-    # 💖 SMART TRIGGER SYSTEM
-    # ==============================================
+    # ==================================================
+    # 💖 TRIGGER SYSTEM
+    # ==================================================
 
-    is_private = chat_type == "private"
-
-    is_niki = (
-        "niki" in text.lower()
-        or BOT_USERNAME.lower() in text.lower()
-    )
-
+    is_niki = "niki" in text.lower()
     is_reply = False
 
     if update.message.reply_to_message:
-
         if update.message.reply_to_message.from_user:
+            if update.message.reply_to_message.from_user.is_bot:
+                is_reply = True
 
-            replied_user = update.message.reply_to_message.from_user.username
-
-            if replied_user:
-
-                if replied_user.lower() == BOT_USERNAME.replace("@", "").lower():
-                    is_reply = True
-
-    # ==============================================
-    # 💖 GROUP CONTROL
-    # ==============================================
-
-    if not is_private:
-
+    if chat_type != "private":
         if not is_niki and not is_reply:
             return
 
-    # ==============================================
-    # 💖 OWNER CHECK
-    # ==============================================
+    # ==================================================
+    # 💖 OWNER SYSTEM (FULL RESTORED)
+    # ==================================================
 
     owner_words = [
-        "owner",
-        "developer",
-        "dev",
-        "creator",
-        "admin",
-        "boss",
-        "who made you",
-        "tumhara owner"
+        "owner", "developer", "dev", "creator",
+        "who made you", "tumhara owner", "boss"
     ]
 
     if any(w in text.lower() for w in owner_words):
 
         replies = [
-
             f"Hehe 🤭 {OWNER} is my owner 💖",
-
             f"I was created by {OWNER} 😌✨",
-
             f"My developer is {OWNER} 💕",
-
             f"{OWNER} is my special one 🥺💖",
-
             f"I'm only {OWNER}'s Niki 😤💖"
         ]
 
         await update.message.reply_text(random.choice(replies))
         return
 
-    # ==============================================
+    # ==================================================
     # 💖 MOOD
-    # ==============================================
+    # ==================================================
 
     mood = detect_mood(text)
 
-    # ==============================================
-    # 💖 AI PROMPT
-    # ==============================================
+    # ==================================================
+    # 💖 PROMPT
+    # ==================================================
 
     prompt = f"""
 You are Niki, a cute telegram bot girl.
@@ -8012,108 +7946,46 @@ Personality:
 - Friendly
 - Emotional
 - Romantic
-- Human-like chat
-- Hinglish style
+- Hinglish
 - Never say AI
 
 Owner: {OWNER}
-
 User: {name}
-
 Mood: {mood}
-
-Reply Rules:
-- Short-medium replies
-- Real human vibe
-- Sometimes tease user
-- Sometimes emotional
-- Sometimes caring
-- Use emojis naturally
-- Don't repeat same lines
-- In DM behave more close/emotional
-- In groups behave cute + social
 
 Chat History:
 {history_text}
 
-Current Message:
+Message:
 {text}
 """
 
+    # ==================================================
+    # 💖 HUMAN TYPING FEEL
+    # ==================================================
+
+    await typing_delay(update, text)
+
+    # ==================================================
+    # 💖 AI RESPONSE
+    # ==================================================
+
     try:
 
-        response = client_ai.chat.completions.create(
-
-            model="meta-llama/llama-3-8b-instruct:free",
-
-            messages=[
-                {
-                    "role": "system",
-                    "content": prompt
-                },
-                {
-                    "role": "user",
-                    "content": text
-                }
-            ],
-
-            temperature=0.9,
-            max_tokens=300
-        )
-
-        reply = response.choices[0].message.content
-
-        if not reply:
-
-            await update.message.reply_text(
-                "⚠️ me abhi thoda busy hu 💔"
-            )
-
-            return
-
-        reply = reply.strip()
-
-        if len(reply) > 4000:
-            reply = reply[:4000]
-
-        # ==============================================
-        # 💖 RANDOM VIBE REACTION
-        # ==============================================
-
-        if random.random() < 0.35:
-
-            reply += "\n\n" + vibe_reaction(mood)
-
-        # ==============================================
-        # 💖 SEND REPLY
-        # ==============================================
+        reply = get_ai_reply(prompt, text, chat_type)
 
         await update.message.reply_text(reply)
 
-        # ==============================================
-        # 💖 AUTO STICKER SYSTEM
-        # ==============================================
-
-        if mood in stickers and stickers[mood]:
-
-            try:
-
-                await update.message.reply_sticker(
-                    random.choice(stickers[mood])
-                )
-
-            except:
-                pass
-
     except Exception as e:
 
-        print("🔥 OPENROUTER AI ERROR:", e)
+        print("ERROR:", e)
 
-        await update.message.reply_text(
-            f"⚠️ ERROR:\n{str(e)[:200]}"
-        )
+        await update.message.reply_text("⚠️ ERROR:\n{str(e)[:200]}")
+async def niki_ai(update, context):
 
-        return
+    
+
+        
     
 
     
