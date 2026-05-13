@@ -2227,6 +2227,12 @@ async def give(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if giver.id == receiver.id:
         await message.reply_text("🤡 Khud ko paisa nahi de sakte!")
         return
+    # ❌ BOT CHECK
+    if receiver.is_bot:
+        await message.reply_text(
+            "🤖 Bots ko paisa transfer nahi kar sakte 😏"
+        )
+        return        
 
     # ✅ FIXED AMOUNT READ (IMPORTANT)
     if not context.args:
