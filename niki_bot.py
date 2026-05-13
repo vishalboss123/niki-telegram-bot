@@ -83,14 +83,27 @@ DATABASE_FILE = "database.json"
 # =================== START COMMAND ===================
 
 # =================== START COMMAND ===================
+from telegram import (
+    Update,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup
+)
+from telegram.ext import ContextTypes
+
+# =====================================================
+# 💖 START COMMAND
+# =====================================================
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
     if not await check_bot_active(update, context):
         return
-    
+
     user = update.effective_user
     chat = update.effective_chat
 
-    # ✅ SAVE USER / GROUP
+    # ================= SAVE USER =================
+
     col.update_one(
         {"chat_id": chat.id},
         {"$set": {"chat_id": chat.id, "type": chat.type}},
@@ -100,143 +113,447 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     uid = str(user.id)
 
     if uid not in data:
-        data[uid] = {"name": user.first_name, "money": 1000, "kills": 0}
+        data[uid] = {
+            "name": user.first_name,
+            "money": 1000,
+            "kills": 0
+        }
         save_data()
-        
+
+    # ================= WELCOME =================
 
     welcome_text = (
-        f"👋 Hᴇʟʟᴏ {user.first_name}!\n\n"
-        "💝 Mʏ Nᴀᴍᴇ Iꜱ Nɪᴋɪ\n"
-        "Wᴇʟᴄᴏᴍᴇ Tᴏ Nɪᴋɪ'ꜱ Wᴏʀʟᴅ 🌸\n\n"
-        "I'ᴍ Nᴏᴛ Jᴜꜱᴛ A Bᴏᴛ…\n"
-        "I'ᴍ Yᴏᴜʀ Vɪʀᴛᴜᴀʟ Gɪʀʟ 😌✨\n\n"
-        "💰 Eᴀʀɴ Mᴏɴᴇʏ\n"
-        "⚔ Fɪɢʜᴛ Eɴᴇᴍɪᴇꜱ\n"
-        "😈 Rᴏʙ Pᴇᴏᴘʟᴇ\n"
-        "🛡 Pʀᴏᴛᴇᴄᴛ Yᴏᴜʀꜱᴇʟꜰ\n"
-        "🏆 Cʟɪᴍʙ Tʜᴇ Lᴇᴀᴅᴇʀʙᴏᴀʀᴅ\n\n"
-        "❗ Nɪᴋɪ Iꜱ Aʟᴡᴀʏꜱ Wᴀᴛᴄʜɪɴɢ Yᴏᴜ 👀🔥\n\n"
-        "⚡ Tʏᴘᴇ /economy Tᴏ Sᴇᴇ Aʟʟ Cᴏᴍᴍᴀɴᴅꜱ\n\n"
-        "👑 Oᴡɴᴇʀ: @YTT_BISHAL"
+        f"✨ Hᴇʏʏʏ {user.first_name}… ʏᴇs ʏᴏᴜ ᴄᴜᴛɪᴇ 😚✨\n\n"
+
+        "❝ I’ᴍ Nɪᴋɪ — ʏᴏᴜʀ ᴄʜᴀᴏs ᴘᴀʀᴛɴᴇʀ & ғᴜɴ ᴅᴇᴀʟᴇʀ 💃🔥\n"
+        "❝ ʏᴏᴜʀ ᴀʟʟ-ɪɴ-ᴏɴᴇ ʙᴏᴛ 🤖💎\n"
+        "❝ Mᴜsɪᴄ • Gᴀᴍᴇs • Aɪ Cʜᴀᴛ • Pʀᴏᴛᴇᴄᴛɪᴏɴ 🛡️\n"
+        "❝ Wʜᴇʀᴇ ᴠɪʙᴇs ɢᴇᴛ ᴡɪʟᴅ ᴀɴᴅ ᴄʜᴀᴛs ɢᴇᴛ sᴘɪᴄʏ 🌶️😉\n\n"
+
+        "✨🧸 Nɪᴋɪ — Tʜᴇ Cᴜᴛᴇ Gɪʀʟ Bᴀʙʏ! 🌸\n\n"
+
+        "👀 Sᴛᴏᴘ Sᴄʀᴏʟʟɪɴɢ…\n"
+        "Sᴀᴄʜ ʙᴀᴛᴀᴏ… Gʀᴏᴜᴘ ᴍᴇ ʙᴏʀᴇ ʜᴏ ʀᴀʜᴇ ʜᴏ ɴᴀ? 😏\n\n"
+
+        "Tᴏ ᴀᴀᴏ… ᴛʜᴏᴅᴀ sᴀ ғᴜɴ ᴋᴀʀᴛᴇ ʜᴀɪɴ 😈✨\n\n"
+
+        "🎮 Fᴇᴀᴛᴜʀᴇs:\n"
+        "||‣ Rᴘɢ: Sᴛᴀʙ = Kɪʟʟ, Sᴛᴇᴀʟ = Rᴏʙ, Pʀᴏᴛᴇᴄᴛ 🛡️||\n"
+        "||‣ Sᴏᴄɪᴀʟ: Kɪss, Hᴜɢ, Sʟᴀᴘ, Kɪᴄᴋ, Pᴜɴᴄʜ 💋👊||\n"
+        "||‣ Eᴄᴏɴᴏᴍʏ: Cʟᴀɪᴍ, Gɪᴠᴇ, Eᴀʀɴ & Fʟᴇx 💰||\n"
+        "||‣ Mᴜsɪᴄ: Pʟᴀʏ, Vᴘʟᴀʏ, Sᴋɪᴘ, Sᴇᴇᴋ 🎶||\n"
+        "||‣ Gᴀᴍᴇs: Dᴜᴇʟ, Dᴀʀᴛ, Mɪɴᴇs, Sʟᴏᴛ, Bᴏᴍʙ 🎲||\n\n"
+
+        "😈 Pᴏᴡᴇʀ sʜᴏᴡ ᴋᴀʀᴏ…\n"
+        "Fʀɪᴇɴᴅs ᴋᴏ ʟᴏᴏᴛᴏ, Tᴏᴘ ᴘᴇ ᴀᴀᴏ, ᴀᴜʀ ɢʀᴏᴜᴘ ᴍᴇ ᴅᴏᴍɪɴᴀᴛᴇ ᴋᴀʀᴏ 👑🔥\n\n"
+
+        "🌸 Wᴀʀɴɪɴɢ:\n"
+        "Eᴋ ʙᴀᴀʀ sᴛᴀʀᴛ ᴋɪʏᴀ… ᴛᴏ ᴀᴅᴅɪᴄᴛ ʜᴏ ᴊᴀᴏɢᴇ 😌💖"
     )
 
-    # ✅ Inline buttons
+    # ================= BUTTONS =================
+
     keyboard = [
+
         [
-            InlineKeyboardButton("👑 Owner", url="https://t.me/YTT_BISHAL"),
-            InlineKeyboardButton("🎮 Game", callback_data="start_game")
+            InlineKeyboardButton(
+                "👑 𝐕ɪsʜᴀʟ ✘ 𝐃ᴇᴠɪʟ⚡",
+                url="https://t.me/YTT_BISHAL"
+            ),
+
+            InlineKeyboardButton(
+                "💖 𝐒𝐔𝐏𝐏𝐎𝐑𝐓",
+                url="https://t.me/+EooSNZ9sR2AyZDlh"
+            )
         ],
+
         [
-            InlineKeyboardButton("➕ Add me", url="https://t.me/iim_Nikibot?startgroup=true")
+            InlineKeyboardButton(
+                "⚡ 𝐇𝐄𝐋𝐏 & 𝐂𝐌𝐃𝐒 ⚡",
+                callback_data="help_cmds"
+            )
+        ],
+
+        [
+            InlineKeyboardButton(
+                "🌸 𝐀𝐁𝐎𝐔𝐓",
+                url="https://t.me/YTN_BISHAL"
+            ),
+
+            InlineKeyboardButton(
+                "➕ 🗯️ 𝐊𝐈𝐃𝐍𝐀𝐏 𝐌𝐄 💌",
+                url="https://t.me/iim_nikibot?startgroup=true"
+            )
         ]
     ]
 
-    await update.message.reply_text(
-        welcome_text,
+    # ================= SEND PHOTO =================
+
+    await update.message.reply_photo(
+        photo="https://files.catbox.moe/yourphoto.jpg",
+        caption=welcome_text,
+        parse_mode="MarkdownV2",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
-# =================== CALLBACK HANDLER FOR GAME & BACK ===================
+
+# =====================================================
+# 🔘 BUTTON CALLBACK
+# =====================================================
 
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
     query = update.callback_query
     await query.answer()
 
     data = query.data
 
-    # ❌ Skip other systems
-    if data.startswith("marry_") or data.startswith("duel_"):
-        return
+    # =====================================================
+    # ⚡ HELP MENU
+    # =====================================================
 
-    # ================= GAME MENU =================
-    if data == "start_game":
+    if data == "help_cmds":
+
+        text = """
+✨ <b>Nɪᴋɪ Hᴇʟᴘ & Cᴏᴍᴍᴀɴᴅs</b>
+
+💖 Sᴇʟᴇᴄᴛ A Cᴀᴛᴇɢᴏʀʏ Bᴇʟᴏᴡ 😌
+"""
+
         keyboard = [
+
             [
-                InlineKeyboardButton("💰 Economy", callback_data="start_economy"),
-                InlineKeyboardButton("❓ Help", callback_data="start_help")
+                InlineKeyboardButton(
+                    "💰 𝐄𝐂𝐎𝐍𝐎𝐌𝐘",
+                    callback_data="economy_menu"
+                ),
+
+                InlineKeyboardButton(
+                    "🎮 𝐆𝐀𝐌𝐄𝐒",
+                    callback_data="games_menu"
+                )
             ],
+
             [
-                InlineKeyboardButton("🔙 Back", callback_data="start_back")
+                InlineKeyboardButton(
+                    "🎵 𝐌𝐔𝐒𝐈𝐂",
+                    callback_data="music_menu"
+                ),
+
+                InlineKeyboardButton(
+                    "🛠 𝐌𝐀𝐍𝐀𝐆𝐄𝐌𝐄𝐍𝐓",
+                    callback_data="manage_menu"
+                )
+            ],
+
+            [
+                InlineKeyboardButton(
+                    "🏆 𝐑𝐄𝐖𝐀𝐑𝐃𝐒",
+                    callback_data="reward_menu"
+                ),
+
+                InlineKeyboardButton(
+                    "💞 𝐒𝐎𝐂𝐈𝐀𝐋",
+                    callback_data="social_menu"
+                )
+            ],
+
+            [
+                InlineKeyboardButton(
+                    "🏠 𝐇𝐎𝐌𝐄",
+                    callback_data="home_menu"
+                )
             ]
         ]
 
-        await query.edit_message_text(
-            "🎲 Game Menu:",
-            reply_markup=InlineKeyboardMarkup(keyboard)
-        )
-    elif data == "start_economy":
-        economy_text = (
-                       "💰 *Nɪᴋɪ Eᴄᴏɴᴏᴍʏ Sʏꜱᴛᴇᴍ Oᴠᴇʀᴠɪᴇᴡ*\n\n"
-                      "💬 *Hᴏᴡ Iᴛ Wᴏʀᴋꜱ:*\n"
-                      "Uꜱᴇ Nɪᴋɪ’ꜱ Eᴄᴏɴᴏᴍʏ Sʏꜱᴛᴇᴍ Tᴏ Eᴀʀɴ, Mᴀɴᴀɢᴇ, Gɪꜰᴛ, Aɴᴅ Pʀᴏᴛᴇᴄᴛ Vɪʀᴛᴜᴀʟ Mᴏɴᴇʏ Iɴ Yᴏᴜʀ Gʀᴏᴜᴘ.\n\n"
-                      "• /daily — Cʟᴀɪᴍ $1500 Dᴀɪʟʏ Rᴇᴡᴀʀᴅ\n"
-                      "• /claim — Uɴʟᴏᴄᴋ Gʀᴏᴜᴘ Rᴇᴡᴀʀᴅꜱ Bᴀꜱᴇᴅ Oɴ Mᴇᴍʙᴇʀꜱ\n"
-                      "• /bal — Cʜᴇᴄᴋ Yᴏᴜʀ Oʀ Aɴᴏᴛʜᴇʀ Uꜱᴇʀ’ꜱ Bᴀʟᴀɴᴄᴇ\n"
-                      "• /rob (ʀᴇᴘʟʏ) <ᴀᴍᴏᴜɴᴛ> — Rᴏʙ Mᴏɴᴇʏ Fʀᴏᴍ A Uꜱᴇʀ\n"
-                      "• /kill (ʀᴇᴘʟʏ) — Kɪʟʟ A Uꜱᴇʀ & Eᴀʀɴ $200–$600\n"
-                      "• /revive — Rᴇᴠɪᴠᴇ Yᴏᴜʀꜱᴇʟꜰ Oʀ A Rᴇᴘʟɪᴇᴅ Uꜱᴇʀ\n"
-                      "• /protect 1ᴅ|2ᴅ|3ᴅ — Bᴜʏ Pʀᴏᴛᴇᴄᴛɪᴏɴ Fʀᴏᴍ Rᴏʙʙᴇʀʏ\n"
-                      "• /give (ʀᴇᴘʟʏ) <ᴀᴍᴏᴜɴᴛ> — Tʀᴀɴꜱꜰᴇʀ Mᴏɴᴇʏ\n"
-                      "• /shop — Sʜᴏᴘ Fᴏʀ Gɪꜰᴛ Iᴛᴇᴍꜱ\n"
-                      "• /items (ʀᴇᴘʟʏ) — Vɪᴇᴡ Yᴏᴜʀ / Oᴛʜᴇʀꜱ Iɴᴠᴇɴᴛᴏʀʏ\n"
-                      "• /toprich — Tᴏᴘ 10 Rɪᴄʜᴇꜱᴛ Uꜱᴇʀꜱ\n"
-                      "• /topkill — Tᴏᴘ 10 Kɪʟʟᴇʀꜱ\n"
-                      "• /check — Cʜᴇᴄᴋ Pʀᴏᴛᴇᴄᴛɪᴏɴ Sᴛᴀᴛᴜꜱ (Cᴏꜱᴛꜱ $2000)\n"
-
-        )
-        keyboard = [
-            [InlineKeyboardButton("🔙 Back", callback_data="start_back")]
-        ]
-        await query.edit_message_text(
-            economy_text,
+        await query.edit_message_caption(
+            caption=text,
+            parse_mode="HTML",
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
 
-    elif data == "start_help":
-        help_text = "💡 Help ke liye apna owner dekho 👑"
-        keyboard = [
-            [InlineKeyboardButton("👑 Owner", url="https://t.me/YTT_BISHAL")],
-            [InlineKeyboardButton("🔙 Back", callback_data="start_game")]
-        ]
+    # =====================================================
+    # 💰 ECONOMY
+    # =====================================================
 
-        await query.edit_message_text(
-            help_text,
-            reply_markup=InlineKeyboardMarkup(keyboard)
-        )
-    elif data == "start_back":
-        user = query.from_user
+    elif data == "economy_menu":
 
-        welcome_text = (
-            f"👋 Hᴇʟʟᴏ {user.first_name}!\n\n"
-            "💝 Mʏ Nᴀᴍᴇ Iꜱ Nɪᴋɪ\n"
-            "Wᴇʟᴄᴏᴍᴇ Tᴏ Nɪᴋɪ'ꜱ Wᴏʀʟᴅ 🌸\n\n"
-            "I'ᴍ Nᴏᴛ Jᴜꜱᴛ A Bᴏᴛ…\n"
-            "I'ᴍ Yᴏᴜʀ Vɪʀᴛᴜᴀʟ Gɪʀʟ 😌✨\n\n"
-            "💰 Eᴀʀɴ Mᴏɴᴇʏ\n"
-            "⚔ Fɪɢʜᴛ Eɴᴇᴍɪᴇꜱ\n"
-            "😈 Rᴏʙ Pᴇᴏᴘʟᴇ\n"
-            "🛡 Pʀᴏᴛᴇᴄᴛ Yᴏᴜʀꜱᴇʟꜰ\n"
-            "🏆 Cʟɪᴍʙ Tʜᴇ Lᴇᴀᴅᴇʀʙᴏᴀʀᴅ\n\n"
-            "❗ Nɪᴋɪ Iꜱ Aʟᴡᴀʏꜱ Wᴀᴛᴄʜɪɴɢ Yᴏᴜ 👀🔥\n\n"
-            "⚡ Tʏᴘᴇ /economy Tᴏ Sᴇᴇ Aʟʟ Cᴏᴍᴍᴀɴᴅꜱ\n\n"
-            "👑 Oᴡɴᴇʀ: @YTT_BISHAL"
-        )
+        text = """
+👤 <b>Nᴏʀᴍᴀʟ Eᴄᴏɴᴏᴍʏ Sʏꜱᴛᴇᴍ Oᴠᴇʀᴠɪᴇᴡ</b>
+
+💬 <b>Hᴏᴡ Iᴛ Wᴏʀᴋꜱ:</b>
+Uꜱᴇ Nɪᴋɪ’ꜱ Eᴄᴏɴᴏᴍʏ Sʏꜱᴛᴇᴍ Tᴏ Eᴀʀɴ, Mᴀɴᴀɢᴇ, Gɪꜰᴛ, Aɴᴅ Pʀᴏᴛᴇᴄᴛ Vɪʀᴛᴜᴀʟ Mᴏɴᴇʏ 😌
+
+• /daily — Cʟᴀɪᴍ $1500 Dᴀɪʟʏ Rᴇᴡᴀʀᴅ
+• /claim — Uɴʟᴏᴄᴋ Gʀᴏᴜᴘ Rᴇᴡᴀʀᴅꜱ
+• /bal — Cʜᴇᴄᴋ Bᴀʟᴀɴᴄᴇ
+• /rob — Rᴏʙ Uᴘ Tᴏ $20000
+• /kill — Eᴀʀɴ $200–$400
+• /revive — Rᴇᴠɪᴠᴇ Uꜱᴇʀ
+• /protect — Bᴜʏ Pʀᴏᴛᴇᴄᴛɪᴏɴ
+• /give — Tʀᴀɴꜱꜰᴇʀ Mᴏɴᴇʏ
+• /shop — Sʜᴏᴘ Iᴛᴇᴍꜱ
+• /items — Vɪᴇᴡ Iɴᴠᴇɴᴛᴏʀʏ
+• /toprich — Tᴏᴘ 10 Rɪᴄʜᴇꜱᴛ
+• /topkill — Tᴏᴘ 10 Kɪʟʟᴇʀꜱ
+• /check — Cʜᴇᴄᴋ Pʀᴏᴛᴇᴄᴛɪᴏɴ
+
+━━━━━━━━━━━━━━━━━━━
+
+💓 <b>Pʀᴇᴍɪᴜᴍ Eᴄᴏɴᴏᴍʏ</b>
+
+• /daily — ₹5000 Dᴀɪʟʏ
+• /rob — Bᴇᴛᴛᴇʀ Rᴏʙ
+• /kill — Mᴏʀᴇ Rᴇᴡᴀʀᴅ
+• /check — Fʀᴇᴇ Pʀᴏᴛᴇᴄᴛɪᴏɴ Cʜᴇᴄᴋ
+• /bail — Pʀᴇᴍɪᴜᴍ Bᴀɪʟ
+• ⚡ Fᴀsᴛᴇʀ Cᴏᴏʟᴅᴏᴡɴ
+• 🚔 Lᴇss Jᴀɪʟ Tɪᴍᴇ
+• 💓 Pʀᴇᴍɪᴜᴍ Bᴀᴅɢᴇ
+
+💳 Uᴘɢʀᴀᴅᴇ Tᴏ Pʀᴇᴍɪᴜᴍ → /pay
+"""
 
         keyboard = [
             [
-                InlineKeyboardButton("👑 Owner", url="https://t.me/YTT_BISHAL"),
-                InlineKeyboardButton("🎮 Game", callback_data="start_game")
-            ],
-            [
-                InlineKeyboardButton("➕ Add me", url="https://t.me/iim_Nikibot?startgroup=true")
+                InlineKeyboardButton(
+                    "🔙 𝐁𝐀𝐂𝐊",
+                    callback_data="help_cmds"
+                )
             ]
         ]
 
-
-        await query.edit_message_text(
-            welcome_text,
+        await query.edit_message_caption(
+            caption=text,
+            parse_mode="HTML",
             reply_markup=InlineKeyboardMarkup(keyboard)
-            )
+        )
+
+    # =====================================================
+    # 🎮 GAMES
+    # =====================================================
+
+    elif data == "games_menu":
+
+        text = """
+🎮 <b>𝐆𝐀𝐌𝐄𝐒 𝐂𝐎𝐌𝐌𝐀𝐍𝐃𝐒</b>
+
+⚔ /duel → Fight Duel  
+🃏 /cduel → Card Duel  
+🎯 /dart → Throw Dart  
+💣 /bomb → Bomb Game  
+🔫 /gun → Russian Roulette  
+🎰 /slot → Slot Machine  
+💎 /mines → Mines Game  
+🪙 /coin → Coin Flip  
+🧠 /guess → Guess Number  
+📝 /wordseek → Word Game  
+🏆 /wordlb → Word Leaderboard  
+"""
+
+        keyboard = [
+            [
+                InlineKeyboardButton(
+                    "🔙 𝐁𝐀𝐂𝐊",
+                    callback_data="help_cmds"
+                )
+            ]
+        ]
+
+        await query.edit_message_caption(
+            caption=text,
+            parse_mode="HTML",
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+
+    # =====================================================
+    # 🎵 MUSIC
+    # =====================================================
+
+    elif data == "music_menu":
+
+        text = """
+🎵 <b>𝐌𝐔𝐒𝐈𝐂 𝐂𝐎𝐌𝐌𝐀𝐍𝐃𝐒</b>
+
+▶ /play → Play Song  
+📺 /vplay → Video Play  
+⏭ /skip → Skip Song  
+⏹ /stop → Stop Music  
+🔎 /seek → Seek Track  
+🔁 /loop → Loop Music  
+📜 /queue → Queue List  
+"""
+
+        keyboard = [
+            [
+                InlineKeyboardButton(
+                    "🔙 𝐁𝐀𝐂𝐊",
+                    callback_data="help_cmds"
+                )
+            ]
+        ]
+
+        await query.edit_message_caption(
+            caption=text,
+            parse_mode="HTML",
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+
+    # =====================================================
+    # 🛠 MANAGEMENT
+    # =====================================================
+
+    elif data == "manage_menu":
+
+        text = """
+🛠 <b>𝐌𝐀𝐍𝐀𝐆𝐄𝐌𝐄𝐍𝐓 ⚡</b>
+
+⛔ /ban – Ban User
+✔ /unban – Unban User
+🔇 /mute – Mute User
+🔊 /unmute – Unmute User
+⏳ /tmute – Temp Mute
+🚫 /tban – Temp Ban
+⭐ /promote – Promote User
+📌 /pin – Pin Message
+"""
+
+        keyboard = [
+            [
+                InlineKeyboardButton(
+                    "🔙 𝐁𝐀𝐂𝐊",
+                    callback_data="help_cmds"
+                )
+            ]
+        ]
+
+        await query.edit_message_caption(
+            caption=text,
+            parse_mode="HTML",
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+
+    # =====================================================
+    # 🏆 REWARDS
+    # =====================================================
+
+    elif data == "reward_menu":
+
+        text = """
+🏆 <b>𝐆𝐑𝐎𝐔𝐏 𝐑𝐄𝐖𝐀𝐑𝐃𝐒 💰</b>
+
+👥 100+ → $10000
+👥 500+ → $20000
+👥 1000+ → $30000
+👥 2000+ → $40000
+👥 3000+ → $50000
+
+⚠️ One Time Claim
+"""
+
+        keyboard = [
+            [
+                InlineKeyboardButton(
+                    "🔙 𝐁𝐀𝐂𝐊",
+                    callback_data="help_cmds"
+                )
+            ]
+        ]
+
+        await query.edit_message_caption(
+            caption=text,
+            parse_mode="HTML",
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+
+    # =====================================================
+    # 💞 SOCIAL
+    # =====================================================
+
+    elif data == "social_menu":
+
+        text = """
+💞 <b>𝐒𝐎𝐂𝐈𝐀𝐋 𝐂𝐎𝐌𝐌𝐀𝐍𝐃𝐒</b>
+
+💋 /kiss → Kiss Someone
+🤗 /hug → Hug User
+👋 /slap → Slap User
+🦵 /kick → Kick Someone
+👊 /punch → Punch User
+🧸 /cuddle → Romantic Cuddle
+👉 /poke → Poke User
+😈 /bite → Bite Someone
+😂 /tickle → Tickle User
+❤️ /love → Love Meter
+
+💍 /propose → Propose Someone
+💕 /partner → Check Partner
+👩‍❤️‍👨 /couple → Couple Profile
+📜 /couplehistory → Love History
+🏆 /coupleleaderboard → Top Couples
+💔 /divorce → Break Relationship
+"""
+
+        keyboard = [
+            [
+                InlineKeyboardButton(
+                    "🔙 𝐁𝐀𝐂𝐊",
+                    callback_data="help_cmds"
+                )
+            ]
+        ]
+
+        await query.edit_message_caption(
+            caption=text,
+            parse_mode="HTML",
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+
+    # =====================================================
+    # 🏠 HOME
+    # =====================================================
+
+    elif data == "home_menu":
+
+        keyboard = [
+
+            [
+                InlineKeyboardButton(
+                    "👑 𝐕ɪsʜᴀʟ ✘ 𝐃ᴇᴠɪʟ⚡",
+                    url="https://t.me/YTT_BISHAL"
+                ),
+
+                InlineKeyboardButton(
+                    "💖 𝐒𝐔𝐏𝐏𝐎𝐑𝐓",
+                    url="https://t.me/+EooSNZ9sR2AyZDlh"
+                )
+            ],
+
+            [
+                InlineKeyboardButton(
+                    "⚡ 𝐇𝐄𝐋𝐏 & 𝐂𝐌𝐃𝐒 ⚡",
+                    callback_data="help_cmds"
+                )
+            ],
+
+            [
+                InlineKeyboardButton(
+                    "🌸 𝐀𝐁𝐎𝐔𝐓",
+                    url="https://t.me/YTN_BISHAL"
+                ),
+
+                InlineKeyboardButton(
+                    "➕ 🗯️ 𝐊𝐈𝐃𝐍𝐀𝐏 𝐌𝐄 💌",
+                    url="https://t.me/iim_nikibot?startgroup=true"
+                )
+            ]
+        ]
+
+        await query.edit_message_caption(
+            caption=welcome_text,
+            parse_mode="MarkdownV2",
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
 
     
 # =================== TOP RICHEST COMMAND ===================
@@ -542,7 +859,8 @@ async def claim_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.edit_message_text(
         "💰 Dᴀɪʟʏ Cʟᴀɪᴍ Sᴜᴄᴄᴇss!\n\n"
         "🎁 Yᴏᴜ Rᴇᴄᴇɪᴠᴇᴅ ₹1500\n"
-        "💓 Vᴇʀɪғɪᴄᴀᴛɪᴏɴ Pᴀssᴇᴅ 😏"
+        "💬 Vᴇʀɪғɪᴄᴀᴛɪᴏɴ Pᴀssᴇᴅ 😏"
+        "💓 Uᴘɢʀᴀᴅᴇ Tᴏ Pʀᴇᴍɪᴜᴍ Fᴏʀ Hɪɢʜᴇʀ Dᴀɪʟʏ Rᴇᴡᴀʀᴅ Aɴᴅ Sᴋɪᴘ Vᴇʀɪꜰɪᴄᴀᴛɪᴏɴ → /pay"
     )
 
     
@@ -8796,22 +9114,82 @@ def main():
     app.add_handler(CommandHandler("userinfo", userinfo))
     # ================= CALLBACKS =================
 
-    app.add_handler(CallbackQueryHandler(accept, pattern="^marry_acc_"))
-    app.add_handler(CallbackQueryHandler(reject, pattern="^marry_rej_"))
+    # ================= CALLBACKS =================
 
-    app.add_handler(CallbackQueryHandler(accept_btn, pattern="^duel_acc_"))
-    app.add_handler(CallbackQueryHandler(cancel_btn, pattern="^duel_rej_"))
+    app.add_handler(
+        CallbackQueryHandler(
+            accept,
+            pattern="^marry_acc_"
+        )
+    )
 
-    app.add_handler(CallbackQueryHandler(button_callback, pattern="^start_"))
-    app.add_handler(CallbackQueryHandler(button, pattern="^(num_|bet_)"))
+    app.add_handler(
+        CallbackQueryHandler(
+            reject,
+            pattern="^marry_rej_"
+        )
+    )
 
-    app.add_handler(CallbackQueryHandler(mine_click, pattern="^(mine_|cashout)"))
+    # ================= DUEL =================
 
-    # 💰 DAILY CLAIM (IMPORTANT - KEEP ABOVE GENERAL HANDLER)
-    app.add_handler(CallbackQueryHandler(claim_callback, pattern="^claim_"), group=0)
+    app.add_handler(
+        CallbackQueryHandler(
+            accept_btn,
+            pattern="^duel_acc_"
+        )
+    )
 
-    # 👤 USERINFO
-    app.add_handler(CallbackQueryHandler(userinfo_buttons))
+    app.add_handler(
+        CallbackQueryHandler(
+            cancel_btn,
+            pattern="^duel_rej_"
+        )
+    )
+
+    # ================= START / HELP / MENUS =================
+
+    app.add_handler(
+        CallbackQueryHandler(
+            button_callback,
+            pattern="^(start_|help_cmds|economy_menu|games_menu|music_menu|manage_menu|reward_menu|social_menu|home_menu)"
+        )
+    )
+
+    # ================= BET / NUMBER =================
+
+    app.add_handler(
+        CallbackQueryHandler(
+            button,
+            pattern="^(num_|bet_)"
+        )
+    )
+
+    # ================= MINES =================
+
+    app.add_handler(
+        CallbackQueryHandler(
+            mine_click,
+            pattern="^(mine_|cashout)"
+        )
+    )
+
+    # ================= DAILY CLAIM =================
+
+    app.add_handler(
+        CallbackQueryHandler(
+            claim_callback,
+            pattern="^claim_"
+        ),
+        group=0
+    )
+
+    # ================= USER INFO =================
+
+    app.add_handler(
+        CallbackQueryHandler(
+            userinfo_buttons
+        )
+    )
     # ================= 🔥 HANDLERS (CLEAN PRIORITY ORDER) =================
 
     # 🛑 BLOCK
