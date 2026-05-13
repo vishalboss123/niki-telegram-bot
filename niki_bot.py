@@ -240,30 +240,58 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     
 # =================== TOP RICHEST COMMAND ===================
+# =================== TOP RICHEST COMMAND ===================
+
 async def toprich(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    # 💖 BOT ACTIVE CHECK
     if not await check_bot_active(update, context):
         return
-    
 
-    # ✅ sirf real users filter karo
+    # 💖 SIRF REAL USERS
     users_only = {
         uid: u for uid, u in data.items()
         if isinstance(u, dict) and "money" in u
     }
 
+    # 💖 AGAR DATA EMPTY
     if not users_only:
-        await update.message.reply_text("❌ No data found!")
+
+        await update.message.reply_text(
+            "❌ No data found!"
+        )
         return
 
-    sorted_rich = sorted(users_only.items(), key=lambda x: x[1]["money"], reverse=True)[:10]
+    # 💖 TOP 10 SORT
+    sorted_rich = sorted(
+        users_only.items(),
+        key=lambda x: x[1]["money"],
+        reverse=True
+    )[:10]
 
-    msg = "🏆 Top 10 Richest Users:\n\n"
+    # 💖 MESSAGE START
+    msg = "🏆 Tᴏᴘ 10 Rɪᴄʜᴇꜱᴛ Uꜱᴇʀꜱ:\n\n"
+
+    # 💖 LOOP USERS
     for idx, (uid, user) in enumerate(sorted_rich, 1):
-        msg += f"{idx}. {user.get('name','Unknown')} — ₹{user.get('money',0)}\n"
 
+        # 💓 PREMIUM BADGE
+        badge = get_badge(user)
+
+        # 💖 LINE ADD
+        msg += (
+            f"{idx}. {badge} "
+            f"{user.get('name','Unknown')} "
+            f"— ₹{user.get('money',0)}\n"
+        )
+
+    # 💖 FINAL SEND
     await update.message.reply_text(msg)
 # =================== TOP KILLERS COMMAND ===================
+# =================== TOP KILLERS COMMAND ===================
+
 async def topkill(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
     if not await check_bot_active(update, context):
         return
 
@@ -273,14 +301,27 @@ async def topkill(update: Update, context: ContextTypes.DEFAULT_TYPE):
     }
 
     if not users_only:
+
         await update.message.reply_text("❌ No data found!")
         return
 
-    sorted_kills = sorted(users_only.items(), key=lambda x: x[1]["kills"], reverse=True)[:10]
+    sorted_kills = sorted(
+        users_only.items(),
+        key=lambda x: x[1]["kills"],
+        reverse=True
+    )[:10]
 
-    msg = "⚔ Top 10 Killers:\n\n"
+    msg = "⚔ Tᴏᴘ 10 Kɪʟʟᴇʀꜱ:\n\n"
+
     for idx, (uid, user) in enumerate(sorted_kills, 1):
-        msg += f"{idx}. {user.get('name','Unknown')} — {user.get('kills',0)} kills\n"
+
+        badge = get_badge(user)
+
+        msg += (
+            f"{idx}. {badge} "
+            f"{user.get('name','Unknown')} "
+            f"— {user.get('kills',0)} Kɪʟʟꜱ\n"
+        )
 
     await update.message.reply_text(msg)
 
@@ -451,9 +492,11 @@ async def balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     status_text = "Alive ❤️" if not user_data.get("dead", False) else "Dead ☠️"
 
+    badge = get_badge(user_data)
+
     await update.message.reply_text(
         f"┏━━━ 💼 PROFILE ━━━\n"
-        f"👤 Name   : {target_user.first_name}\n"
+        f"👤 Name   : {badge} {target_user.first_name}\n"
         f"💰 Bal    : ₹{user_data.get('money',0)}\n"
         f"🏆 Rank   : {rank}\n"
         f"❤️ Status : {status_text}\n"
@@ -461,39 +504,110 @@ async def balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"┗━━━━━━━━━━━━━━━"
     )
 # ------------------ PROTECT COMMAND ------------------
+# ------------------ PROTECT COMMAND ------------------
+
 async def protect(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if not await check_bot_active(update, context):
         return
-    
-    user = get_user(update.effective_user.id, update.effective_user.first_name)
-    now = time.time()
-    cost_map = {"1d":(800,86400), "2d":(1000,172800), "3d":(2000,259200)}
-    if not context.args:
-        await update.message.reply_text("👑 Vishal Boss kya keh rahe hai suno 😎🔥\n"
-                                         "/protect 1d -->> ₹800\n"
-                                         "/protect 2d -->> ₹1000\n"
-                                         "/protect 3d -->> ₹2000\n"
 
-                                      "👍 Ye Vishal Boss ka hukum he, follow karo!\n")
+    user = get_user(
+        update.effective_user.id,
+        update.effective_user.first_name
+    )
+
+    now = time.time()
+
+    cost_map = {
+        "1d": (800, 86400),
+        "2d": (1000, 172800),
+        "3d": (2000, 259200)
+    }
+
+    # ---------------- NO ARG ----------------
+
+    if not context.args:
+
+        await update.message.reply_text(
+            "👑 Vɪꜱʜᴀʟ Bᴏꜱꜱ Kᴀ Hᴜᴋᴜᴍ 😎🔥\n\n"
+            "/protect 1d → ₹800\n"
+            "/protect 2d → ₹1000\n"
+            "/protect 3d → ₹2000\n\n"
+            "💓 Pʀᴇᴍɪᴜᴍ Uꜱᴇʀꜱ Cᴀɴ Uꜱᴇ 2ᴅ & 3ᴅ"
+        )
         return
+
     choice = context.args[0].lower()
+
+    # ---------------- INVALID ----------------
+
     if choice not in cost_map:
-        await update.message.reply_text("❌ Invalid option! Use 1d,2d,3d")
+
+        await update.message.reply_text(
+            "❌ Iɴᴠᴀʟɪᴅ Oᴘᴛɪᴏɴ.\n"
+            "Uꜱᴇ: 1ᴅ / 2ᴅ / 3ᴅ"
+        )
         return
+
+    # ---------------- PREMIUM CHECK ----------------
+
+    if not user.get("premium", False):
+
+        if choice in ["2d", "3d"]:
+
+            await update.message.reply_text(
+                "❗ Nᴏʀᴍᴀʟ Uꜱᴇʀꜱ Cᴀɴ Oɴʟʏ Uꜱᴇ: 1ᴅ\n"
+                "💓 Uᴘɢʀᴀᴅᴇ Tᴏ Pʀᴇᴍɪᴜᴍ → /pay"
+            )
+            return
+
+    # ---------------- COST ----------------
+
     cost, duration = cost_map[choice]
-    if user.get("protection_until",0) > now:
+
+    # ---------------- ALREADY PROTECTED ----------------
+
+    if user.get("protection_until", 0) > now:
+
         rem = user["protection_until"] - now
-        await update.message.reply_text(f"🛡You are already protected for {format_time(rem)} more")
+
+        await update.message.reply_text(
+            f"🛡 Aʟʀᴇᴀᴅʏ Pʀᴏᴛᴇᴄᴛᴇᴅ.\n"
+            f"⏳ {format_time(rem)} Rᴇᴍᴀɪɴɪɴɢ"
+        )
         return
+
+    # ---------------- MONEY CHECK ----------------
+
     if user["money"] < cost:
-        await update.message.reply_text("💸 Paisa kam hai!")
+
+        await update.message.reply_text(
+            "💸 Pᴀɪꜱᴀ Kᴀᴍ Hᴀɪ."
+        )
         return
+
+    # ---------------- APPLY ----------------
+
     user["money"] -= cost
+
     user["protection_until"] = now + duration
+
     save_data()
-    
-    await update.message.reply_text(f"🛡 Protection enabled for {choice}")
+
+    # ---------------- SUCCESS ----------------
+
+    if user.get("premium", False):
+
+        await update.message.reply_text(
+            f"💓 Pʀᴇᴍɪᴜᴍ Pʀᴏᴛᴇᴄᴛɪᴏɴ Aᴄᴛɪᴠᴇᴅ.\n"
+            f"🛡️ Yᴏᴜ Aʀᴇ Pʀᴏᴛᴇᴄᴛᴇᴅ Fᴏʀ {choice}."
+        )
+
+    else:
+
+        await update.message.reply_text(
+            f"🛡️ Yᴏᴜ Aʀᴇ Nᴏᴡ Pʀᴏᴛᴇᴄᴛᴇᴅ Fᴏʀ {choice}."
+        )
 
 # ------------------ CLAIM GROUP ------------------
 # ------------------ CLAIM GROUP ------------------
@@ -658,43 +772,97 @@ async def rob(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "restore_time": now + 86400
         }
 
-    # 🚔 30% police chance
+    # 🚔 POLICE CHANCE
     if random.random() < 0.3:
+
         fine = 300
+
+        robber_badge = "💓" if robber_data.get("premium", False) else "👤"
+
+        # 💓 PREMIUM USER
+        if robber_data.get("premium", False):
+
+            jail_time = 60
+
+            status_text = "\n💎 Sᴛᴀᴛᴜꜱ : Pʀᴇᴍɪᴜᴍ Uꜱᴇʀ"
+
+            bail_text = "\n🔓 Bᴀɪʟ Aᴠᴀɪʟᴀʙʟᴇ Fᴏʀ Pʀᴇᴍɪᴜᴍ Uꜱᴇʀ"
+
+        # 👤 NORMAL USER
+        else:
+
+            jail_time = 180
+
+            status_text = ""
+
+            bail_text = ""
+
         robber_data["money"] -= fine
+
         victim_data["money"] += fine
 
-        jail_users[robber_id] = now + 180
+        jail_users[robber_id] = now + jail_time
+
         rob_cooldown[robber_id] = now + 6
 
         save_data()
-        
 
         await update.message.reply_text(
-            f"🚔 Police ne pakad liya!\n"
+            f"🚔 {robber_badge} Police ne pakad liya!\n"
             f"💸 ₹{fine} fine!\n"
-            f"⛓ 3 min jail\n"
+            f"⛓ {jail_time // 60} min jail\n"
             f"💰 Robbery fail!"
+            f"{status_text}"
+            f"{bail_text}"
         )
+
         return
 
-    # Successful rob
+    # 💓 PREMIUM LIMIT
+    if robber_data.get("premium", False):
+
+        max_rob = 100000
+
+        robber_badge = "💓"
+
+        premium_text = "\n💎 Sᴛᴀᴛᴜꜱ : Pʀᴇᴍɪᴜᴍ Rᴏʙ"
+
+    # 👤 NORMAL USER
+    else:
+
+        max_rob = 20000
+
+        robber_badge = "👤"
+
+        premium_text = ""
+
+    stolen = min(
+        amount,
+        victim_data["money"],
+        max_rob
+    )
+
+    # 💖 SUCCESSFUL ROB
     victim_data["money"] -= stolen
+
     robber_data["money"] += stolen
 
     rob_cooldown[robber_id] = now + 6
 
     save_data()
-    
 
-    
     try:
+
         await update.message.reply_text(
-            f"👤 {robber.first_name} robbed ₹{stolen} from {victim.first_name}\n"
-            f"💰 {victim.first_name}'s balance: ₹{victim_data['money']}\n"
-            f"💰 {robber.first_name}'s balance: ₹{robber_data['money']}"
-        ) 
+            f"💰 {robber_badge} {robber.first_name} "
+            f"robbed ₹{stolen} from {victim.first_name}\n"
+            f"🏦 {victim.first_name} Balance : ₹{victim_data['money']}\n"
+            f"💵 {robber.first_name} Balance : ₹{robber_data['money']}"
+            f"{premium_text}"
+        )
+
     except Exception as e:
+
         print("ROB ERROR:", e)
 # ------------------ KILL COMMAND ------------------
 # ------------------ KILL COMMAND ------------------
@@ -774,24 +942,52 @@ async def kill(update: Update, context: ContextTypes.DEFAULT_TYPE):
     victim_data["dead"] = True
     victim_data["dead_until"] = now + 86400
 
-    reward = random.randint(200, 600)
-    killer_data["money"] = killer_data.get("money", 1000) + reward
-    killer_data["kills"] = killer_data.get("kills", 0) + 1
+    # 💓 PREMIUM USER
+    if killer_data.get("premium", False):
 
-    # cooldown + save
+        reward = random.randint(400, 600)
+
+        killer_badge = "💓"
+
+        premium_text = "\n💎 Sᴛᴀᴛᴜꜱ : Pʀᴇᴍɪᴜᴍ Kɪʟʟ"
+
+    # 👤 NORMAL USER
+    else:
+
+        reward = random.randint(200, 400)
+
+        killer_badge = "👤"
+
+        premium_text = ""
+
+    killer_data["money"] = (
+        killer_data.get("money", 1000)
+        + reward
+    )
+
+    killer_data["kills"] = (
+        killer_data.get("kills", 0)
+        + 1
+    )
+
+    # 💖 COOLDOWN + SAVE
     kill_cooldown[str(killer.id)] = now + 6
-    save_data()
-    
 
-    # ✅ SAME MESSAGE (UNCHANGED)
-    
+    save_data()
+
+    # 💖 FINAL MESSAGE
     try:
+
         await update.message.reply_text(
-            f"☠️ {killer.first_name} killed {victim.first_name}!\n"
+            f"☠️ {killer_badge} {killer.first_name} "
+            f"killed {victim.first_name}!\n"
             f"💰 Earned: ₹{reward}\n"
             f"⏳ Victim 24hr baad revive hoga!"
+            f"{premium_text}"
         )
+
     except Exception as e:
+
         print("KILL ERROR:", e)
 
 # ------------------ BAIL COMMAND ------------------
@@ -800,41 +996,69 @@ async def bail(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if not await check_bot_active(update, context):
         return
-    
+
     user = update.effective_user
+
     user_id = str(user.id)
+
     now = time.time()
 
-    # ❌ Not in jail
+    user_data = get_user(
+        user.id,
+        user.first_name
+    )
+
+    # 💓 PREMIUM CHECK
+    if not user_data.get("premium", False):
+
+        await update.message.reply_text(
+            "💓 Tʜɪꜱ Cᴏᴍᴍᴀɴᴅ Iꜱ Oɴʟʏ Fᴏʀ Pʀᴇᴍɪᴜᴍ Uꜱᴇʀꜱ.\n"
+            "🛒 Bᴜʏ Pʀᴇᴍɪᴜᴍ Uꜱɪɴɢ → /pay"
+        )
+        return
+
+    # ❌ NOT IN JAIL
     if user_id not in jail_users:
-        await update.message.reply_text("😎 Tum jail me nahi ho!")
+
+        await update.message.reply_text(
+            "😎 Tᴜᴍ Jᴀɪʟ Mᴇ Nᴀʜɪ Hᴏ!"
+        )
         return
 
-    # ✅ Auto free if time completed
+    # ✅ AUTO FREE
     if now >= jail_users[user_id]:
+
         del jail_users[user_id]
+
         save_data()
-        
-        await update.message.reply_text("😎 Tum already free ho!")
+
+        await update.message.reply_text(
+            "😎 Tᴜᴍ Aʟʀᴇᴀᴅʏ Fʀᴇᴇ Hᴏ!"
+        )
         return
 
-    user_data = get_user(user.id, user.first_name)
-
-    # 💸 Not enough money
+    # 💸 NOT ENOUGH MONEY
     if user_data["money"] < 1000:
-        await update.message.reply_text("₹1000 chahiye bail ke liye!")
+
+        await update.message.reply_text(
+            "💸 ₹1000 Cʜᴀʜɪʏᴇ Bᴀɪʟ Kᴇ Lɪʏᴇ!"
+        )
         return
 
-    # 💰 Deduct money
+    # 💰 DEDUCT MONEY
     user_data["money"] -= 1000
 
-    # 🔓 Remove jail
+    # 🔓 REMOVE JAIL
     del jail_users[user_id]
 
     save_data()
-    
 
-    await update.message.reply_text("💸 Bail mil gayi! Ab free ho 😈")
+    # 💖 FINAL MESSAGE
+    await update.message.reply_text(
+        "🔓 💓 Pʀᴇᴍɪᴜᴍ Bᴀɪʟ Aᴄᴛɪᴠᴇᴅ!\n"
+        "💸 ₹1000 Dᴇᴅᴜᴄᴛᴇᴅ\n"
+        "😈 Aʙ Tᴜᴍ Fʀᴇᴇ Hᴏ!"
+    )
 
 
 # ================= SHOP & GIFT COMMANDS (Part 1 JSON style) =================
@@ -1024,33 +1248,73 @@ async def gift(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ================= ECONOMY COMMAND =================
 from telegram import Update
 from telegram.ext import ContextTypes
+
 async def economy(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if not await check_bot_active(update, context):
         return
-    
-    text = (
-         "💰 *Nɪᴋɪ Eᴄᴏɴᴏᴍʏ Sʏꜱᴛᴇᴍ Oᴠᴇʀᴠɪᴇᴡ*\n\n"
-       "💬 *Hᴏᴡ Iᴛ Wᴏʀᴋꜱ:*\n"
-       "Uꜱᴇ Nɪᴋɪ’ꜱ Eᴄᴏɴᴏᴍʏ Sʏꜱᴛᴇᴍ Tᴏ Eᴀʀɴ, Mᴀɴᴀɢᴇ, Gɪꜰᴛ, Aɴᴅ Pʀᴏᴛᴇᴄᴛ Vɪʀᴛᴜᴀʟ Mᴏɴᴇʏ Iɴ Yᴏᴜʀ Gʀᴏᴜᴘ.\n\n"
-       "• /daily — Cʟᴀɪᴍ $1500 Dᴀɪʟʏ Rᴇᴡᴀʀᴅ\n"
-       "• /claim — Uɴʟᴏᴄᴋ Gʀᴏᴜᴘ Rᴇᴡᴀʀᴅꜱ Bᴀꜱᴇᴅ Oɴ Mᴇᴍʙᴇʀꜱ\n"
-       "• /bal — Cʜᴇᴄᴋ Yᴏᴜʀ Oʀ Aɴᴏᴛʜᴇʀ Uꜱᴇʀ’ꜱ Bᴀʟᴀɴᴄᴇ\n"
-       "• /rob (ʀᴇᴘʟʏ) <ᴀᴍᴏᴜɴᴛ> — Rᴏʙ Mᴏɴᴇʏ Fʀᴏᴍ A Uꜱᴇʀ\n"
-       "• /kill (ʀᴇᴘʟʏ) — Kɪʟʟ A Uꜱᴇʀ & Eᴀʀɴ $200–$600\n"
-       "• /revive — Rᴇᴠɪᴠᴇ Yᴏᴜʀꜱᴇʟꜰ Oʀ A Rᴇᴘʟɪᴇᴅ Uꜱᴇʀ\n"
-       "• /protect 1ᴅ|2ᴅ|3ᴅ — Bᴜʏ Pʀᴏᴛᴇᴄᴛɪᴏɴ Fʀᴏᴍ Rᴏʙʙᴇʀʏ\n"
-       "• /give (ʀᴇᴘʟʏ) <ᴀᴍᴏᴜɴᴛ> — Tʀᴀɴꜱꜰᴇʀ Mᴏɴᴇʏ\n"
-       "• /shop — Sʜᴏᴘ Fᴏʀ Gɪꜰᴛ Iᴛᴇᴍꜱ\n"
-       "• /items (ʀᴇᴘʟʏ) — Vɪᴇᴡ Yᴏᴜʀ / Oᴛʜᴇʀꜱ Iɴᴠᴇɴᴛᴏʀʏ\n"
-       "• /toprich — Tᴏᴘ 10 Rɪᴄʜᴇꜱᴛ Uꜱᴇʀꜱ\n"
-       "• /topkill — Tᴏᴘ 10 Kɪʟʟᴇʀꜱ\n"
-       "• /check — Cʜᴇᴄᴋ Pʀᴏᴛᴇᴄᴛɪᴏɴ Sᴛᴀᴛᴜꜱ (Cᴏꜱᴛꜱ $2000)\n"
 
+    user_data = get_user(
+        update.effective_user.id,
+        update.effective_user.first_name
     )
 
-    # ✅ Send as Markdown for bold formatting
-    await update.message.reply_text(text, parse_mode="Markdown")
+    # 💓 PREMIUM USER
+    if user_data.get("premium", False):
+
+        text = (
+            "💓 *Pʀᴇᴍɪᴜᴍ Eᴄᴏɴᴏᴍʏ Sʏꜱᴛᴇᴍ Oᴠᴇʀᴠɪᴇᴡ*\n\n"
+
+            "💬 *Hᴏᴡ Iᴛ Wᴏʀᴋꜱ:*\n"
+            "Uꜱᴇ Nɪᴋɪ’ꜱ Pʀᴇᴍɪᴜᴍ Eᴄᴏɴᴏᴍʏ Tᴏ Gᴇᴛ Hɪɢʜᴇʀ Rᴇᴡᴀʀᴅꜱ, "
+            "Pʀᴇᴍɪᴜᴍ Bᴇɴᴇꜰɪᴛꜱ, Aɴᴅ Sᴘᴇᴄɪᴀʟ Fᴇᴀᴛᴜʀᴇꜱ 😏💓\n\n"
+
+            "• /daily — Cʟᴀɪᴍ $5000 Dᴀɪʟʏ Rᴇᴡᴀʀᴅ\n"
+            "• /claim — Uɴʟᴏᴄᴋ Gʀᴏᴜᴘ Rᴇᴡᴀʀᴅꜱ Bᴀꜱᴇᴅ Oɴ Mᴇᴍʙᴇʀꜱ\n"
+            "• /bal — Cʜᴇᴄᴋ Yᴏᴜʀ Oʀ Aɴᴏᴛʜᴇʀ Uꜱᴇʀ’ꜱ Bᴀʟᴀɴᴄᴇ\n"
+            "• /rob (ʀᴇᴘʟʏ) <ᴀᴍᴏᴜɴᴛ> — Rᴏʙ Uᴘ Tᴏ $100000\n"
+            "• /kill (ʀᴇᴘʟʏ) — Eᴀʀɴ $400–$600\n"
+            "• /revive — Rᴇᴠɪᴠᴇ Yᴏᴜʀꜱᴇʟꜰ Oʀ A Rᴇᴘʟɪᴇᴅ Uꜱᴇʀ\n"
+            "• /protect 1ᴅ|2ᴅ|3ᴅ — Bᴜʏ Pʀᴏᴛᴇᴄᴛɪᴏɴ\n"
+            "• /check — Fʀᴇᴇ Pʀᴏᴛᴇᴄᴛɪᴏɴ Cʜᴇᴄᴋ\n"
+            "• /bail — Gᴇᴛ Oᴜᴛ Oꜰ Jᴀɪʟ\n"
+            "• /give (ʀᴇᴘʟʏ) <ᴀᴍᴏᴜɴᴛ> — Tʀᴀɴꜱꜰᴇʀ Mᴏɴᴇʏ\n"
+            "• /shop — Sʜᴏᴘ Fᴏʀ Gɪꜰᴛ Iᴛᴇᴍꜱ\n"
+            "• /items (ʀᴇᴘʟʏ) — Vɪᴇᴡ Iɴᴠᴇɴᴛᴏʀʏ\n"
+            "• /toprich — Tᴏᴘ 10 Rɪᴄʜᴇꜱᴛ Uꜱᴇʀꜱ\n"
+            "• /topkill — Tᴏᴘ 10 Kɪʟʟᴇʀꜱ\n"
+        )
+
+    # 👤 NORMAL USER
+    else:
+
+        text = (
+            "👤 *Nᴏʀᴍᴀʟ Eᴄᴏɴᴏᴍʏ Sʏꜱᴛᴇᴍ Oᴠᴇʀᴠɪᴇᴡ*\n\n"
+
+            "💬 *Hᴏᴡ Iᴛ Wᴏʀᴋꜱ:*\n"
+            "Uꜱᴇ Nɪᴋɪ’ꜱ Eᴄᴏɴᴏᴍʏ Sʏꜱᴛᴇᴍ Tᴏ Eᴀʀɴ, Mᴀɴᴀɢᴇ, "
+            "Gɪꜰᴛ, Aɴᴅ Pʀᴏᴛᴇᴄᴛ Vɪʀᴛᴜᴀʟ Mᴏɴᴇʏ 😌\n\n"
+
+            "• /daily — Cʟᴀɪᴍ $1500 Dᴀɪʟʏ Rᴇᴡᴀʀᴅ\n"
+            "• /claim — Uɴʟᴏᴄᴋ Gʀᴏᴜᴘ Rᴇᴡᴀʀᴅꜱ Bᴀꜱᴇᴅ Oɴ Mᴇᴍʙᴇʀꜱ\n"
+            "• /bal — Cʜᴇᴄᴋ Yᴏᴜʀ Oʀ Aɴᴏᴛʜᴇʀ Uꜱᴇʀ’ꜱ Bᴀʟᴀɴᴄᴇ\n"
+            "• /rob (ʀᴇᴘʟʏ) <ᴀᴍᴏᴜɴᴛ> — Rᴏʙ Uᴘ Tᴏ $20000\n"
+            "• /kill (ʀᴇᴘʟʏ) — Eᴀʀɴ $200–$400\n"
+            "• /revive — Rᴇᴠɪᴠᴇ Yᴏᴜʀꜱᴇʟꜰ Oʀ A Rᴇᴘʟɪᴇᴅ Uꜱᴇʀ\n"
+            "• /protect 1ᴅ — Bᴜʏ Pʀᴏᴛᴇᴄᴛɪᴏɴ\n"
+            "• /give (ʀᴇᴘʟʏ) <ᴀᴍᴏᴜɴᴛ> — Tʀᴀɴꜱꜰᴇʀ Mᴏɴᴇʏ\n"
+            "• /shop — Sʜᴏᴘ Fᴏʀ Gɪꜰᴛ Iᴛᴇᴍꜱ\n"
+            "• /items (ʀᴇᴘʟʏ) — Vɪᴇᴡ Iɴᴠᴇɴᴛᴏʀʏ\n"
+            "• /toprich — Tᴏᴘ 10 Rɪᴄʜᴇꜱᴛ Uꜱᴇʀꜱ\n"
+            "• /topkill — Tᴏᴘ 10 Kɪʟʟᴇʀꜱ\n\n"
+
+            "💓 Uᴘɢʀᴀᴅᴇ Tᴏ Pʀᴇᴍɪᴜᴍ → /pay"
+        )
+
+    await update.message.reply_text(
+        text,
+        parse_mode="Markdown"
+    )
 
 # =================== REVIVE COMMAND ===================
 # =================== REVIVE COMMAND ===================
@@ -1234,47 +1498,66 @@ async def economy_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
 from telegram import Update
 from telegram.ext import ContextTypes
 
-OWNER_ID = 6175559434  # Owner numeric ID
-OWNER_USERNAME = "YTT_BISHAL"  # Owner Telegram username
+OWNER_ID = 6175559434
+OWNER_USERNAME = "YTT_BISHAL"
 
 async def show_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if not await check_bot_active(update, context):
         return
-    
-    # Check if command is in reply
+
+    # 💖 TARGET USER
     if update.message.reply_to_message:
+
         target_user = update.message.reply_to_message.from_user
+
     else:
+
         target_user = update.effective_user
 
-    # Check if target is owner
+    # 💖 OWNER PROTECTION
     if target_user.id == OWNER_ID:
+
         await update.message.reply_text(
-            f"🤔 Abey yar tu mera owner ka id dekhna chahega 🤔 nehi ye thik bat ni 😎\n"
-            f"📝 Owner ka id secret hai, mt dekh 👉 @{OWNER_USERNAME}"
+            f"🤔 Aʙᴇʏ Yᴀʀ Tᴜ Mᴇʀᴇ Oᴡɴᴇʀ Kᴀ Iᴅ Dᴇᴋʜɴᴀ Cʜᴀʜᴇɢᴀ 😎\n"
+            f"📝 Oᴡɴᴇʀ Kᴀ Iᴅ Sᴇᴄʀᴇᴛ Hᴀɪ 👉 @{OWNER_USERNAME}"
         )
         return
 
-    # Group chat id
-    chat_id = update.effective_chat.id
-    # User numeric id
-    user_id = target_user.id
-    # Username if available
-    username = target_user.username or target_user.first_name
-
-    # Build message
-    msg = (
-        f"👤 User Name : {username}\n"
-        f"🆔 User ID   : {user_id}\n"
-        f"💬 Chat ID  : {chat_id}"
+    # 💖 USER DATA
+    user_data = get_user(
+        target_user.id,
+        target_user.first_name
     )
+
+    # 💖 BADGE
+    badge = get_badge(user_data)
+
+    # 💖 IDS
+    chat_id = update.effective_chat.id
+
+    user_id = target_user.id
+
+    username = (
+        target_user.username
+        or target_user.first_name
+    )
+
+    # 💖 FINAL MESSAGE
+    msg = (
+        f"👤 Uꜱᴇʀ Nᴀᴍᴇ : {badge} {username}\n"
+        f"🆔 Uꜱᴇʀ Iᴅ : {user_id}\n"
+        f"💬 Cʜᴀᴛ Iᴅ : {chat_id}"
+    )
+
     await update.message.reply_text(msg)
 
 
 
 
 # ---------------- CHECK COMMAND FINAL ----------------
+# ================= CHECK COMMAND PREMIUM FINAL =================
+
 import time
 from telegram import Update
 from telegram.ext import ContextTypes
@@ -1283,80 +1566,75 @@ async def check(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if not await check_bot_active(update, context):
         return
-    
-    #loaddata
 
     checker = update.effective_user
     checker_data = get_user(checker.id, checker.first_name)
 
-    cost = 2000
-
-    # ---------------- IF NUMERIC ID USED IN GROUP ----------------
-    if context.args:
-        if checker_data.get("money", 0) < cost:
-            await update.message.reply_text("😢 Paisa kam hai, 2000 chahiye check ke liye")
-            return
-
-        # Deduct money
-        checker_data["money"] -= cost
-        save_data()
-        
+    # 💓 PREMIUM ONLY
+    if not checker_data.get("premium", False):
 
         await update.message.reply_text(
-            "😔 Sorry yahape group me chat id ya numeric id se check nahi kiya ja sakta.\n\n"
-            "⚠️ Warning nahi tha but tumhara ₹2000 cut ho gaya 😅\n"
-            "Agli baar aisi galti mat karna 👍"
+            "💓 Tʜɪꜱ Cᴏᴍᴍᴀɴᴅ Iꜱ Oɴʟʏ Fᴏʀ Pʀᴇᴍɪᴜᴍ Uꜱᴇʀꜱ.\n"
+            "Bᴜʏ Pʀᴇᴍɪᴜᴍ Uꜱɪɴɢ → /pay"
         )
         return
 
     # ---------------- IF NOT REPLY ----------------
+
     if not update.message.reply_to_message:
+
         await update.message.reply_text(
-            "❌ Reply karke /check likho kisi ka protection check karne ke liye 😌"
+            "⚠️ Uꜱᴀɢᴇ: /check Rᴇᴘʟʏ Oʀ Uꜱᴇʀ Iᴅ."
         )
         return
 
-    # ---------------- NORMAL REPLY CHECK ----------------
+    # ---------------- TARGET ----------------
+
     target = update.message.reply_to_message.from_user
     target_data = get_user(target.id, target.first_name)
 
-    if checker_data.get("money", 0) < cost:
-        await update.message.reply_text("😢 Paisa kam hai, 2000 chahiye check ke liye")
-        return
-
-    # Deduct money
-    checker_data["money"] -= cost
-    save_data()
-    
-
-    # Calculate protection hours only
     now = time.time()
+
     protection_until = target_data.get("protection_until", 0)
 
-    if protection_until > now:
-        remaining_seconds = int(protection_until - now)
-        hours = remaining_seconds // 3600
-        protection_text = f"🛡 Active for {hours} hour(s)"
-    else:
-        protection_text = "❌ No active protection"
+    # ---------------- PROTECTION ----------------
 
-    # ----------- SEND DM TO CHECKER -----------
+    if protection_until > now:
+
+        remaining_seconds = int(protection_until - now)
+
+        hours = remaining_seconds // 3600
+
+        protection_text = f"🛡 Aᴄᴛɪᴠᴇ Fᴏʀ {hours} Hᴏᴜʀ(ꜱ)"
+
+    else:
+
+        protection_text = "❌ Nᴏ Aᴄᴛɪᴠᴇ Pʀᴏᴛᴇᴄᴛɪᴏɴ"
+
+    # ---------------- DM ----------------
+
     try:
+
         await context.bot.send_message(
             chat_id=checker.id,
             text=(
-                f"🛡 {target.first_name} ka Protection Status\n\n"
-                f"{protection_text}\n\n"
-                f"💸 ₹{cost} deduct ho gaya"
+                f"💓 Pʀᴏᴛᴇᴄᴛɪᴏɴ Cʜᴇᴄᴋ\n\n"
+                f"👤 Uꜱᴇʀ: {target.first_name}\n"
+                f"{protection_text}"
             )
         )
-    except:
-        await update.message.reply_text("⚠️ DM send nahi ho paya")
 
-    # ----------- GROUP MESSAGE -----------
+    except:
+
+        await update.message.reply_text(
+            "⚠️ Dᴍ Sᴇɴᴅ Nᴀʜɪ Hᴜᴀ."
+        )
+        return
+
+    # ---------------- GROUP MESSAGE ----------------
+
     await update.message.reply_text(
-        f"🎉 {target.first_name} ka protection tum check kar liya 👍\n"
-        f"DM me check karo 📨"
+        f"💓 Pʀᴏᴛᴇᴄᴛɪᴏɴ Cʜᴇᴄᴋ Sᴇɴᴛ Iɴ Dᴍ."
     )
 
 
@@ -8002,7 +8280,235 @@ Message:
     
 
     
-       
+#======================payment======================
+from telegram import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    Update
+)
+
+from telegram.ext import ContextTypes
+
+# ==================================================
+# 💖 PREMIUM BADGE
+# ==================================================
+
+def get_badge(user_data):
+
+    # 💓 PREMIUM USER
+    if user_data.get("premium", False):
+        return "💓"
+
+    # 👤 NORMAL USER
+    return "👤"
+
+# ==================================================
+# 💎 PAY COMMAND
+# ==================================================
+
+async def pay(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not update.message:
+        return
+
+    user_data = get_user(
+        update.effective_user.id,
+        update.effective_user.first_name
+    )
+
+    # 💓 ALREADY PREMIUM
+    if user_data.get("premium", False):
+
+        keyboard = InlineKeyboardMarkup([
+            [
+                InlineKeyboardButton(
+                    "👑 Owner",
+                    url="https://t.me/YTT_BISHAL"
+                )
+            ]
+        ])
+
+        await update.message.reply_text(
+            """
+╔══❖•ೋ° 💓 °ೋ•❖══╗
+      💎 PREMIUM ACTIVE
+╚══❖•ೋ° 💓 °ೋ•❖══╝
+
+✨ Your Premium Benefits:
+
+💰 ₹5000 Daily Reward
+💸 Rob Up To ₹100000
+⚔ Kill Reward ₹400-₹600
+🔍 Free /check Access
+🔓 /bail Command Access
+🛡 1D, 2D & 3D Protection
+💓 Premium Badge Everywhere
+🏆 Premium Top Rank Style
+🚔 Less Jail Time
+💎 Premium Kill & Rob Status
+
+━━━━━━━━━━━━━━━
+
+💖 You already have Premium 😏
+""",
+            reply_markup=keyboard
+        )
+
+        return
+
+    # 💖 BUTTONS
+    keyboard = InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton(
+                "💳 Buy Premium",
+                url="https://t.me/YTT_BISHAL"
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                "👑 Contact Owner",
+                url="https://t.me/YTT_BISHAL"
+            )
+        ]
+    ])
+
+    # 💖 NORMAL PAY MESSAGE
+    await update.message.reply_text(
+        """
+╔══❖•ೋ° 💎 °ೋ•❖══╗
+        👑 NIKI PREMIUM
+╚══❖•ೋ° 💎 °ೋ•❖══╝
+
+💖 Premium Benefits:
+
+💓 Special Premium Badge
+💰 ₹5000 Daily Reward
+💸 Rob Up To ₹100000
+⚔ Kill Reward ₹400-₹600
+🔍 Free /check Command
+🔓 /bail Command
+🛡 1D, 2D & 3D Protection
+🚔 Less Jail Time
+🏆 Premium Top Rank Style
+💎 Premium Kill & Rob Status
+⚡ Faster Commands
+🎁 Exclusive Features
+💞 Better AI Personality
+🚫 No Verification
+
+━━━━━━━━━━━━━━━
+
+💳 Price: ₹49 / Month
+
+📩 Contact Owner To Buy Premium:
+@YTT_BISHAL
+""",
+        reply_markup=keyboard
+    )
+
+# ==================================================
+# 💎 ADD PREMIUM (OWNER ONLY)
+# ==================================================
+
+async def addpremium(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    # 👑 OWNER CHECK
+    if update.effective_user.id != OWNER_ID:
+
+        await update.message.reply_text(
+            "❌ Oɴʟʏ Mʏ Oᴡɴᴇʀ Cᴀɴ Uꜱᴇ Tʜɪꜱ Cᴏᴍᴍᴀɴᴅ!"
+        )
+        return
+
+    # ❌ NO ID
+    if len(context.args) < 1:
+
+        await update.message.reply_text(
+            "⚠️ Usage:\n/addpremium user_id"
+        )
+        return
+
+    try:
+
+        user_id = str(context.args[0])
+
+        user = get_user(
+            user_id,
+            "Premium User"
+        )
+
+        # 💓 ACTIVATE PREMIUM
+        user["premium"] = True
+
+        save_data()
+
+        username = user.get("username", "No Username")
+        name = user.get("name", "Unknown")
+
+        await update.message.reply_text(
+            f"💓 Pʀᴇᴍɪᴜᴍ Aᴄᴛɪᴠᴀᴛᴇᴅ!\n\n"
+            f"👤 Name: {name}\n"
+            f"📛 Username: @{username}\n"
+            f"🆔 ID: {user_id}"
+        )
+
+    except Exception as e:
+
+        await update.message.reply_text(
+            f"❌ Error:\n{e}"
+        )
+
+# ==================================================
+# 💔 REMOVE PREMIUM (OWNER ONLY)
+# ==================================================
+
+async def removepremium(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    # 👑 OWNER CHECK
+    if update.effective_user.id != OWNER_ID:
+
+        await update.message.reply_text(
+            "❌ Oɴʟʏ Mʏ Oᴡɴᴇʀ Cᴀɴ Uꜱᴇ Tʜɪꜱ Cᴏᴍᴍᴀɴᴅ!"
+        )
+        return
+
+    # ❌ NO ID
+    if len(context.args) < 1:
+
+        await update.message.reply_text(
+            "⚠️ Usage:\n/removepremium user_id"
+        )
+        return
+
+    try:
+
+        user_id = str(context.args[0])
+
+        user = get_user(
+            user_id,
+            "User"
+        )
+
+        # 💔 REMOVE PREMIUM
+        user["premium"] = False
+
+        save_data()
+
+        username = user.get("username", "No Username")
+        name = user.get("name", "Unknown")
+
+        await update.message.reply_text(
+            f"💔 Pʀᴇᴍɪᴜᴍ Rᴇᴍᴏᴠᴇᴅ!\n\n"
+            f"👤 Name: {name}\n"
+            f"📛 Username: @{username}\n"
+            f"🆔 ID: {user_id}"
+        )
+
+    except Exception as e:
+
+        await update.message.reply_text(
+            f"❌ Error:\n{e}"
+        )
         
 
      
@@ -8165,6 +8671,9 @@ def main():
     app.add_handler(CommandHandler("gjoin", gjoin))
     app.add_handler(CommandHandler("shoot", shoot))
     app.add_handler(CommandHandler("admin", admin_list))
+    app.add_handler(CommandHandler("pay", pay))
+    app.add_handler(CommandHandler("addpremium", addpremium))
+    app.add_handler(CommandHandler("removepremium", removepremium))
     app.add_handler(CommandHandler("userinfo", userinfo))
     
     # ================= CALLBACKS =================
