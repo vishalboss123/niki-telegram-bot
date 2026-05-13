@@ -425,37 +425,124 @@ def is_protected(user_data):
     return user_data.get("protection_until", 0) > now
 # ------------------ DAILY COMMAND ------------------
 # ------------------ DAILY COMMAND ------------------
+import time
+import random
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import ContextTypes
+
+pending_daily = {}
+
+# ==================================================
+# 💰 DAILY COMMAND (GROUP + DM REDIRECT)
+# ==================================================
+
 async def daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
     if not update.message:
         return
 
-    if not await check_bot_active(update, context):
-        return
-
-    user = get_user(update.effective_user.id, update.effective_user.first_name)
+    user = update.effective_user
+    user_data = get_user(user.id, user.first_name)
 
     now = time.time()
 
-    if now - user.get("last_daily", 0) < 86400:
-        remain = 86400 - (now - user.get("last_daily", 0))
+    # ==================================================
+    # 💓 GROUP MESSAGE → DM START BUTTON
+    # ==================================================
+    if update.effective_chat.type != "private":
+
+        keyboard = InlineKeyboardMarkup([
+            [
+                InlineKeyboardButton(
+                    "🚀 Start Daily In DM",
+                    url=f"https://t.me/{context.bot.username}?start=daily"
+                )
+            ]
+        ])
 
         await update.message.reply_text(
-            f"⏳ Daily already claimed. Try after {format_time(remain)}"
+            "💓 Dᴀɪʟʏ Rᴇᴡᴀʀᴅ Oɴʟʏ Iɴ DM 😏\n"
+            "👉 Start bot in private chat to claim reward",
+            reply_markup=keyboard
         )
         return
 
-    # 💰 MONEY
-    user["money"] += 1500
+    # ==================================================
+    # ⏳ COOLDOWN
+    # ==================================================
+    if now - user_data.get("last_daily", 0) < 86400:
+        remain = 86400 - (now - user_data.get("last_daily", 0))
 
-    # update time
-    user["last_daily"] = now
+        await update.message.reply_text(
+            f"⏳ Aʟʀᴇᴀᴅʏ Cʟᴀɪᴍᴇᴅ!\n🕒 Tʀʏ Aғᴛᴇʀ {format_time(remain)}"
+        )
+        return
+
+    # ==================================================
+    # 🤖 CAPTCHA
+    # ==================================================
+    a = random.randint(1, 9)
+    b = random.randint(1, 9)
+
+    pending_daily[user.id] = {
+        "answer": a + b,
+        "time": now
+    }
+
+    keyboard = InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton(
+                "🎁 Cʟᴀɪᴍ Rᴇᴡᴀʀᴅ",
+                callback_data=f"claim_{user.id}"
+            )
+        ]
+    ])
+
+    await update.message.reply_text(
+        f"🤖 Vᴇʀɪғɪᴄᴀᴛɪᴏɴ RᴇQᴜɪʀᴇᴅ\n\n"
+        f"❓ Sᴏʟᴠᴇ:\n"
+        f"{a} + {b} = ?\n\n"
+        f"⏳ Wᴀɪᴛ 10 Sᴇᴄ & Cʟɪᴄᴋ Bᴜᴛᴛᴏɴ",
+        reply_markup=keyboard
+    )
+
+
+# ==================================================
+# 🔘 BUTTON CALLBACK
+# ==================================================
+
+async def claim_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    await query.answer()
+
+    user = query.from_user
+
+    if user.id not in pending_daily:
+        await query.edit_message_text("❌ Nᴏ Pᴇɴᴅɪɴɢ Vᴇʀɪғɪᴄᴀᴛɪᴏɴ")
+        return
+
+    data = pending_daily[user.id]
+
+    if time.time() - data["time"] < 10:
+        await query.answer("⏳ Wᴀɪᴛ 10 Sᴇᴄ!", show_alert=True)
+        return
+
+    user_data = get_user(user.id, user.first_name)
+
+    reward = 1500
+
+    user_data["money"] = user_data.get("money", 0) + reward
+    user_data["last_daily"] = time.time()
 
     save_data()
-    
 
-    # ✅ FINAL MESSAGE (ONLY ONE)
-    await update.message.reply_text(
-        "💰 Daily reward: ₹1500\nNext daily available after 24h"
+    del pending_daily[user.id]
+
+    await query.edit_message_text(
+        "💰 Dᴀɪʟʏ Cʟᴀɪᴍ Sᴜᴄᴄᴇss!\n\n"
+        "🎁 Yᴏᴜ Rᴇᴄᴇɪᴠᴇᴅ ₹1500\n"
+        "💓 Vᴇʀɪғɪᴄᴀᴛɪᴏɴ Pᴀssᴇᴅ 😏"
     )
 
     
@@ -1559,8 +1646,20 @@ async def show_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ================= CHECK COMMAND PREMIUM FINAL =================
 
 import time
-from telegram import Update
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
+
+# ==================================================
+# 💓 BADGE SYSTEM
+# ==================================================
+
+def get_badge(user_data):
+    return "💓" if user_data.get("premium") else "👤"
+
+
+# ==================================================
+# 💓 /CHECK COMMAND (FULL UPGRADE)
+# ==================================================
 
 async def check(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -1571,74 +1670,95 @@ async def check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     checker_data = get_user(checker.id, checker.first_name)
 
     # 💓 PREMIUM ONLY
-    if not checker_data.get("premium", False):
-
+    if not checker_data.get("premium"):
         await update.message.reply_text(
             "💓 Tʜɪꜱ Cᴏᴍᴍᴀɴᴅ Iꜱ Oɴʟʏ Fᴏʀ Pʀᴇᴍɪᴜᴍ Uꜱᴇʀꜱ.\n"
-            "Bᴜʏ Pʀᴇᴍɪᴜᴍ Uꜱɪɴɢ → /pay"
+            "Bᴜʏ → /pay"
         )
         return
 
-    # ---------------- IF NOT REPLY ----------------
+    # ==================================================
+    # 🎯 TARGET PARSE (@username / reply / id)
+    # ==================================================
 
-    if not update.message.reply_to_message:
+    target = None
 
+    # 1️⃣ Reply
+    if update.message.reply_to_message:
+        target = update.message.reply_to_message.from_user
+
+    # 2️⃣ @username or ID
+    elif context.args:
+        query = context.args[0]
+
+        # try username
+        if query.startswith("@"):
+            username = query.replace("@", "")
+            # simple scan (anti-fake safe)
+            for uid, u in data.items():
+                if isinstance(u, dict) and u.get("username") == username:
+                    target = type("obj", (), {
+                        "id": uid,
+                        "first_name": u.get("name", "User"),
+                        "username": username
+                    })()
+                    break
+
+        # try ID
+        elif query.isdigit():
+            u = get_user(query, "User")
+            target = type("obj", (), {
+                "id": query,
+                "first_name": u.get("name", "User"),
+                "username": None
+            })()
+
+    if not target:
         await update.message.reply_text(
-            "⚠️ Uꜱᴀɢᴇ: /check Rᴇᴘʟʏ Oʀ Uꜱᴇʀ Iᴅ."
+            "⚠️ Uꜱᴀɢᴇ:\n"
+            "/check reply\n"
+            "/check @username\n"
+            "/check user_id"
         )
         return
 
-    # ---------------- TARGET ----------------
-
-    target = update.message.reply_to_message.from_user
     target_data = get_user(target.id, target.first_name)
 
-    now = time.time()
+    # ==================================================
+    # 🛡 PROTECTION STATUS
+    # ==================================================
 
+    now = time.time()
     protection_until = target_data.get("protection_until", 0)
 
-    # ---------------- PROTECTION ----------------
-
     if protection_until > now:
-
-        remaining_seconds = int(protection_until - now)
-
-        hours = remaining_seconds // 3600
-
-        protection_text = f"🛡 Aᴄᴛɪᴠᴇ Fᴏʀ {hours} Hᴏᴜʀ(ꜱ)"
-
+        rem = int(protection_until - now)
+        status = f"🛡 Aᴄᴛɪᴠᴇ ({rem//3600}h {rem%3600//60}m)"
     else:
+        status = "❌ Nᴏ Pʀᴏᴛᴇᴄᴛɪᴏɴ"
 
-        protection_text = "❌ Nᴏ Aᴄᴛɪᴠᴇ Pʀᴏᴛᴇᴄᴛɪᴏɴ"
+    badge = get_badge(target_data)
 
-    # ---------------- DM ----------------
+    # ==================================================
+    # 🎯 INLINE RESULT (NO DM)
+    # ==================================================
 
-    try:
-
-        await context.bot.send_message(
-            chat_id=checker.id,
-            text=(
-                f"💓 Pʀᴏᴛᴇᴄᴛɪᴏɴ Cʜᴇᴄᴋ\n\n"
-                f"👤 Uꜱᴇʀ: {target.first_name}\n"
-                f"{protection_text}"
+    keyboard = InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton(
+                "💓 Premium Upgrade",
+                url="https://t.me/YTT_BISHAL"
             )
-        )
-
-    except:
-
-        await update.message.reply_text(
-            "⚠️ Dᴍ Sᴇɴᴅ Nᴀʜɪ Hᴜᴀ."
-        )
-        return
-
-    # ---------------- GROUP MESSAGE ----------------
+        ]
+    ])
 
     await update.message.reply_text(
-        f"💓 Pʀᴏᴛᴇᴄᴛɪᴏɴ Cʜᴇᴄᴋ Sᴇɴᴛ Iɴ Dᴍ."
+        f"💓 Pʀᴏᴛᴇᴄᴛɪᴏɴ Cʜᴇᴄᴋ\n\n"
+        f"{badge} 👤 Uꜱᴇʀ: {target.first_name}\n"
+        f"{status}\n\n"
+        f"⚡ Checked by {checker.first_name}",
+        reply_markup=keyboard
     )
-
-
-
 
 
 pending_users = {}  # user_id : sticker_file_id
@@ -3706,8 +3826,11 @@ async def member_update_welcome(update: Update, context: ContextTypes.DEFAULT_TY
 
 # ================= MAGIC =================
 async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    import asyncio, random
+
     user = update.effective_user
-    user_id = user.id
+    user_id = str(user.id)
     mention = f"<a href='tg://user?id={user_id}'>{user.first_name}</a>"
 
     msg = await update.message.reply_text("💻 Initializing hack...")
@@ -3720,25 +3843,24 @@ async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
 
     for step in steps:
+        await asyncio.sleep(1.2)
+
         try:
-            await asyncio.sleep(1.5)
             await msg.edit_text(f"💻 {step}")
         except:
-            pass  # 🔥 anti-freeze
+            continue  # safe continue (no crash)
 
-    # 🔥 USER DATA FIX
-    u = get_user(user_id)
+    # ================= USER FIX =================
+
+    u = get_user(user_id, user.first_name)
 
     if not u:
         u = {}
 
-    if "money" not in u:
-        u["money"] = 0
+    u.setdefault("money", 0)
+    u.setdefault("magic_used", False)
 
-    if "magic_used" not in u:
-        u["magic_used"] = False
-
-    # ❌ SAME DESIGN (WITH BAR)
+    # ❌ already used
     if u["magic_used"]:
         await msg.edit_text(f"""
 ╭━━━〔 ❌ ACCESS DENIED 〕━━━╮
@@ -3760,11 +3882,10 @@ async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
     u["money"] += reward
 
     save_data()
-    
 
-    # ✅ FINAL (SAME BAR STYLE)
-    try:
-        await msg.edit_text(f"""
+    # ================= FINAL =================
+
+    await msg.edit_text(f"""
 ╭━━━〔 💰 HACK SUCCESSFUL 〕━━━╮
 
 👤 {mention}
@@ -3776,8 +3897,6 @@ async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 ╰━━━━━━━━━━━━━━━━━━━━╯
 """, parse_mode="HTML")
-    except:
-        pass
 
 # ================= DART SOLO =================
 async def dart(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -8675,17 +8794,24 @@ def main():
     app.add_handler(CommandHandler("addpremium", addpremium))
     app.add_handler(CommandHandler("removepremium", removepremium))
     app.add_handler(CommandHandler("userinfo", userinfo))
-    
     # ================= CALLBACKS =================
+
     app.add_handler(CallbackQueryHandler(accept, pattern="^marry_acc_"))
     app.add_handler(CallbackQueryHandler(reject, pattern="^marry_rej_"))
+
     app.add_handler(CallbackQueryHandler(accept_btn, pattern="^duel_acc_"))
     app.add_handler(CallbackQueryHandler(cancel_btn, pattern="^duel_rej_"))
+
     app.add_handler(CallbackQueryHandler(button_callback, pattern="^start_"))
     app.add_handler(CallbackQueryHandler(button, pattern="^(num_|bet_)"))
-    app.add_handler(CallbackQueryHandler(mine_click, pattern="mine_|cashout"))
-    app.add_handler(CallbackQueryHandler(userinfo_buttons))
 
+    app.add_handler(CallbackQueryHandler(mine_click, pattern="^(mine_|cashout)"))
+
+    # 💰 DAILY CLAIM (IMPORTANT - KEEP ABOVE GENERAL HANDLER)
+    app.add_handler(CallbackQueryHandler(claim_callback, pattern="^claim_"), group=0)
+
+    # 👤 USERINFO
+    app.add_handler(CallbackQueryHandler(userinfo_buttons))
     # ================= 🔥 HANDLERS (CLEAN PRIORITY ORDER) =================
 
     # 🛑 BLOCK
