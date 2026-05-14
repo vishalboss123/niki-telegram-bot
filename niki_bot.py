@@ -817,7 +817,7 @@ from telegram.ext import ContextTypes
 pending_daily = {}
 
 # ==================================================
-# 💰 DAILY COMMAND (GROUP + DM REDIRECT)
+# 💰 DAILY COMMAND
 # ==================================================
 
 async def daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -831,7 +831,7 @@ async def daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
     now = time.time()
 
     # ==================================================
-    # 💓 GROUP MESSAGE → DM START BUTTON
+    # 💓 GROUP → DM REDIRECT
     # ==================================================
     if update.effective_chat.type != "private":
 
@@ -863,36 +863,74 @@ async def daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     # ==================================================
-    # 🤖 CAPTCHA
+    # 💎 PREMIUM USER
+    # ==================================================
+    if user_data.get("premium", False):
+
+        pending_daily[user.id] = {
+            "premium": True,
+            "time": now
+        }
+
+        keyboard = InlineKeyboardMarkup([
+            [
+                InlineKeyboardButton(
+                    "💓 Claim Premium Reward",
+                    callback_data=f"claim_{user.id}"
+                )
+            ]
+        ])
+
+        await update.message.reply_text(
+            "╔═══━━━─── • ───━━━═══╗\n"
+            "      💓 𝐏ʀᴇᴍɪᴜᴍ 𝐃ᴀɪʟʏ 💓\n"
+            "╚═══━━━─── • ───━━━═══╝\n\n"
+
+            "✨ 𝐏ʀᴇᴍɪᴜᴍ 𝐔sᴇʀ 𝐃ᴇᴛᴇᴄᴛᴇᴅ 😈\n\n"
+
+            "💰 𝐘ᴏᴜ 𝐑ᴇᴄᴇɪᴠᴇᴅ ₹5000\n"
+            "⚡ Nᴏ Vᴇʀɪғɪᴄᴀᴛɪᴏɴ RᴇQᴜɪʀᴇᴅ\n"
+            "🔥 Fᴀsᴛ Pʀᴇᴍɪᴜᴍ Cʟᴀɪᴍ Sᴜᴄᴄᴇss"
+        )
+        return
+
+    # ==================================================
+    # 🤖 NORMAL USER
     # ==================================================
     a = random.randint(1, 9)
     b = random.randint(1, 9)
 
     pending_daily[user.id] = {
         "answer": a + b,
-        "time": now
+        "time": now,
+        "premium": False
     }
 
     keyboard = InlineKeyboardMarkup([
         [
             InlineKeyboardButton(
-                "🎁 Cʟᴀɪᴍ Rᴇᴡᴀʀᴅ",
+                "🎁 Cʟᴀɪᴍ Yᴏᴜʀ Rᴇᴡᴀʀᴅ",
                 callback_data=f"claim_{user.id}"
             )
         ]
     ])
 
     await update.message.reply_text(
-        f"🤖 Vᴇʀɪғɪᴄᴀᴛɪᴏɴ RᴇQᴜɪʀᴇᴅ\n\n"
-        f"❓ Sᴏʟᴠᴇ:\n"
-        f"{a} + {b} = ?\n\n"
-        f"⏳ Wᴀɪᴛ 10 Sᴇᴄ & Cʟɪᴄᴋ Bᴜᴛᴛᴏɴ",
+        "╔═══━━━─── • ───━━━═══╗\n"
+        "      🤖 𝐃ᴀɪʟʏ 𝐑ᴇᴡᴀʀᴅ 𝐕ᴇʀɪғɪᴄᴀᴛɪᴏɴ 🤖\n"
+        "╚═══━━━─── • ───━━━═══╝\n\n"
+
+        "🧠 𝐒ᴏʟᴠᴇ 𝐓ʜɪs 𝐐ᴜᴇsᴛɪᴏɴ:\n"
+        f"➤ {a} + {b} = ?\n\n"
+
+        "💡 𝐇ɪɢʜᴇʀ 𝐁ᴀʟᴀɴᴄᴇ 𝐖ᴀɴᴛ?\n"
+        "👉 Use /pay to unlock premium rewards 💓",
         reply_markup=keyboard
     )
 
 
 # ==================================================
-# 🔘 BUTTON CALLBACK
+# 🔘 CLAIM CALLBACK
 # ==================================================
 
 async def claim_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -907,28 +945,47 @@ async def claim_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     data = pending_daily[user.id]
-
-    if time.time() - data["time"] < 10:
-        await query.answer("⏳ Wᴀɪᴛ 10 Sᴇᴄ!", show_alert=True)
-        return
-
     user_data = get_user(user.id, user.first_name)
 
-    reward = 1500
+    if not data.get("premium"):
+        if time.time() - data["time"] < 10:
+            await query.answer("⏳ Wᴀɪᴛ 10 Sᴇᴄ!", show_alert=True)
+            return
+
+    if data.get("premium"):
+        reward = 5000
+    else:
+        reward = 1500
 
     user_data["money"] = user_data.get("money", 0) + reward
     user_data["last_daily"] = time.time()
 
     save_data()
-
     del pending_daily[user.id]
 
-    await query.edit_message_text(
-        "💰 Dᴀɪʟʏ Cʟᴀɪᴍ Sᴜᴄᴄᴇss!\n\n"
-        "🎁 Yᴏᴜ Rᴇᴄᴇɪᴠᴇᴅ ₹1500\n"
-        "💬 Vᴇʀɪғɪᴄᴀᴛɪᴏɴ Pᴀssᴇᴅ 😏"
-        "💓 Uᴘɢʀᴀᴅᴇ Tᴏ Pʀᴇᴍɪᴜᴍ Fᴏʀ Hɪɢʜᴇʀ Dᴀɪʟʏ Rᴇᴡᴀʀᴅ Aɴᴅ Sᴋɪᴘ Vᴇʀɪꜰɪᴄᴀᴛɪᴏɴ → /pay"
-    )
+    # ==================================================
+    # 💰 UPDATED NORMAL MESSAGE (YOUR REQUEST)
+    # ==================================================
+    if data.get("premium"):
+        msg = (
+            "💎 Premium Reward Added Successfully ⚡"
+        )
+    else:
+        msg = (
+            "╔═══━━━─── • ───━━━═══╗\n"
+            "      💰 𝐃ᴀɪʟʏ 𝐑ᴇᴡᴀʀᴅ 𝐒ᴜᴄᴄᴇss 💰\n"
+            "╚═══━━━─── • ───━━━═══╝\n\n"
+
+            "🎉 𝐂ᴏɴɢʀᴀᴛᴜʟᴀᴛɪᴏɴs!\n"
+            f"💸 𝐘ᴏᴜ 𝐑ᴇᴄᴇɪᴠᴇᴅ ₹{reward}\n\n"
+
+            "⚡ 𝐑ᴇᴡᴀʀᴅ 𝐀ᴅᴅᴇᴅ 𝐒ᴜᴄᴄᴇssғᴜʟʟʏ\n\n"
+
+            "💡 𝐖ᴀɴᴛ 𝐇ɪɢʜᴇʀ 𝐁ᴀʟᴀɴᴄᴇ?\n"
+            "👉 𝐔sᴇ /pay 𝐓ᴏ 𝐔ɴʟᴏᴄᴋ 𝐏ʀᴇᴍɪᴜᴍ 💓"
+        
+            "💓 Uᴘɢʀᴀᴅᴇ Tᴏ Pʀᴇᴍɪᴜᴍ Fᴏʀ Hɪɢʜᴇʀ Dᴀɪʟʏ Rᴇᴡᴀʀᴅ Aɴᴅ Sᴋɪᴘ Vᴇʀɪꜰɪᴄᴀᴛɪᴏɴ → /pay"
+       )
 
     
 # ------------------ BALANCE COMMAND ------------------
@@ -968,7 +1025,7 @@ async def balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(
         f"┏━━━ 💼 PROFILE ━━━\n"
-        f" {badge} Name   : {target_user.first_name}\n"
+        f"{badge} Name  : {target_user.first_name}\n"
         f"💰 Bal    : ₹{user_data.get('money',0)}\n"
         f"🏆 Rank   : {rank}\n"
         f"❤️ Status : {status_text}\n"
@@ -987,12 +1044,12 @@ async def protect(update: Update, context: ContextTypes.DEFAULT_TYPE):
         update.effective_user.id,
         update.effective_user.first_name
     )
-
+map = {
+        "1d": (800, 86400),
+        "2d"
     now = time.time()
 
-    cost_map = {
-        "1d": (800, 86400),
-        "2d": (1000, 172800),
+    cost_: (1000, 172800),
         "3d": (2000, 259200)
     }
 
@@ -2803,7 +2860,7 @@ async def send(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.args.pop(0)
 
     keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("🌸 Start Me", url=f"https://t.me/{BOT_USERNAME}")]
+        [InlineKeyboardButton("🌸 Start Me", url=f"https://t.me/iim_nikibot")]
     ])
 
     total = 0
