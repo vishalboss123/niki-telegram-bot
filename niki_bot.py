@@ -138,11 +138,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Tᴏ ᴀᴀᴏ… ᴛʜᴏᴅᴀ sᴀ ғᴜɴ ᴋᴀʀᴛᴇ ʜᴀɪɴ 😈✨\n\n"
 
         "🎮 Fᴇᴀᴛᴜʀᴇs:\n"
-        "||‣ Rᴘɢ: Sᴛᴀʙ = Kɪʟʟ, Sᴛᴇᴀʟ = Rᴏʙ, Pʀᴏᴛᴇᴄᴛ 🛡️||\n"
-        "||‣ Sᴏᴄɪᴀʟ: Kɪss, Hᴜɢ, Sʟᴀᴘ, Kɪᴄᴋ, Pᴜɴᴄʜ 💋👊||\n"
-        "||‣ Eᴄᴏɴᴏᴍʏ: Cʟᴀɪᴍ, Gɪᴠᴇ, Eᴀʀɴ & Fʟᴇx 💰||\n"
-        "||‣ Mᴜsɪᴄ: Pʟᴀʏ, Vᴘʟᴀʏ, Sᴋɪᴘ, Sᴇᴇᴋ 🎶||\n"
-        "||‣ Gᴀᴍᴇs: Dᴜᴇʟ, Dᴀʀᴛ, Mɪɴᴇs, Sʟᴏᴛ, Bᴏᴍʙ 🎲||\n\n"
+        "<tg-spoiler>‣ Rᴘɢ: Sᴛᴀʙ = Kɪʟʟ, Sᴛᴇᴀʟ = Rᴏʙ, Pʀᴏᴛᴇᴄᴛ 🛡️</tg-spoiler>\n"
+        "<tg-spoiler>‣ Sᴏᴄɪᴀʟ: Kɪss, Hᴜɢ, Sʟᴀᴘ, Kɪᴄᴋ, Pᴜɴᴄʜ 💋👊</tg-spoiler>\n"
+        "<tg-spoiler>‣ Eᴄᴏɴᴏᴍʏ: Cʟᴀɪᴍ, Gɪᴠᴇ, Eᴀʀɴ & Fʟᴇx 💰</tg-spoiler>\n"
+        "<tg-spoiler>‣ Mᴜsɪᴄ: Pʟᴀʏ, Vᴘʟᴀʏ, Sᴋɪᴘ, Sᴇᴇᴋ 🎶</tg-spoiler>\n"
+        "<tg-spoiler>‣ Gᴀᴍᴇs: Dᴜᴇʟ, Dᴀʀᴛ, Mɪɴᴇs, Sʟᴏᴛ, Bᴏᴍʙ 🎲</tg-spoiler>\n\n"
 
         "😈 Pᴏᴡᴇʀ sʜᴏᴡ ᴋᴀʀᴏ…\n"
         "Fʀɪᴇɴᴅs ᴋᴏ ʟᴏᴏᴛᴏ, Tᴏᴘ ᴘᴇ ᴀᴀᴏ, ᴀᴜʀ ɢʀᴏᴜᴘ ᴍᴇ ᴅᴏᴍɪɴᴀᴛᴇ ᴋᴀʀᴏ 👑🔥\n\n"
@@ -204,7 +204,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_photo(
         photo=bot_photo,
         caption=welcome_text,
-        parse_mode="MarkdownV2",
+        parse_mode="HTML",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
