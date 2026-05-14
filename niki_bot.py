@@ -1044,12 +1044,15 @@ async def protect(update: Update, context: ContextTypes.DEFAULT_TYPE):
         update.effective_user.id,
         update.effective_user.first_name
     )
-map = {
-        "1d": (800, 86400),
-        "2d"
+
     now = time.time()
 
-    cost_: (1000, 172800),
+    # ==================================================
+    # 💎 PROTECTION PLANS
+    # ==================================================
+    plan_map = {
+        "1d": (800, 86400),
+        "2d": (1000, 172800),
         "3d": (2000, 259200)
     }
 
