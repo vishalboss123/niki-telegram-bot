@@ -187,10 +187,22 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ]
     ]
 
+    # ================= BOT DP AUTO FETCH =================
+
+    photos = await context.bot.get_user_profile_photos(
+        context.bot.id,
+        limit=1
+    )
+
+    bot_photo = None
+
+    if photos.total_count > 0:
+        bot_photo = photos.photos[0][-1].file_id
+
     # ================= SEND PHOTO =================
 
     await update.message.reply_photo(
-        photo="https://files.catbox.moe/yourphoto.jpg",
+        photo=bot_photo,
         caption=welcome_text,
         parse_mode="MarkdownV2",
         reply_markup=InlineKeyboardMarkup(keyboard)
@@ -565,81 +577,117 @@ async def toprich(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await check_bot_active(update, context):
         return
 
-    # 💖 SIRF REAL USERS
+    # 💖 REAL USERS ONLY
     users_only = {
         uid: u for uid, u in data.items()
         if isinstance(u, dict) and "money" in u
     }
 
-    # 💖 AGAR DATA EMPTY
+    # 💖 EMPTY CHECK
     if not users_only:
 
         await update.message.reply_text(
-            "❌ No data found!"
+            "❌ Nᴏ Dᴀᴛᴀ Fᴏᴜɴᴅ!"
         )
         return
 
-    # 💖 TOP 10 SORT
+    # 💖 SORT TOP 10
     sorted_rich = sorted(
         users_only.items(),
         key=lambda x: x[1]["money"],
         reverse=True
     )[:10]
 
-    # 💖 MESSAGE START
-    msg = "🏆 Tᴏᴘ 10 Rɪᴄʜᴇꜱᴛ Uꜱᴇʀꜱ:\n\n"
+    # 💖 STYLISH HEADER
+    msg = (
+        "╔═══━━━─── • ───━━━═══╗\n"
+        "   💰 𝐓𝐎𝐏 𝐑𝐈𝐂𝐇 💰\n"
+        "╚═══━━━─── • ───━━━═══╝\n\n"
+        "💖 Rɪᴄʜᴇꜱᴛ Pʟᴀʏᴇʀꜱ Oғ Nɪᴋɪ 😈\n\n"
+    )
 
-    # 💖 LOOP USERS
+    # 💖 USERS LOOP
     for idx, (uid, user) in enumerate(sorted_rich, 1):
 
-        # 💓 PREMIUM BADGE
-        badge = get_badge(user)
+        # 💓 PREMIUM / NORMAL
+        badge = "💓" if user.get("premium", False) else "👤"
 
-        # 💖 LINE ADD
         msg += (
-            f"{idx}. {badge} "
-            f"{user.get('name','Unknown')} "
-            f"— ₹{user.get('money',0)}\n"
+            f"┏━〔 #{idx} 〕━⬣\n"
+            f"{badge} {user.get('name', 'Unknown')}\n"
+            f"💸 ₹{user.get('money', 0)}\n"
+            f"┗━━━━━━━━━━⬣\n\n"
         )
 
-    # 💖 FINAL SEND
+    # 💖 LEGEND
+    msg += (
+        "━━━━━━━━━━━━━━━━━━\n"
+        "💓 Premium User\n"
+        "👤 Normal User"
+    )
+
+    # 💖 SEND
     await update.message.reply_text(msg)
-# =================== TOP KILLERS COMMAND ===================
+
+
 # =================== TOP KILLERS COMMAND ===================
 
 async def topkill(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
+    # 💖 BOT ACTIVE CHECK
     if not await check_bot_active(update, context):
         return
 
+    # 💖 REAL USERS ONLY
     users_only = {
         uid: u for uid, u in data.items()
         if isinstance(u, dict) and "kills" in u
     }
 
+    # 💖 EMPTY CHECK
     if not users_only:
 
-        await update.message.reply_text("❌ No data found!")
+        await update.message.reply_text(
+            "❌ Nᴏ Dᴀᴛᴀ Fᴏᴜɴᴅ!"
+        )
         return
 
+    # 💖 SORT TOP 10
     sorted_kills = sorted(
         users_only.items(),
         key=lambda x: x[1]["kills"],
         reverse=True
     )[:10]
 
-    msg = "⚔ Tᴏᴘ 10 Kɪʟʟᴇʀꜱ:\n\n"
+    # 💖 STYLISH HEADER
+    msg = (
+        "╔═══━━━─── • ───━━━═══╗\n"
+        "   ⚔ 𝐓𝐎𝐏 𝐊𝐈𝐋𝐋 ⚔\n"
+        "╚═══━━━─── • ───━━━═══╝\n\n"
+        "☠️ Dᴇᴀᴅʟɪᴇꜱᴛ Pʟᴀʏᴇʀꜱ Oғ Nɪᴋɪ 🔥\n\n"
+    )
 
+    # 💖 USERS LOOP
     for idx, (uid, user) in enumerate(sorted_kills, 1):
 
-        badge = get_badge(user)
+        # 💓 PREMIUM / NORMAL
+        badge = "💓" if user.get("premium", False) else "👤"
 
         msg += (
-            f"{idx}. {badge} "
-            f"{user.get('name','Unknown')} "
-            f"— {user.get('kills',0)} Kɪʟʟꜱ\n"
+            f"┏━〔 #{idx} 〕━⬣\n"
+            f"{badge} {user.get('name', 'Unknown')}\n"
+            f"⚔ {user.get('kills', 0)} Kɪʟʟꜱ\n"
+            f"┗━━━━━━━━━━⬣\n\n"
         )
 
+    # 💖 LEGEND
+    msg += (
+        "━━━━━━━━━━━━━━━━━━\n"
+        "💓 Premium User\n"
+        "👤 Normal User"
+    )
+
+    # 💖 SEND
     await update.message.reply_text(msg)
 
 
@@ -901,7 +949,7 @@ async def balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(
         f"┏━━━ 💼 PROFILE ━━━\n"
-        f"👤 Name   : {badge} {target_user.first_name}\n"
+        f" {badge} Name   : {target_user.first_name}\n"
         f"💰 Bal    : ₹{user_data.get('money',0)}\n"
         f"🏆 Rank   : {rank}\n"
         f"❤️ Status : {status_text}\n"
