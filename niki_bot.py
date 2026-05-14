@@ -122,36 +122,41 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # ================= WELCOME =================
 
-        welcome_text = (
-            f"✨ Hᴇʏʏʏ {user.first_name}… ʏᴇs ʏᴏᴜ ᴄᴜᴛɪᴇ 😚✨\n\n"
+    welcome_text = (
+        f"✨ Hᴇʏʏʏ {user.first_name}… ʏᴇs ʏᴏᴜ ᴄᴜᴛɪᴇ 😚✨\n\n"
 
-            "<blockquote>"
-            "❝ I’ᴍ Nɪᴋɪ — ʏᴏᴜʀ ᴄʜᴀᴏs ᴘᴀʀᴛɴᴇʀ & ғᴜɴ ᴅᴇᴀʟᴇʀ 💃🔥\n"
-            "❝ Yᴏᴜʀ ᴀʟʟ-ɪɴ-ᴏɴᴇ ʙᴏᴛ 🤖💎\n"
-            "❝ Mᴜsɪᴄ • Gᴀᴍᴇs • Aɪ Cʜᴀᴛ • Pʀᴏᴛᴇᴄᴛɪᴏɴ 🛡️\n"
-            "❝ Wʜᴇʀᴇ ᴠɪʙᴇs ɢᴇᴛ ᴡɪʟᴅ ᴀɴᴅ ᴄʜᴀᴛs ɢᴇᴛ sᴘɪᴄʏ 🌶️😉"
-            "</blockquote>\n\n"
+        "<blockquote>"
+        "❝ I’ᴍ Nɪᴋɪ — ʏᴏᴜʀ ᴄʜᴀᴏs ᴘᴀʀᴛɴᴇʀ & ғᴜɴ ᴅᴇᴀʟᴇʀ 💃🔥\n"
+        "❝ Yᴏᴜʀ ᴀʟʟ-ɪɴ-ᴏɴᴇ ʙᴏᴛ 🤖💎\n"
+        "❝ Mᴜsɪᴄ • Gᴀᴍᴇs • Aɪ Cʜᴀᴛ • Pʀᴏᴛᴇᴄᴛɪᴏɴ 🛡️\n"
+        "❝ Wʜᴇʀᴇ ᴠɪʙᴇs ɢᴇᴛ ᴡɪʟᴅ ᴀɴᴅ ᴄʜᴀᴛs ɢᴇᴛ sᴘɪᴄʏ 🌶️😉"
+        "</blockquote>\n\n"
 
-            "✨🧸 <b>Nɪᴋɪ — Tʜᴇ Cᴜᴛᴇ Gɪʀʟ Bᴀʙʏ!</b> 🌸\n\n"
+        "✨🧸 <b>Nɪᴋɪ — Tʜᴇ Cᴜᴛᴇ Gɪʀʟ Bᴀʙʏ!</b> 🌸\n\n"
 
-            "👀 <b>Sᴛᴏᴘ Sᴄʀᴏʟʟɪɴɢ…</b>\n"
-            "Sᴀᴄʜ ʙᴀᴛᴀᴏ… Gʀᴏᴜᴘ ᴍᴇ ʙᴏʀᴇ ʜᴏ ʀᴀʜᴇ ʜᴏ ɴᴀ? 😏\n\n"
+        "<blockquote>"
+        "❝ 👀 <b>Sᴛᴏᴘ Sᴄʀᴏʟʟɪɴɢ…</b>\n"
+        "❝ Sᴀᴄʜ ʙᴀᴛᴀᴏ… Gʀᴏᴜᴘ ᴍᴇ ʙᴏʀᴇ ʜᴏ ʀᴀʜᴇ ʜᴏ ɴᴀ? 😏\n\n"
+        "<blockquote>"
 
-            "Tᴏ ᴀᴀᴏ… ᴛʜᴏᴅᴀ sᴀ ғᴜɴ ᴋᴀʀᴛᴇ ʜᴀɪɴ 😈✨\n\n"
+        
+        "❝Tᴏ ᴀᴀᴏ… ᴛʜᴏᴅᴀ sᴀ ғᴜɴ ᴋᴀʀᴛᴇ ʜᴀɪɴ 😈✨\n\n"
+        
 
-            "🎮 <b>Fᴇᴀᴛᴜʀᴇs:</b>\n"
-            "<tg-spoiler>‣ Rᴘɢ: Sᴛᴀʙ = Kɪʟʟ, Sᴛᴇᴀʟ = Rᴏʙ, Pʀᴏᴛᴇᴄᴛ 🛡️</tg-spoiler>\n"
-            "<tg-spoiler>‣ Sᴏᴄɪᴀʟ: Kɪss, Hᴜɢ, Sʟᴀᴘ, Kɪᴄᴋ, Pᴜɴᴄʜ 💋👊</tg-spoiler>\n"
-            "<tg-spoiler>‣ Eᴄᴏɴᴏᴍʏ: Cʟᴀɪᴍ, Gɪᴠᴇ, Eᴀʀɴ & Fʟᴇx 💰</tg-spoiler>\n"
-            "<tg-spoiler>‣ Mᴜsɪᴄ: Pʟᴀʏ, Vᴘʟᴀʏ, Sᴋɪᴘ, Sᴇᴇᴋ 🎶</tg-spoiler>\n"
-            "<tg-spoiler>‣ Gᴀᴍᴇs: Dᴜᴇʟ, Dᴀʀᴛ, Mɪɴᴇs, Sʟᴏᴛ, Bᴏᴍʙ 🎲</tg-spoiler>\n\n"
+        
+        "🎮 <b>Fᴇᴀᴛᴜʀᴇs:</b>\n"
+        "<tg-spoiler>‣ Rᴘɢ: Sᴛᴀʙ = Kɪʟʟ, Sᴛᴇᴀʟ = Rᴏʙ, Pʀᴏᴛᴇᴄᴛ 🛡️</tg-spoiler>\n"
+        "<tg-spoiler>‣ Sᴏᴄɪᴀʟ: Kɪss, Hᴜɢ, Sʟᴀᴘ, Kɪᴄᴋ, Pᴜɴᴄʜ 💋👊</tg-spoiler>\n"
+        "<tg-spoiler>‣ Eᴄᴏɴᴏᴍʏ: Cʟᴀɪᴍ, Gɪᴠᴇ, Eᴀʀɴ & Fʟᴇx 💰</tg-spoiler>\n"
+        "<tg-spoiler>‣ Mᴜsɪᴄ: Pʟᴀʏ, Vᴘʟᴀʏ, Sᴋɪᴘ, Sᴇᴇᴋ 🎶</tg-spoiler>\n"
+        "<tg-spoiler>‣ Gᴀᴍᴇs: Dᴜᴇʟ, Dᴀʀᴛ, Mɪɴᴇs, Sʟᴏᴛ, Bᴏᴍʙ 🎲</tg-spoiler>\n\n"
 
-            "😈 <b>Pᴏᴡᴇʀ sʜᴏᴡ ᴋᴀʀᴏ…</b>\n"
-            "Fʀɪᴇɴᴅs ᴋᴏ ʟᴏᴏᴛᴏ, Tᴏᴘ ᴘᴇ ᴀᴀᴏ, ᴀᴜʀ ɢʀᴏᴜᴘ ᴍᴇ ᴅᴏᴍɪɴᴀᴛᴇ ᴋᴀʀᴏ 👑🔥\n\n"
+        "😈 <b>Pᴏᴡᴇʀ sʜᴏᴡ ᴋᴀʀᴏ…</b>\n"
+        "Fʀɪᴇɴᴅs ᴋᴏ ʟᴏᴏᴛᴏ, Tᴏᴘ ᴘᴇ ᴀᴀᴏ, ᴀᴜʀ ɢʀᴏᴜᴘ ᴍᴇ ᴅᴏᴍɪɴᴀᴛᴇ ᴋᴀʀᴏ 👑🔥\n\n"
 
-            "🌸 <b>Wᴀʀɴɪɴɢ:</b>\n"
-            "Eᴋ ʙᴀᴀʀ sᴛᴀʀᴛ ᴋɪʏᴀ… ᴛᴏ ᴀᴅᴅɪᴄᴛ ʜᴏ ᴊᴀᴏɢᴇ 😌💖"
-        )
+        "🌸 <b>Wᴀʀɴɪɴɢ:</b>\n"
+        "Eᴋ ʙᴀᴀʀ sᴛᴀʀᴛ ᴋɪʏᴀ… ᴛᴏ ᴀᴅᴅɪᴄᴛ ʜᴏ ᴊᴀᴏɢᴇ 😌💖"
+    )
 
     # ================= BUTTONS =================
 
