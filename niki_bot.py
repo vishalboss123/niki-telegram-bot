@@ -563,27 +563,23 @@ Uꜱᴇ Nɪᴋɪ’ꜱ Eᴄᴏɴᴏᴍʏ Sʏꜱᴛᴇᴍ Tᴏ Eᴀʀɴ, Mᴀɴ�
 
         await query.edit_message_caption(
             caption=welcome_text,
-            parse_mode="MarkdownV2",
+            parse_mode="HTML",
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
 
     
 # =================== TOP RICHEST COMMAND ===================
-# =================== TOP RICHEST COMMAND ===================
 
 async def toprich(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    # 💖 BOT ACTIVE CHECK
     if not await check_bot_active(update, context):
         return
 
-    # 💖 REAL USERS ONLY
     users_only = {
         uid: u for uid, u in data.items()
         if isinstance(u, dict) and "money" in u
     }
 
-    # 💖 EMPTY CHECK
     if not users_only:
 
         await update.message.reply_text(
@@ -591,42 +587,35 @@ async def toprich(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    # 💖 SORT TOP 10
     sorted_rich = sorted(
         users_only.items(),
         key=lambda x: x[1]["money"],
         reverse=True
     )[:10]
 
-    # 💖 STYLISH HEADER
     msg = (
         "╔═══━━━─── • ───━━━═══╗\n"
-        "   💰 𝐓𝐎𝐏 𝐑𝐈𝐂𝐇 💰\n"
+        "     💰 𝐓𝐎𝐏 𝐑𝐈𝐂𝐇 💰\n"
         "╚═══━━━─── • ───━━━═══╝\n\n"
-        "💖 Rɪᴄʜᴇꜱᴛ Pʟᴀʏᴇʀꜱ Oғ Nɪᴋɪ 😈\n\n"
     )
 
-    # 💖 USERS LOOP
     for idx, (uid, user) in enumerate(sorted_rich, 1):
 
-        # 💓 PREMIUM / NORMAL
         badge = "💓" if user.get("premium", False) else "👤"
 
         msg += (
-            f"┏━〔 #{idx} 〕━⬣\n"
-            f"{badge} {user.get('name', 'Unknown')}\n"
-            f"💸 ₹{user.get('money', 0)}\n"
-            f"┗━━━━━━━━━━⬣\n\n"
+            f"{idx}. {badge} "
+            f"{user.get('name', 'Unknown')} "
+            f"➜ ₹{user.get('money', 0)}\n"
         )
 
-    # 💖 LEGEND
     msg += (
-        "━━━━━━━━━━━━━━━━━━\n"
+        "\n━━━━━━━━━━━━━━━━━━\n"
+        "💖 Rɪᴄʜᴇꜱᴛ Pʟᴀʏᴇʀꜱ Oғ Nɪᴋɪ 😈\n\n"
         "💓 Premium User\n"
         "👤 Normal User"
     )
 
-    # 💖 SEND
     await update.message.reply_text(msg)
 
 
@@ -634,17 +623,14 @@ async def toprich(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def topkill(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    # 💖 BOT ACTIVE CHECK
     if not await check_bot_active(update, context):
         return
 
-    # 💖 REAL USERS ONLY
     users_only = {
         uid: u for uid, u in data.items()
         if isinstance(u, dict) and "kills" in u
     }
 
-    # 💖 EMPTY CHECK
     if not users_only:
 
         await update.message.reply_text(
@@ -652,44 +638,36 @@ async def topkill(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    # 💖 SORT TOP 10
     sorted_kills = sorted(
         users_only.items(),
         key=lambda x: x[1]["kills"],
         reverse=True
     )[:10]
 
-    # 💖 STYLISH HEADER
     msg = (
         "╔═══━━━─── • ───━━━═══╗\n"
-        "   ⚔ 𝐓𝐎𝐏 𝐊𝐈𝐋𝐋 ⚔\n"
+        "    ⚔ 𝐓𝐎𝐏 𝐊𝐈𝐋𝐋 ⚔\n"
         "╚═══━━━─── • ───━━━═══╝\n\n"
-        "☠️ Dᴇᴀᴅʟɪᴇꜱᴛ Pʟᴀʏᴇʀꜱ Oғ Nɪᴋɪ 🔥\n\n"
     )
 
-    # 💖 USERS LOOP
     for idx, (uid, user) in enumerate(sorted_kills, 1):
 
-        # 💓 PREMIUM / NORMAL
         badge = "💓" if user.get("premium", False) else "👤"
 
         msg += (
-            f"┏━〔 #{idx} 〕━⬣\n"
-            f"{badge} {user.get('name', 'Unknown')}\n"
-            f"⚔ {user.get('kills', 0)} Kɪʟʟꜱ\n"
-            f"┗━━━━━━━━━━⬣\n\n"
+            f"{idx}. {badge} "
+            f"{user.get('name', 'Unknown')} "
+            f"➜ {user.get('kills', 0)} Kɪʟʟꜱ\n"
         )
 
-    # 💖 LEGEND
     msg += (
-        "━━━━━━━━━━━━━━━━━━\n"
+        "\n━━━━━━━━━━━━━━━━━━\n"
+        "☠️ Dᴇᴀᴅʟɪᴇꜱᴛ Pʟᴀʏᴇʀꜱ Oғ Nɪᴋɪ 🔥\n\n"
         "💓 Premium User\n"
         "👤 Normal User"
     )
 
-    # 💖 SEND
     await update.message.reply_text(msg)
-
 
 # ===================== PART 2 FULL ECONOMY BOT =====================
 # ------------------ GLOBAL DATA ------------------
