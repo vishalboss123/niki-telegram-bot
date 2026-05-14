@@ -9021,7 +9021,641 @@ async def removepremium(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         
 
-     
+# =====================================================
+# 🌸 AUTO WELCOME SYSTEM
+# =====================================================
+
+from telegram import (
+    Update,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup
+)
+from telegram.ext import ContextTypes
+
+# =====================================================
+# 💌 AUTO DM MESSAGE
+# =====================================================
+
+async def send_auto_dm(context, user_id):
+
+    try:
+        await context.bot.send_message(
+            chat_id=user_id,
+            text=(
+                "╭━━━〔 💖 𝗡𝗜𝗞𝗜 𝗕𝗢𝗧 💖 〕━━━╮\n\n"
+                "✨ Hᴇʏʏ Cᴜᴛɪᴇ 😚\n\n"
+                "💞 Tʜᴀɴᴋ Yᴏᴜ Fᴏʀ Jᴏɪɴɪɴɢ\n"
+                "🌸 Nɪᴋɪ Bᴏᴛ Fᴀᴍɪʟʏ 🌸\n\n"
+                "🎮 Gᴀᴍᴇs • 💰 Eᴄᴏɴᴏᴍʏ • 🎵 Mᴜsɪᴄ\n"
+                "💖 Sᴏᴄɪᴀʟ • 🤖 Aɪ • ⚡ Fᴜɴ\n\n"
+                "🚀 Cʟɪᴄᴋ /start Aɴᴅ Eɴᴊᴏʏ\n\n"
+                "╰━━━〔 👑 𝗡𝗜𝗞𝗜 〕━━━╯"
+            )
+        )
+    except:
+        pass
+
+
+# =====================================================
+# 💖 JOIN REQUEST WELCOME
+# =====================================================
+
+async def join_request_welcome(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
+
+    request = update.chat_join_request
+
+    user = request.from_user
+    chat = request.chat
+
+    # =====================================================
+    # ✅ APPROVE REQUEST
+    # =====================================================
+
+    await request.approve()
+
+    # =====================================================
+    # 🖼️ BOT DP FETCH
+    # =====================================================
+
+    photos = await context.bot.get_user_profile_photos(
+        context.bot.id,
+        limit=1
+    )
+
+    bot_photo = None
+
+    if photos.total_count > 0:
+        bot_photo = photos.photos[0][-1].file_id
+
+    # =====================================================
+    # 💌 WELCOME TEXT
+    # =====================================================
+
+    text = (
+        "╔═══━━━─── • ───━━━═══╗\n"
+        "       🌸 𝗪𝗘𝗟𝗖𝗢𝗠𝗘 🌸\n"
+        "╚═══━━━─── • ───━━━═══╝\n\n"
+
+        f"💖 Hᴇʏʏ [{user.first_name}](tg://user?id={user.id}) 😚\n\n"
+
+        "╭──────────────╮\n"
+        f"👤 Nᴀᴍᴇ : {user.full_name}\n"
+        f"🆔 ID : `{user.id}`\n"
+        f"🏡 Gʀᴏᴜᴘ : {chat.title}\n"
+        "╰──────────────╯\n\n"
+
+        "✨ Yᴏᴜʀ Jᴏɪɴ Rᴇǫᴜᴇsᴛ Hᴀs\n"
+        "💖 Bᴇᴇɴ Aᴄᴄᴇᴘᴛᴇᴅ 💖\n\n"
+
+        "╭──────────────╮\n"
+        "🎮 Pʟᴀʏ Aᴡᴇsᴏᴍᴇ Gᴀᴍᴇs\n"
+        "💰 Eᴀʀɴ Vɪʀᴛᴜᴀʟ Mᴏɴᴇʏ\n"
+        "🎵 Eɴᴊᴏʏ Mᴜsɪᴄ\n"
+        "💞 Mᴀᴋᴇ Fʀɪᴇɴᴅs\n"
+        "⚡ Hᴀᴠᴇ Uɴʟɪᴍɪᴛᴇᴅ Fᴜɴ\n"
+        "╰──────────────╯\n\n"
+
+        "🌸 Nɪᴋɪ Fᴀᴍɪʟʏ Mᴇ\n"
+        "Aᴀᴘᴋᴀ Sᴡᴀɢᴀᴛ Hᴀɪ 😈✨"
+    )
+
+    # =====================================================
+    # 🔘 BUTTONS
+    # =====================================================
+
+    keyboard = [
+
+        [
+            InlineKeyboardButton(
+                "🚀 𝐒𝐓𝐀𝐑𝐓 𝐍𝐈𝐊𝐈 💖",
+                url=f"https://t.me/{context.bot.username}?start=start"
+            )
+        ],
+
+        [
+            InlineKeyboardButton(
+                "👑 𝐕ɪsʜᴀʟ ✘ 𝐃ᴇᴠɪʟ ⚡",
+                url="https://t.me/YTT_BISHAL"
+            )
+        ]
+    ]
+
+    # =====================================================
+    # 📸 SEND PHOTO
+    # =====================================================
+
+    await context.bot.send_photo(
+        chat_id=chat.id,
+        photo=bot_photo,
+        caption=text,
+        parse_mode="Markdown",
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+
+    # =====================================================
+    # 💌 AUTO DM
+    # =====================================================
+
+    await send_auto_dm(
+        context,
+        user.id
+    )
+
+
+# =====================================================
+# 🎉 NORMAL MEMBER WELCOME
+# =====================================================
+
+async def welcome_new_member(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
+
+    chat = update.effective_chat
+
+    # =====================================================
+    # 🖼️ BOT DP FETCH
+    # =====================================================
+
+    photos = await context.bot.get_user_profile_photos(
+        context.bot.id,
+        limit=1
+    )
+
+    bot_photo = None
+
+    if photos.total_count > 0:
+        bot_photo = photos.photos[0][-1].file_id
+
+    # =====================================================
+    # 👥 LOOP NEW USERS
+    # =====================================================
+
+    for user in update.message.new_chat_members:
+
+        if user.id == context.bot.id:
+            continue
+
+        text = (
+            "╔═══━━━─── • ───━━━═══╗\n"
+            "      🎉 𝗡𝗘𝗪 𝗠𝗘𝗠𝗕𝗘𝗥 🎉\n"
+            "╚═══━━━─── • ───━━━═══╝\n\n"
+
+            f"💖 Wᴇʟᴄᴏᴍᴇ [{user.first_name}](tg://user?id={user.id}) 😚\n\n"
+
+            "╭──────────────╮\n"
+            f"👤 Nᴀᴍᴇ : {user.full_name}\n"
+            f"🆔 ID : `{user.id}`\n"
+            f"🏡 Gʀᴏᴜᴘ : {chat.title}\n"
+            "╰──────────────╯\n\n"
+
+            "✨ Nɪᴋɪ Bᴏᴛ Fᴀᴍɪʟʏ\n"
+            "Mᴇ Aᴀᴘᴋᴀ Sᴡᴀɢᴀᴛ Hᴀɪ 💞\n\n"
+
+            "╭──────────────╮\n"
+            "🎮 Pʟᴀʏ Gᴀᴍᴇs\n"
+            "💰 Eᴀʀɴ Cᴏɪɴs\n"
+            "🎵 Lɪsᴛᴇɴ Mᴜsɪᴄ\n"
+            "💖 Eɴᴊᴏʏ Fᴜɴ Cʜᴀᴛs\n"
+            "⚡ Bᴇᴄᴏᴍᴇ Gʀᴏᴜᴘ Kɪɴɢ\n"
+            "╰──────────────╯\n\n"
+
+            "😈 Sᴛᴀʀᴛ Yᴏᴜʀ\n"
+            "Nɪᴋɪ Jᴏᴜʀɴᴇʏ Nᴏᴡ ✨"
+        )
+
+        keyboard = [
+
+            [
+                InlineKeyboardButton(
+                    "🚀 𝐒𝐓𝐀𝐑𝐓 𝐁𝐎𝐓 💖",
+                    url=f"https://t.me/{context.bot.username}?start=start"
+                )
+            ],
+
+            [
+                InlineKeyboardButton(
+                    "👑 𝐕ɪsʜᴀʟ ✘ 𝐃ᴇᴠɪʟ ⚡",
+                    url="https://t.me/YTT_BISHAL"
+                )
+            ]
+        ]
+
+        # =====================================================
+        # 📸 SEND WELCOME
+        # =====================================================
+
+        await context.bot.send_photo(
+            chat_id=chat.id,
+            photo=bot_photo,
+            caption=text,
+            parse_mode="Markdown",
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+
+        # =====================================================
+        # 💌 SEND DM
+        # =====================================================
+
+        await send_auto_dm(
+            context,
+            user.id
+    )     
+
+
+# =========================================================
+# 🔥 FREE MULTI VOICE SYSTEM (NO API / NO BILLING)
+# 👧 voice1-5 = Girl Voices
+# 👦 voice6-10 = Boy Voices
+# 🌍 Hindi + English Supported
+# =========================================================
+
+from gtts import gTTS
+from telegram import Update
+from telegram.ext import (
+    ContextTypes,
+    CommandHandler
+)
+
+import os
+import random
+import re
+
+# =========================================================
+# 💎 PREMIUM CHECK
+# =========================================================
+
+def is_premium(user_id):
+
+    user = data.get(str(user_id), {})
+
+    return user.get("premium", False)
+
+# =========================================================
+# 🌍 AUTO LANGUAGE DETECT
+# =========================================================
+
+def detect_lang(text):
+
+    hindi_pattern = re.compile(r'[\u0900-\u097F]')
+
+    if hindi_pattern.search(text):
+        return "hi"
+
+    return "en"
+
+# =========================================================
+# 👧 GIRL STYLES
+# =========================================================
+
+girl_styles = {
+
+    1: {"tld": "com.au"},
+    2: {"tld": "co.uk"},
+    3: {"tld": "us"},
+    4: {"tld": "ca"},
+    5: {"tld": "co.in"}
+}
+
+# =========================================================
+# 👦 BOY STYLES
+# =========================================================
+
+boy_styles = {
+
+    6: {"tld": "com"},
+    7: {"tld": "ie"},
+    8: {"tld": "co.za"},
+    9: {"tld": "com.ng"},
+    10: {"tld": "com.pk"}
+}
+
+# =========================================================
+# 🌸 NORMAL VOICE
+# =========================================================
+
+async def voice(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not await check_bot_active(update, context):
+        return
+
+    if not context.args:
+
+        txt = (
+            "╔═══━━━─── • ───━━━═══╗\n"
+            "      🎤 𝐍ɪᴋɪ 𝐀ɪ 𝐕ᴏɪᴄᴇ 🎤\n"
+            "╚═══━━━─── • ───━━━═══╝\n\n"
+
+            "💖 <b>𝐖ᴇʟᴄᴏᴍᴇ 𝐓ᴏ 𝐍ɪᴋɪ 𝐕ᴏɪᴄᴇ 𝐖ᴏʀʟᴅ</b>\n"
+            "━━━━━━━━━━━━━━━━━━━\n\n"
+
+            "🌸 <b>𝐅ʀᴇᴇ 𝐔sᴇʀ 𝐌ᴏᴅᴇ</b>\n"
+            "╭━━━━━━━━━━━━━━━╮\n"
+            "➜ <code>/voice hello everyone</code>\n"
+            "➜ <code>/voice नमस्ते दोस्तों</code>\n"
+            "╰━━━━━━━━━━━━━━━╯\n\n"
+
+            "💎 <b>𝐏ʀᴇᴍɪᴜᴍ 𝐕ᴏɪᴄᴇ 𝐌ᴏᴅᴇ</b>\n"
+            "╔════════════════╗\n"
+            "👧 <code>/voice1</code> → <code>/voice5</code>\n"
+            "💋 Cute Girl AI Voices\n\n"
+
+            "👦 <code>/voice6</code> → <code>/voice10</code>\n"
+            "🔥 Stylish Boy AI Voices\n"
+            "╚════════════════╝\n\n"
+
+            "🎀 <b>𝐐ᴜɪᴄᴋ 𝐕ᴏɪᴄᴇ 𝐌ᴏᴅᴇ</b>\n"
+            "┏━━━━━━━━━━━━━━━┓\n"
+            "👧 <code>/voicef your text</code>\n"
+            "👦 <code>/voicem your text</code>\n"
+            "┗━━━━━━━━━━━━━━━┛\n\n"
+
+            "✨ <b>𝐏ʀᴇᴍɪᴜᴍ 𝐅ᴇᴀᴛᴜʀᴇs</b>\n"
+            "━━━━━━━━━━━━━━━━━━━\n"
+
+            "💎 10 Premium AI Voices\n"
+            "🎭 Smart Voice Style System\n"
+            "🌍 Hindi + English Support\n"
+            "⚡ Ultra Fast Voice Generate\n"
+            "🎤 Smooth Human Like Audio\n"
+            "💞 Cute Romantic Girl Voices\n"
+            "😈 Deep Stylish Boy Voices\n"
+            "🧠 Smart Accent Detection\n"
+            "🔥 VIP Premium Effects\n"
+            "🎧 Crystal Clear Audio Quality\n"
+            "📢 Telegram HD Voice Support\n"
+            "💫 Auto AI Voice Styling\n"
+            "🎶 Smooth Natural Speaking\n"
+            "🚀 Premium Access Only Modes\n\n"
+
+            "╔════════════════╗\n"
+            " 💸 <b>𝐔ɴʟᴏᴄᴋ 𝐏ʀᴇᴍɪᴜᴍ 𝐍ᴏᴡ</b>\n"
+            "╚════════════════╝\n\n"
+
+            "✨ 𝐁ᴇᴄᴏᴍᴇ 𝐕ɪᴘ & 𝐔sᴇ 𝐍ɪᴋɪ'𝐬\n"
+            "𝐌ᴏsᴛ 𝐏ᴏᴡᴇʀғᴜʟ 𝐀ɪ 𝐕ᴏɪᴄᴇ𝐬 😈💖\n\n"
+
+            "💸 Buy Premium → /pay"
+        )
+
+        await update.message.reply_text(
+            txt,
+            parse_mode="HTML"
+        )
+        return
+
+    text = " ".join(context.args)
+
+    await make_voice(
+        update,
+        text,
+        "co.in"
+    )
+
+# =========================================================
+# 👧 RANDOM FEMALE
+# =========================================================
+
+async def voicef(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    user = update.effective_user
+
+    if not is_premium(user.id):
+
+        txt = (
+            "╔═══ 💎 𝐏ʀᴇᴍɪᴜᴍ 𝐅ᴇᴍᴀʟᴇ 𝐕ᴏɪᴄᴇ 💎 ═══╗\n\n"
+
+            "👧 <b>𝐅ᴇᴍᴀʟᴇ 𝐀ɪ 𝐕ᴏɪᴄᴇs Locked</b>\n"
+            "━━━━━━━━━━━━━━━━━━━\n\n"
+
+            "💖 Premium Users Can Unlock:\n\n"
+
+            "🎤 Cute Girl AI Voices\n"
+            "💋 Romantic Soft Speaking\n"
+            "🌍 Hindi + English Voices\n"
+            "⚡ Ultra Fast Voice System\n"
+            "🎶 Smooth Audio Effects\n"
+            "🔥 VIP Voice Effects\n"
+            "🎧 HD Telegram Audio\n"
+            "💞 Stylish Female Voice Modes\n"
+            "🧠 Smart Accent AI\n"
+            "💎 Exclusive Premium Voices\n\n"
+
+            "👧 Commands:\n"
+            "<code>/voice1</code> → <code>/voice5</code>\n"
+            "<code>/voicef your text</code>\n\n"
+
+            "💸 Unlock Premium → /pay"
+        )
+
+        await update.message.reply_text(
+            txt,
+            parse_mode="HTML"
+        )
+        return
+
+    if not context.args:
+
+        await update.message.reply_text(
+            "👧 <b>𝐅ᴇᴍᴀʟᴇ 𝐕ᴏɪᴄᴇ 𝐌ᴏᴅᴇ</b>\n\n"
+            "✨ Example:\n"
+            "<code>/voicef hello cutie</code>\n\n"
+            "💖 Random Cute Girl Voice Will Be Used",
+            parse_mode="HTML"
+        )
+        return
+
+    style = random.choice(list(girl_styles.values()))
+
+    text = " ".join(context.args)
+
+    await make_voice(
+        update,
+        text,
+        style["tld"]
+    )
+
+# =========================================================
+# 👦 RANDOM MALE
+# =========================================================
+
+async def voicem(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    user = update.effective_user
+
+    if not is_premium(user.id):
+
+        txt = (
+            "╔═══ 💎 𝐏ʀᴇᴍɪᴜᴍ 𝐌ᴀʟᴇ 𝐕ᴏɪᴄᴇ 💎 ═══╗\n\n"
+
+            "👦 <b>𝐌ᴀʟᴇ 𝐀ɪ 𝐕ᴏɪᴄᴇs Locked</b>\n"
+            "━━━━━━━━━━━━━━━━━━━\n\n"
+
+            "🔥 Premium Users Can Unlock:\n\n"
+
+            "🎤 Deep Boy AI Voices\n"
+            "😈 Stylish Male Speaking\n"
+            "🌍 Hindi + English Voices\n"
+            "⚡ Ultra Fast Voice System\n"
+            "🎶 Smooth Audio Effects\n"
+            "🔥 VIP Voice Effects\n"
+            "🎧 HD Telegram Audio\n"
+            "👑 Powerful Male Voice Modes\n"
+            "🧠 Smart Accent AI\n"
+            "💎 Exclusive Premium Voices\n\n"
+
+            "👦 Commands:\n"
+            "<code>/voice6</code> → <code>/voice10</code>\n"
+            "<code>/voicem your text</code>\n\n"
+
+            "💸 Unlock Premium → /pay"
+        )
+
+        await update.message.reply_text(
+            txt,
+            parse_mode="HTML"
+        )
+        return
+
+    if not context.args:
+
+        await update.message.reply_text(
+            "👦 <b>𝐌ᴀʟᴇ 𝐕ᴏɪᴄᴇ 𝐌ᴏᴅᴇ</b>\n\n"
+            "✨ Example:\n"
+            "<code>/voicem hello bro</code>\n\n"
+            "🔥 Random Stylish Boy Voice Will Be Used",
+            parse_mode="HTML"
+        )
+        return
+
+    style = random.choice(list(boy_styles.values()))
+
+    text = " ".join(context.args)
+
+    await make_voice(
+        update,
+        text,
+        style["tld"]
+    )
+
+# =========================================================
+# 💎 PREMIUM VOICE1-10
+# =========================================================
+
+async def premium_voice(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    user = update.effective_user
+
+    cmd = (
+        update.message.text
+        .split()[0]
+        .replace("/", "")
+    )
+
+    if not is_premium(user.id):
+
+        txt = (
+            "╔═══ 💎 𝐏ʀᴇᴍɪᴜᴍ 𝐕ᴏɪᴄᴇ 💎 ═══╗\n\n"
+
+            "🔒 <b>Premium Voice Locked</b>\n"
+            "━━━━━━━━━━━━━━━━━━━\n\n"
+
+            "👧 <code>/voice1</code> → <code>/voice5</code>\n"
+            "💞 Cute Girl AI Voices\n\n"
+
+            "👦 <code>/voice6</code> → <code>/voice10</code>\n"
+            "🔥 Stylish Boy AI Voices\n\n"
+
+            "✨ Premium Features:\n\n"
+
+            "🎤 Human Like AI Voice\n"
+            "🌍 Hindi + English Support\n"
+            "⚡ Ultra Fast Generation\n"
+            "🎧 HD Telegram Audio\n"
+            "💎 VIP Voice Effects\n"
+            "🧠 Smart Accent Detection\n"
+            "💋 Romantic Female Voice\n"
+            "😈 Deep Male Voice\n"
+            "🚀 Exclusive Premium Access\n"
+            "🎶 Smooth AI Audio System\n\n"
+
+            "💸 Buy Premium → /pay"
+        )
+
+        await update.message.reply_text(
+            txt,
+            parse_mode="HTML"
+        )
+        return
+
+    if not context.args:
+
+        await update.message.reply_text(
+            f"🎤 <b>{cmd.upper()} 𝐕ᴏɪᴄᴇ 𝐌ᴏᴅᴇ</b>\n\n"
+            f"✨ Example:\n"
+            f"<code>/{cmd} hello everyone</code>\n\n"
+            f"💖 Premium AI Voice Ready",
+            parse_mode="HTML"
+        )
+        return
+
+    num = int(cmd.replace("voice", ""))
+
+    if num <= 5:
+        style = girl_styles[num]
+    else:
+        style = boy_styles[num]
+
+    text = " ".join(context.args)
+
+    await make_voice(
+        update,
+        text,
+        style["tld"]
+    )
+
+# =========================================================
+# 🎤 MAKE VOICE
+# =========================================================
+
+async def make_voice(update, text, tld):
+
+    filename = f"voice_{random.randint(1000,9999)}.mp3"
+
+    lang = detect_lang(text)
+
+    tts = gTTS(
+        text=text,
+        lang=lang,
+        tld=tld
+    )
+
+    tts.save(filename)
+
+    lang_name = "Hindi 🇮🇳" if lang == "hi" else "English 🇺🇸"
+
+    caption = (
+        "╔═══━━━─── • ───━━━═══╗\n"
+        "       🎤 𝐍ɪᴋɪ 𝐀ɪ 𝐕ᴏɪᴄᴇ 🎤\n"
+        "╚═══━━━─── • ───━━━═══╝\n\n"
+
+        f"💬 <b>Text:</b> {text}\n"
+        f"🌍 <b>Language:</b> {lang_name}\n"
+        f"🎭 <b>Voice Style:</b> {tld}\n\n"
+
+        "✨ 𝐕ᴏɪᴄᴇ 𝐆ᴇɴᴇʀᴀᴛᴇᴅ 𝐒ᴜᴄᴄᴇssғᴜʟʟʏ 💖"
+    )
+
+    await update.message.reply_voice(
+        voice=open(filename, "rb"),
+        caption=caption,
+        parse_mode="HTML"
+    )
+
+    os.remove(filename)    
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
@@ -9065,6 +9699,12 @@ def main():
     # ================= 🔥 TRACK SYSTEM (FIRST - MUST) =================
     app.add_handler(MessageHandler(filters.ALL, track_user), group=-1)
     app.add_handler(ChatMemberHandler(track_join, ChatMemberHandler.CHAT_MEMBER), group=-1)
+    app.add_handler(ChatJoinRequestHandler(join_request_welcome))
+
+    app.add_handler(MessageHandler(
+        filters.StatusUpdate.NEW_CHAT_MEMBERS,
+        welcome_new_member
+    ))
      
     # ---------------- Command Handlers ----------------
     app.add_handler(CommandHandler("start", start))
@@ -9184,6 +9824,21 @@ def main():
     app.add_handler(CommandHandler("pay", pay))
     app.add_handler(CommandHandler("addpremium", addpremium))
     app.add_handler(CommandHandler("removepremium", removepremium))
+    app.add_handler(CommandHandler("voice", voice))
+    app.add_handler(CommandHandler("voicef", voicef))
+    app.add_handler(CommandHandler("voicem", voicem))
+
+    app.add_handler(CommandHandler("voice1", premium_voice))
+    app.add_handler(CommandHandler("voice2", premium_voice))
+    app.add_handler(CommandHandler("voice3", premium_voice))
+    app.add_handler(CommandHandler("voice4", premium_voice))
+    app.add_handler(CommandHandler("voice5", premium_voice))
+
+    app.add_handler(CommandHandler("voice6", premium_voice))
+    app.add_handler(CommandHandler("voice7", premium_voice))
+    app.add_handler(CommandHandler("voice8", premium_voice))
+    app.add_handler(CommandHandler("voice9", premium_voice))
+    app.add_handler(CommandHandler("voice10", premium_voice))
     app.add_handler(CommandHandler("userinfo", userinfo))
     # ================= CALLBACKS =================
 
@@ -9313,13 +9968,7 @@ def main():
         group=20
     )
 
-    # 👋 WELCOME
-    app.add_handler(
-        ChatMemberHandler(
-            member_update_welcome,
-            ChatMemberHandler.CHAT_MEMBER
-        )
-    )
+    
    
 
     print("🔥 Niki Bot started...")
