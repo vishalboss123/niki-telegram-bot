@@ -14,3 +14,4 @@ pymongo
 dnspython
 deep-translator==1.11.4
 openai>=1.30.0
+gtts
