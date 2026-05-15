@@ -9927,6 +9927,8 @@ async def wordgame(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ===================== ENTER COMMAND =====================
 
+# ===================== ENTER COMMAND =====================
+
 async def enter(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if not update.message:
@@ -9935,14 +9937,17 @@ async def enter(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     user_data = get_user(user.id, user.first_name)
 
+    # already joined
     if user.id in word_game["players"]:
         await update.message.reply_text("⚠️ ᴀʟʀᴇᴀᴅʏ ᴊᴏɪɴᴇᴅ")
         return
 
+    # full check
     if len(word_game["players"]) >= 2:
         await update.message.reply_text("🚫 ɢᴀᴍᴇ ғᴜʟʟ")
         return
 
+    # balance check
     if user_data.get("money", 0) < word_game["entry"]:
         await update.message.reply_text("💸 ɪɴsᴜғғɪᴄɪᴇɴᴛ ʙᴀʟᴀɴᴄᴇ")
         return
@@ -9950,6 +9955,7 @@ async def enter(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # deduct bet
     user_data["money"] -= word_game["entry"]
 
+    # add player
     word_game["players"][user.id] = user.first_name
     word_game["bets"][user.id] = word_game["entry"]
 
@@ -9959,10 +9965,15 @@ async def enter(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"✅ {user.first_name} ᴊᴏɪɴᴇᴅ\n💰 ʙᴇᴛ: {word_game['entry']}\n👥 ᴡᴀɪᴛɪɴɢ..."
     )
 
-# ================= INSTANT START IF 2 PLAYERS =================
+    # 🔥 IMPORTANT AUTO START CALL
+    await check_instant_start(update, context)
+
+
+# ===================== INSTANT START =====================
+
 async def check_instant_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    if len(word_game["players"]) == 2 and not word_game["started"]:
+    if len(word_game["players"]) == 2 and not word_game.get("started"):
 
         word_game["started"] = True
         word_game["active"] = True
@@ -9975,14 +9986,16 @@ async def check_instant_start(update: Update, context: ContextTypes.DEFAULT_TYPE
                 [InlineKeyboardButton("👀 SEE WORD", callback_data="see_word")]
             ])
         )
-# ===================== SEE WORD =====================
+
+
+# ===================== SEE WORD (POPUP FIXED) =====================
 
 async def see_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     query = update.callback_query
     await query.answer()
 
-    # safety check
+    # safety
     if not word_game.get("started"):
         await query.answer("🚫 𝙂𝙖𝙢𝙚 𝙣𝙤𝙩 𝙨𝙩𝙖𝙧𝙩𝙚𝙙", show_alert=True)
         return
@@ -9991,7 +10004,7 @@ async def see_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.answer("⚠️ 𝙒𝙤𝙧𝙙 𝙢𝙞𝙨𝙨𝙞𝙣𝙜", show_alert=True)
         return
 
-    # POPUP (FINAL)
+    # 🔐 TELEGRAM POPUP ALERT
     await query.answer(
         text=f"🔐 𝙒𝙊𝙍𝘿: {word_game['word']}",
         show_alert=True
