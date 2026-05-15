@@ -9851,6 +9851,181 @@ async def allc(update: Update, context: ContextTypes.DEFAULT_TYPE):
         txt,
         parse_mode="HTML"
 )
+
+#=====================WORD GAME=========================
+
+
+word_game = {
+    "active": False,
+    "players": {},
+    "entry": 0,
+    "join_end": 0,
+    "word": None,
+}
+
+# ==================================================
+# 🎮 START GAME
+# ==================================================
+
+async def wordgame(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not update.message:
+        return
+
+    if not context.args:
+
+        await update.message.reply_text(
+            "⌯ » 𝙒𝙊𝙍𝘿 𝙂𝘼𝙈𝙀\n\n"
+            "⚠️ ᴜsᴀɢᴇ: /wordgame <amount>"
+        )
+        return
+
+    amount = context.args[0]
+
+    if not amount.isdigit():
+
+        await update.message.reply_text(
+            "⌯ » 𝙒𝙊𝙍𝘿 𝙂𝘼𝙈𝙀\n\n"
+            "⚠️ ɪɴᴠᴀʟɪᴅ ᴀᴍᴏᴜɴᴛ"
+        )
+        return
+
+    amount = int(amount)
+
+    word_game["active"] = False
+    word_game["players"] = {}
+    word_game["entry"] = amount
+    word_game["word"] = random.choice(["apple", "banana", "mango", "python", "orange"])
+    word_game["join_end"] = time.time() + 60
+
+    await update.message.reply_text(
+        "⌯ » 𝙒𝙊𝙍𝘿 𝙂𝘼𝙈𝙀\n\n"
+        "⌨️ 𝙎𝙩𝙖𝙧𝙩𝙚𝙙 𝙎𝙪𝙘𝙘𝙚𝙨𝙨𝙛𝙪𝙡𝙡𝙮\n\n"
+        f"💰 𝙀𝙣𝙩𝙧𝙮: {amount}\n"
+        "👥 𝙋𝙡𝙖𝙮𝙚𝙧𝙨: 2 𝙈𝙖𝙭\n\n"
+        "⏳ 𝙅𝙤𝙞𝙣 𝙏𝙞𝙢𝙚: 60 𝙎𝙚𝙘\n"
+        "👉 /enter " + str(amount)
+    )
+
+# ==================================================
+# 🎮 ENTER GAME
+# ==================================================
+
+async def enter(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not update.message:
+        return
+
+    user = update.effective_user
+
+    # GAME NOT ACTIVE
+    if word_game["join_end"] == 0:
+
+        await update.message.reply_text(
+            "⌯ » 𝙒𝙊𝙍𝘿 𝙂𝘼𝙈𝙀\n\n"
+            "🚫 ɴᴏ ᴀᴄᴛɪᴠᴇ ɢᴀᴍᴇ"
+        )
+        return
+
+    # JOIN CLOSED + START CHECK
+    if time.time() > word_game["join_end"]:
+
+        if len(word_game["players"]) < 2:
+
+            word_game["players"] = {}
+
+            await update.message.reply_text(
+                "⌯ » 𝙒𝙊𝙍𝘿 𝙂𝘼𝙈𝙀\n\n"
+                "❌ ɴᴏᴛ ᴇɴᴏᴜɢʜ ᴘʟᴀʏᴇʀs\n"
+                "🚫 ɢᴀᴍᴇ ᴄᴀɴᴄᴇʟʟᴇᴅ"
+            )
+
+            return
+
+        word_game["active"] = True
+
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton("👀 𝙎𝙚𝙚 𝙒𝙤𝙧𝙙", callback_data="see_word")]
+        ])
+
+        await update.message.reply_text(
+            "⌯ » 𝙒𝙊𝙍𝘿 𝙂𝘼𝙈𝙀\n\n"
+            "🔥 𝙂𝙖𝙢𝙚 𝙎𝙩𝙖𝙧𝙩𝙚𝙙\n"
+            "🎯 𝙁𝙞𝙧𝙨𝙩 𝙏𝙤 𝙏𝙮𝙥𝙚 𝙒𝙞𝙣𝙨 🏆",
+            reply_markup=keyboard
+        )
+        return
+
+    # ALREADY JOINED CHECK (NEW FEATURE)
+    if user.id in word_game["players"]:
+
+        await update.message.reply_text(
+            "⌯ » 𝙒𝙊𝙍𝘿 𝙂𝘼𝙈𝙀\n\n"
+            "⚠️ ʏᴏᴜ ᴀʟʀᴇᴀᴅʏ ᴊᴏɪɴᴇᴅ\n"
+            "🚫 ɴᴏ ʀᴇ-ᴇɴᴛʀʏ ᴀʟʟᴏᴡᴇᴅ"
+        )
+        return
+
+    # LIMIT 2 PLAYERS
+    if len(word_game["players"]) >= 2:
+
+        await update.message.reply_text(
+            "⌯ » 𝙒𝙊𝙍𝘿 𝙂𝘼𝙈𝙀\n\n"
+            "🚫 ɢᴀᴍᴇ ғᴜʟʟ (2 ᴘʟᴀʏᴇʀs)"
+        )
+        return
+
+    # ADD PLAYER
+    word_game["players"][user.id] = user.first_name
+
+    await update.message.reply_text(
+        "⌯ » 𝙒𝙊𝙍𝘿 𝙂𝘼𝙈𝙀\n\n"
+        f"✅ {user.first_name} ᴊᴏɪɴᴇᴅ\n"
+        f"👥 ᴛᴏᴛᴀʟ: {len(word_game['players'])}/2\n"
+        "⏳ ᴡᴀɪᴛɪɴɢ..."
+    )
+
+# ==================================================
+# 👀 SEE WORD
+# ==================================================
+
+async def see_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    await query.answer()
+
+    if not word_game["active"]:
+        await query.edit_message_text("🚫 ɴᴏ ᴀᴄᴛɪᴠᴇ ɢᴀᴍᴇ")
+        return
+
+    await query.message.reply_text(
+        f"👀 𝙒𝙊𝙍𝘿: {word_game['word']}"
+    )
+
+# ==================================================
+# 🏆 WIN CHECK
+# ==================================================
+
+async def check_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not update.message:
+        return
+
+    if not word_game["active"]:
+        return
+
+    user = update.effective_user
+    text = update.message.text.lower()
+
+    if text == word_game["word"]:
+
+        word_game["active"] = False
+
+        await update.message.reply_text(
+            "🏆 𝙂𝘼𝙈𝙀 𝙊𝙑𝙀𝙍\n\n"
+            f"🎯 𝙒𝙞𝙣𝙣𝙚𝙧: {user.first_name}\n"
+            f"🧠 𝙒𝙤𝙧𝙙: {word_game['word']}"
+        )
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
@@ -10036,9 +10211,22 @@ def main():
     app.add_handler(CommandHandler("voice9", premium_voice))
     app.add_handler(CommandHandler("voice10", premium_voice))
     app.add_handler(CommandHandler("userinfo", userinfo))
-    # ================= CALLBACKS =================
+    
+    # ================= WORD GAME COMMANDS =================
 
-    # ================= CALLBACKS =================
+    app.add_handler(CommandHandler("wordgame", wordgame))
+    app.add_handler(CommandHandler("enter", enter))
+
+    # ================= WORD GAME CALLBACK =================
+
+    app.add_handler(
+        CallbackQueryHandler(
+            see_word,
+            pattern="^see_word$"
+        )
+    )
+
+    # ================= OTHER CALLBACKS =================
 
     app.add_handler(
         CallbackQueryHandler(
@@ -10054,8 +10242,6 @@ def main():
         )
     )
 
-    # ================= DUEL =================
-
     app.add_handler(
         CallbackQueryHandler(
             accept_btn,
@@ -10070,16 +10256,12 @@ def main():
         )
     )
 
-    # ================= START / HELP / MENUS =================
-
     app.add_handler(
         CallbackQueryHandler(
             button_callback,
             pattern="^(start_|help_cmds|economy_menu|games_menu|music_menu|manage_menu|reward_menu|social_menu|home_menu)"
         )
     )
-
-    # ================= BET / NUMBER =================
 
     app.add_handler(
         CallbackQueryHandler(
@@ -10088,16 +10270,12 @@ def main():
         )
     )
 
-    # ================= MINES =================
-
     app.add_handler(
         CallbackQueryHandler(
             mine_click,
             pattern="^(mine_|cashout)"
         )
     )
-
-    # ================= DAILY CLAIM =================
 
     app.add_handler(
         CallbackQueryHandler(
@@ -10107,16 +10285,15 @@ def main():
         group=0
     )
 
-    # ================= USER INFO =================
-
     app.add_handler(
         CallbackQueryHandler(
             userinfo_buttons
         )
     )
-    # ================= 🔥 HANDLERS (CLEAN PRIORITY ORDER) =================
 
-    # 🛑 BLOCK
+    # ================= 🔥 MESSAGE SYSTEM (ORDERED) =================
+
+    # 🛑 BLOCK SYSTEM (HIGHEST PRIORITY)
     app.add_handler(
         MessageHandler(filters.ALL, block_system),
         group=10
@@ -10128,42 +10305,35 @@ def main():
         group=9
     )
 
+    # 🎮 WORD GAME CHECK (IMPORTANT)
+    app.add_handler(
+        MessageHandler(filters.TEXT & ~filters.COMMAND, check_word),
+        group=8
+    )
+
     # 🔥 FILTER SYSTEM
     app.add_handler(
-        MessageHandler(
-            filters.TEXT & ~filters.COMMAND,
-            filter_checker
-        ),
+        MessageHandler(filters.TEXT & ~filters.COMMAND, filter_checker),
         group=5
     )
 
-    # 🎮 GAME SYSTEM
+    # 🎮 GAME HANDLER (OTHER GAMES)
     app.add_handler(
-        MessageHandler(
-            filters.TEXT & ~filters.COMMAND,
-            handle
-        ),
+        MessageHandler(filters.TEXT & ~filters.COMMAND, handle),
         group=4
     )
 
     # 💖 LOVE FLOW
     app.add_handler(
-        MessageHandler(
-            filters.TEXT & ~filters.COMMAND,
-            love_flow
-        ),
+        MessageHandler(filters.TEXT & ~filters.COMMAND, love_flow),
         group=3
     )
 
-    # 🤖 MAIN AI
+    # 🤖 MAIN AI (LAST TEXT PROCESSOR)
     app.add_handler(
-        MessageHandler(
-            filters.TEXT & ~filters.COMMAND,
-            niki_ai
-        ),
+        MessageHandler(filters.TEXT & ~filters.COMMAND, niki_ai),
         group=20
     )
-
     
    
 
