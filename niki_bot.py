@@ -9978,14 +9978,20 @@ async def enter(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def see_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     query = update.callback_query
-    await query.answer()
+    await query.answer()  # click acknowledge
 
-    if not word_game["active"]:
+    if not word_game.get("active"):
         await query.answer("🚫 No active game", show_alert=True)
         return
 
+    word = word_game.get("word")
+
+    if not word:
+        await query.answer("⚠️ Word not ready", show_alert=True)
+        return
+
     await query.answer(
-        f"🔐 WORD: {word_game['word']}",
+        text=f"🔐 WORD: {word}",
         show_alert=True
     )
 
