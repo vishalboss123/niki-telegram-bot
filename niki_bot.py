@@ -9843,16 +9843,10 @@ word_game = {
     "entry": 0,
     "join_end": 0,
     "word": None,
+    "start_time": 0,
     "bets": {},
+    "started": False
 }
-
-# ===================== BALANCE =====================
-
-def get_balance(user_data):
-    try:
-        return int(user_data.get("money", 0))
-    except:
-        return 0
 
 # ===================== RANDOM WORD =====================
 
@@ -9861,19 +9855,37 @@ def generate_word():
     word = ''.join(random.choice(letters) for _ in range(10))
     return word.upper() if random.choice([True, False]) else word.lower()
 
-# ===================== REFUND SYSTEM =====================
+# ===================== REFUND =====================
 
 async def refund_all():
     for uid, bet in word_game["bets"].items():
-
         user_data = get_user(uid, "user")
-        balance = get_balance(user_data)
-
+        balance = user_data.get("money", 0)
         user_data["money"] = balance + bet
-
     save_data()
 
-# ===================== START GAME =====================
+# ===================== TIMER (AUTO CANCEL) =====================
+
+async def game_timer():
+    await asyncio.sleep(40)
+
+    # already started → ignore
+    if word_game["started"]:
+        return
+
+    # cancel condition
+    if len(word_game["players"]) < 2:
+
+        await refund_all()
+
+        word_game["players"] = {}
+        word_game["bets"] = {}
+        word_game["active"] = False
+        word_game["started"] = False
+
+        print("❌ GAME CANCELLED + REFUND DONE")
+
+# ===================== START COMMAND =====================
 
 async def wordgame(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -9895,6 +9907,7 @@ async def wordgame(update: Update, context: ContextTypes.DEFAULT_TYPE):
     amount = int(amount)
 
     word_game["active"] = False
+    word_game["started"] = False
     word_game["players"] = {}
     word_game["bets"] = {}
     word_game["entry"] = amount
@@ -9903,39 +9916,16 @@ async def wordgame(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(
         "⌯ » 𝙒𝙊𝙍𝘿 𝙂𝘼𝙈𝙀\n\n"
-        "⌛ ᴊᴏɪɴɪɴɢ sᴛᴀʀᴛᴇᴅ...\n"
-        "⚡ 40 sᴇᴄ ᴊᴏɪɴ ᴛɪᴍᴇ\n\n"
-        f"💰 ᴇɴᴛʀʏ: {amount}\n"
-        "👥 ᴍᴀx: 2 ᴘʟᴀʏᴇʀs\n\n"
+        "⌛ 40s JOIN OPEN\n"
+        f"💰 ENTRY: {amount}\n"
+        "👥 MAX: 2 PLAYERS\n\n"
         "👉 /enter " + str(amount)
     )
 
-    asyncio.create_task(game_controller())
+    # start timer
+    asyncio.create_task(game_timer())
 
-# ===================== GAME CONTROLLER =====================
-
-async def game_controller():
-
-    await asyncio.sleep(40)
-
-    # CANCEL CONDITION
-    if len(word_game["players"]) < 2:
-
-        await refund_all()
-
-        word_game["active"] = False
-        word_game["players"] = {}
-        word_game["bets"] = {}
-
-        print("❌ GAME CANCELLED + REFUNDED")
-        return
-
-    # START GAME
-    word_game["active"] = True
-
-    print("🔥 GAME STARTED")
-
-# ===================== ENTER GAME =====================
+# ===================== ENTER COMMAND =====================
 
 async def enter(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -9945,8 +9935,6 @@ async def enter(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     user_data = get_user(user.id, user.first_name)
 
-    balance = get_balance(user_data)
-
     if user.id in word_game["players"]:
         await update.message.reply_text("⚠️ ᴀʟʀᴇᴀᴅʏ ᴊᴏɪɴᴇᴅ")
         return
@@ -9955,11 +9943,12 @@ async def enter(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("🚫 ɢᴀᴍᴇ ғᴜʟʟ")
         return
 
-    if balance < word_game["entry"]:
+    if user_data.get("money", 0) < word_game["entry"]:
         await update.message.reply_text("💸 ɪɴsᴜғғɪᴄɪᴇɴᴛ ʙᴀʟᴀɴᴄᴇ")
         return
 
-    user_data["money"] = balance - word_game["entry"]
+    # deduct bet
+    user_data["money"] -= word_game["entry"]
 
     word_game["players"][user.id] = user.first_name
     word_game["bets"][user.id] = word_game["entry"]
@@ -9970,12 +9959,30 @@ async def enter(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"✅ {user.first_name} ᴊᴏɪɴᴇᴅ\n💰 ʙᴇᴛ: {word_game['entry']}\n👥 ᴡᴀɪᴛɪɴɢ..."
     )
 
+    # ================= INSTANT START IF 2 PLAYERS =================
+    if len(word_game["players"]) == 2 and not word_game["started"]:
+
+        word_game["started"] = True
+        word_game["active"] = True
+
+        await update.message.reply_text(
+            "🔥 𝙂𝘼𝙈𝙀 𝙎𝙏𝘼𝙍𝙏𝙀𝘿\n\n"
+            "⚡ 2 ᴘʟᴀʏᴇʀs ᴄᴏᴍᴘʟᴇᴛᴇ",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("👀 SEE WORD", callback_data="see_word")]
+            ])
+        )
+
 # ===================== SEE WORD =====================
 
 async def see_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     query = update.callback_query
     await query.answer()
+
+    if not word_game["active"]:
+        await query.answer("🚫 No active game", show_alert=True)
+        return
 
     await query.answer(
         f"🔐 WORD: {word_game['word']}",
@@ -10003,9 +10010,7 @@ async def check_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reward = bet * 2
 
         user_data = get_user(user.id, user.first_name)
-        balance = get_balance(user_data)
-
-        user_data["money"] = balance + reward
+        user_data["money"] = user_data.get("money", 0) + reward
 
         save_data()
 
@@ -10016,6 +10021,7 @@ async def check_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"💸 ʀᴇᴡᴀʀᴅ: {reward}\n"
             f"🔑 ᴡᴏʀᴅ: {word_game['word']}"
         )
+
 
 
 
