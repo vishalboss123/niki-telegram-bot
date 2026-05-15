@@ -9854,6 +9854,8 @@ async def allc(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 #=====================WORD GAME=========================
 
+import string
+
 
 word_game = {
     "active": False,
@@ -9861,11 +9863,19 @@ word_game = {
     "entry": 0,
     "join_end": 0,
     "word": None,
+    "start_time": 0,
+    "bets": {}
 }
 
-# ==================================================
-# 🎮 START GAME
-# ==================================================
+# ================= RANDOM WORD =================
+
+def generate_word():
+    letters = string.ascii_lowercase
+    word = ''.join(random.choice(letters) for _ in range(10))
+    return word.upper() if random.choice([True, False]) else word.lower()
+
+
+# ================= START GAME =================
 
 async def wordgame(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -9873,43 +9883,36 @@ async def wordgame(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if not context.args:
-
         await update.message.reply_text(
-            "⌯ » 𝙒𝙊𝙍𝘿 𝙂𝘼𝙈𝙀\n\n"
-            "⚠️ ᴜsᴀɢᴇ: /wordgame <amount>"
+            "⌯ » 𝙒𝙊𝙍𝘿 𝙂𝘼𝙈𝙀\n\n⚠️ ᴜsᴀɢᴇ: /wordgame <amount>"
         )
         return
 
     amount = context.args[0]
 
     if not amount.isdigit():
-
-        await update.message.reply_text(
-            "⌯ » 𝙒𝙊𝙍𝘿 𝙂𝘼𝙈𝙀\n\n"
-            "⚠️ ɪɴᴠᴀʟɪᴅ ᴀᴍᴏᴜɴᴛ"
-        )
+        await update.message.reply_text("⚠️ ɪɴᴠᴀʟɪᴅ ᴀᴍᴏᴜɴᴛ")
         return
 
     amount = int(amount)
 
     word_game["active"] = False
     word_game["players"] = {}
+    word_game["bets"] = {}
     word_game["entry"] = amount
-    word_game["word"] = random.choice(["apple", "banana", "mango", "python", "orange"])
-    word_game["join_end"] = time.time() + 60
+    word_game["word"] = generate_word()
+    word_game["join_end"] = time.time() + 40
 
     await update.message.reply_text(
         "⌯ » 𝙒𝙊𝙍𝘿 𝙂𝘼𝙈𝙀\n\n"
-        "⌨️ 𝙎𝙩𝙖𝙧𝙩𝙚𝙙 𝙎𝙪𝙘𝙘𝙚𝙨𝙨𝙛𝙪𝙡𝙡𝙮\n\n"
+        "⌛ 𝙅𝙤𝙞𝙣 𝙊𝙥𝙚𝙣 40𝙨\n"
         f"💰 𝙀𝙣𝙩𝙧𝙮: {amount}\n"
-        "👥 𝙋𝙡𝙖𝙮𝙚𝙧𝙨: 2 𝙈𝙖𝙭\n\n"
-        "⏳ 𝙅𝙤𝙞𝙣 𝙏𝙞𝙢𝙚: 60 𝙎𝙚𝙘\n"
+        "👥 2 ᴘʟᴀʏᴇʀ ᴍᴀx\n\n"
         "👉 /enter " + str(amount)
     )
 
-# ==================================================
-# 🎮 ENTER GAME
-# ==================================================
+
+# ================= ENTER GAME =================
 
 async def enter(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -9918,76 +9921,42 @@ async def enter(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user = update.effective_user
 
-    # GAME NOT ACTIVE
-    if word_game["join_end"] == 0:
-
-        await update.message.reply_text(
-            "⌯ » 𝙒𝙊𝙍𝘿 𝙂𝘼𝙈𝙀\n\n"
-            "🚫 ɴᴏ ᴀᴄᴛɪᴠᴇ ɢᴀᴍᴇ"
-        )
-        return
-
-    # JOIN CLOSED + START CHECK
-    if time.time() > word_game["join_end"]:
-
-        if len(word_game["players"]) < 2:
-
-            word_game["players"] = {}
-
-            await update.message.reply_text(
-                "⌯ » 𝙒𝙊𝙍𝘿 𝙂𝘼𝙈𝙀\n\n"
-                "❌ ɴᴏᴛ ᴇɴᴏᴜɢʜ ᴘʟᴀʏᴇʀs\n"
-                "🚫 ɢᴀᴍᴇ ᴄᴀɴᴄᴇʟʟᴇᴅ"
-            )
-
-            return
-
-        word_game["active"] = True
-
-        keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton("👀 𝙎𝙚𝙚 𝙒𝙤𝙧𝙙", callback_data="see_word")]
-        ])
-
-        await update.message.reply_text(
-            "⌯ » 𝙒𝙊𝙍𝘿 𝙂𝘼𝙈𝙀\n\n"
-            "🔥 𝙂𝙖𝙢𝙚 𝙎𝙩𝙖𝙧𝙩𝙚𝙙\n"
-            "🎯 𝙁𝙞𝙧𝙨𝙩 𝙏𝙤 𝙏𝙮𝙥𝙚 𝙒𝙞𝙣𝙨 🏆",
-            reply_markup=keyboard
-        )
-        return
-
-    # ALREADY JOINED CHECK (NEW FEATURE)
     if user.id in word_game["players"]:
-
-        await update.message.reply_text(
-            "⌯ » 𝙒𝙊𝙍𝘿 𝙂𝘼𝙈𝙀\n\n"
-            "⚠️ ʏᴏᴜ ᴀʟʀᴇᴀᴅʏ ᴊᴏɪɴᴇᴅ\n"
-            "🚫 ɴᴏ ʀᴇ-ᴇɴᴛʀʏ ᴀʟʟᴏᴡᴇᴅ"
-        )
+        await update.message.reply_text("⚠️ ᴀʟʀᴇᴀᴅʏ ᴊᴏɪɴᴇᴅ")
         return
 
-    # LIMIT 2 PLAYERS
     if len(word_game["players"]) >= 2:
-
-        await update.message.reply_text(
-            "⌯ » 𝙒𝙊𝙍𝘿 𝙂𝘼𝙈𝙀\n\n"
-            "🚫 ɢᴀᴍᴇ ғᴜʟʟ (2 ᴘʟᴀʏᴇʀs)"
-        )
+        await update.message.reply_text("🚫 ɢᴀᴍᴇ ғᴜʟʟ")
         return
 
-    # ADD PLAYER
+    user_data = get_user(user.id, user.first_name)
+
+    if user_data["balance"] < word_game["entry"]:
+        await update.message.reply_text("💸 ɪɴsᴜғғɪᴄɪᴇɴᴛ ʙᴀʟᴀɴᴄᴇ")
+        return
+
+    # deduct entry
+    user_data["balance"] -= word_game["entry"]
+
     word_game["players"][user.id] = user.first_name
+    word_game["bets"][user.id] = word_game["entry"]
+
+    save_data()
 
     await update.message.reply_text(
-        "⌯ » 𝙒𝙊𝙍𝘿 𝙂𝘼𝙈𝙀\n\n"
-        f"✅ {user.first_name} ᴊᴏɪɴᴇᴅ\n"
-        f"👥 ᴛᴏᴛᴀʟ: {len(word_game['players'])}/2\n"
-        "⏳ ᴡᴀɪᴛɪɴɢ..."
+        f"✅ {user.first_name} ᴊᴏɪɴᴇᴅ\n💰 ʙᴇᴛ: {word_game['entry']}\n👥 ᴡᴀɪᴛɪɴɢ..."
     )
 
-# ==================================================
-# 👀 SEE WORD
-# ==================================================
+
+# ================= START GAME =================
+
+async def start_game():
+
+    word_game["active"] = True
+    word_game["start_time"] = time.time()
+
+
+# ================= SEE WORD (POPUP) =================
 
 async def see_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -9995,16 +9964,16 @@ async def see_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
 
     if not word_game["active"]:
-        await query.edit_message_text("🚫 ɴᴏ ᴀᴄᴛɪᴠᴇ ɢᴀᴍᴇ")
+        await query.answer("🚫 No active game", show_alert=True)
         return
 
-    await query.message.reply_text(
-        f"👀 𝙒𝙊𝙍𝘿: {word_game['word']}"
+    await query.answer(
+        f"🔐 WORD: {word_game['word']}",
+        show_alert=True
     )
 
-# ==================================================
-# 🏆 WIN CHECK
-# ==================================================
+
+# ================= WIN CHECK + 2X REWARD =================
 
 async def check_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -10015,16 +9984,26 @@ async def check_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     user = update.effective_user
-    text = update.message.text.lower()
+    text = update.message.text
 
     if text == word_game["word"]:
 
         word_game["active"] = False
 
+        bet = word_game["bets"].get(user.id, 0)
+        reward = bet * 2
+
+        user_data = get_user(user.id, user.first_name)
+        user_data["balance"] += reward
+
+        save_data()
+
         await update.message.reply_text(
             "🏆 𝙂𝘼𝙈𝙀 𝙊𝙑𝙀𝙍\n\n"
-            f"🎯 𝙒𝙞𝙣𝙣𝙚𝙧: {user.first_name}\n"
-            f"🧠 𝙒𝙤𝙧𝙙: {word_game['word']}"
+            f"🎯 𝙒ɪɴɴᴇʀ: {user.first_name}\n"
+            f"💰 ʙᴇᴛ: {bet}\n"
+            f"💸 ʀᴇᴡᴀʀᴅ (2x): {reward}\n"
+            f"🔑 ᴡᴏʀᴅ: {word_game['word']}"
         )
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
