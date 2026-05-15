@@ -9960,19 +9960,21 @@ async def enter(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 # ================= INSTANT START IF 2 PLAYERS =================
-if len(word_game["players"]) == 2 and not word_game["started"]:
+async def check_instant_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    word_game["started"] = True
-    word_game["active"] = True
-    word_game["start_time"] = time.time()
+    if len(word_game["players"]) == 2 and not word_game["started"]:
 
-    await update.message.reply_text(
-        "🔥 𝙂𝘼𝙈𝙀 𝙎𝙏𝘼𝙍𝙏𝙀𝘿\n\n"
-        "⚡ 2 ᴘʟᴀʏᴇʀs ᴄᴏᴍᴘʟᴇᴛᴇ",
-        reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("👀 SEE WORD", callback_data="see_word")]
-        ])
-    )
+        word_game["started"] = True
+        word_game["active"] = True
+        word_game["start_time"] = time.time()
+
+        await update.message.reply_text(
+            "🔥 𝙂𝘼𝙈𝙀 𝙎𝙏𝘼𝙍𝙏𝙀𝘿\n\n"
+            "⚡ 2 ᴘʟᴀʏᴇʀs ᴄᴏᴍᴘʟᴇᴛᴇ",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("👀 SEE WORD", callback_data="see_word")]
+            ])
+        )
 # ===================== SEE WORD =====================
 
 async def see_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
