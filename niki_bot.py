@@ -9988,12 +9988,11 @@ async def check_instant_start(update: Update, context: ContextTypes.DEFAULT_TYPE
         )
 
 
-# ===================== SEE WORD (POPUP FIXED) =====================
+# ===================== SEE. (POPUP FIXED) =====================
 
 async def see_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     query = update.callback_query
-    await query.answer()
 
     if not word_game.get("started"):
         await query.answer("🚫 Game not started", show_alert=True)
@@ -10008,7 +10007,6 @@ async def see_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
         show_alert=True
     )
 
-
 # ===================== BUTTON ROUTER (MAIN SAFE HUB) =====================
 
 async def button_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -10016,12 +10014,11 @@ async def button_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     data = query.data
 
-    await query.answer()  # always acknowledge
-
-    # ================= WORD GAME =================
+    # ❌ DON'T TOUCH WORD GAME CALLBACK
     if data == "see_word":
-        return  # handled separately by see_word handler
+        return
 
+    await query.answer()
 # ===================== WIN CHECK =====================
 
 async def check_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -10245,6 +10242,8 @@ def main():
     app.add_handler(CommandHandler("voice8", premium_voice))
     app.add_handler(CommandHandler("voice9", premium_voice))
     app.add_handler(CommandHandler("voice10", premium_voice))
+    app.add_handler(CommandHandler("wordgame", wordgame))
+    app.add_handler(CommandHandler("enter", enter))
     app.add_handler(CommandHandler("userinfo", userinfo))
     
     # ================= WORD GAME CALLBACK =================
