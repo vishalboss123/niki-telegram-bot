@@ -9993,23 +9993,24 @@ async def check_instant_start(update: Update, context: ContextTypes.DEFAULT_TYPE
 async def see_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     query = update.callback_query
+
+    # MUST FIRST ANSWER CALLBACK
     await query.answer()
 
-    # safety
+    # safety checks
     if not word_game.get("started"):
-        await query.answer("🚫 𝙂𝙖𝙢𝙚 𝙣𝙤𝙩 𝙨𝙩𝙖𝙧𝙩𝙚𝙙", show_alert=True)
+        await query.answer("🚫 Game not started", show_alert=True)
         return
 
     if not word_game.get("word"):
-        await query.answer("⚠️ 𝙒𝙤𝙧𝙙 𝙢𝙞𝙨𝙨𝙞𝙣𝙜", show_alert=True)
+        await query.answer("⚠️ Word missing", show_alert=True)
         return
 
-    # 🔐 TELEGRAM POPUP ALERT
+    # FINAL POPUP
     await query.answer(
-        text=f"🔐 𝙒𝙊𝙍𝘿: {word_game['word']}",
+        text=f"🔐 WORD: {word_game['word']}",
         show_alert=True
     )
-
 # ===================== WIN CHECK =====================
 
 async def check_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
