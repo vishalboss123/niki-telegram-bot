@@ -9959,39 +9959,39 @@ async def enter(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"✅ {user.first_name} ᴊᴏɪɴᴇᴅ\n💰 ʙᴇᴛ: {word_game['entry']}\n👥 ᴡᴀɪᴛɪɴɢ..."
     )
 
-    # ================= INSTANT START IF 2 PLAYERS =================
-    if len(word_game["players"]) == 2 and not word_game["started"]:
+# ================= INSTANT START IF 2 PLAYERS =================
+if len(word_game["players"]) == 2 and not word_game["started"]:
 
-        word_game["started"] = True
-        word_game["active"] = True
+    word_game["started"] = True
+    word_game["active"] = True
+    word_game["start_time"] = time.time()
 
-        await update.message.reply_text(
-            "🔥 𝙂𝘼𝙈𝙀 𝙎𝙏𝘼𝙍𝙏𝙀𝘿\n\n"
-            "⚡ 2 ᴘʟᴀʏᴇʀs ᴄᴏᴍᴘʟᴇᴛᴇ",
-            reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("👀 SEE WORD", callback_data="see_word")]
-            ])
-        )
-
+    await update.message.reply_text(
+        "🔥 𝙂𝘼𝙈𝙀 𝙎𝙏𝘼𝙍𝙏𝙀𝘿\n\n"
+        "⚡ 2 ᴘʟᴀʏᴇʀs ᴄᴏᴍᴘʟᴇᴛᴇ",
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("👀 SEE WORD", callback_data="see_word")]
+        ])
+    )
 # ===================== SEE WORD =====================
 
 async def see_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     query = update.callback_query
-    await query.answer()  # click acknowledge
+    await query.answer()
 
-    if not word_game.get("active"):
-        await query.answer("🚫 No active game", show_alert=True)
+    # safety check
+    if not word_game.get("started"):
+        await query.answer("🚫 𝙂𝙖𝙢𝙚 𝙣𝙤𝙩 𝙨𝙩𝙖𝙧𝙩𝙚𝙙", show_alert=True)
         return
 
-    word = word_game.get("word")
-
-    if not word:
-        await query.answer("⚠️ Word not ready", show_alert=True)
+    if not word_game.get("word"):
+        await query.answer("⚠️ 𝙒𝙤𝙧𝙙 𝙢𝙞𝙨𝙨𝙞𝙣𝙜", show_alert=True)
         return
 
+    # POPUP (FINAL)
     await query.answer(
-        text=f"🔐 WORD: {word}",
+        text=f"🔐 𝙒𝙊𝙍𝘿: {word_game['word']}",
         show_alert=True
     )
 
