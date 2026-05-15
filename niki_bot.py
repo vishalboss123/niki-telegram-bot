@@ -9993,11 +9993,8 @@ async def check_instant_start(update: Update, context: ContextTypes.DEFAULT_TYPE
 async def see_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     query = update.callback_query
-
-    # MUST FIRST ANSWER CALLBACK
     await query.answer()
 
-    # safety checks
     if not word_game.get("started"):
         await query.answer("🚫 Game not started", show_alert=True)
         return
@@ -10006,11 +10003,25 @@ async def see_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.answer("⚠️ Word missing", show_alert=True)
         return
 
-    # FINAL POPUP
     await query.answer(
         text=f"🔐 WORD: {word_game['word']}",
         show_alert=True
     )
+
+
+# ===================== BUTTON ROUTER (MAIN SAFE HUB) =====================
+
+async def button_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    data = query.data
+
+    await query.answer()  # always acknowledge
+
+    # ================= WORD GAME =================
+    if data == "see_word":
+        return  # handled separately by see_word handler
+
 # ===================== WIN CHECK =====================
 
 async def check_word(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -10236,11 +10247,6 @@ def main():
     app.add_handler(CommandHandler("voice10", premium_voice))
     app.add_handler(CommandHandler("userinfo", userinfo))
     
-    # ================= WORD GAME COMMANDS =================
-
-    app.add_handler(CommandHandler("wordgame", wordgame))
-    app.add_handler(CommandHandler("enter", enter))
-
     # ================= WORD GAME CALLBACK =================
 
     app.add_handler(
@@ -10250,7 +10256,15 @@ def main():
         )
     )
 
-    # ================= OTHER CALLBACKS =================
+    # ================= MAIN ROUTER =================
+
+    app.add_handler(
+        CallbackQueryHandler(
+            button_router
+        )
+    )
+
+    # ================= MARRY SYSTEM =================
 
     app.add_handler(
         CallbackQueryHandler(
@@ -10266,6 +10280,8 @@ def main():
         )
     )
 
+    # ================= DUEL SYSTEM =================
+
     app.add_handler(
         CallbackQueryHandler(
             accept_btn,
@@ -10280,12 +10296,16 @@ def main():
         )
     )
 
+    # ================= MENU SYSTEM =================
+
     app.add_handler(
         CallbackQueryHandler(
             button_callback,
             pattern="^(start_|help_cmds|economy_menu|games_menu|music_menu|manage_menu|reward_menu|social_menu|home_menu)"
         )
     )
+
+    # ================= NUMBER / BET SYSTEM =================
 
     app.add_handler(
         CallbackQueryHandler(
@@ -10294,12 +10314,16 @@ def main():
         )
     )
 
+    # ================= MINE GAME =================
+
     app.add_handler(
         CallbackQueryHandler(
             mine_click,
             pattern="^(mine_|cashout)"
         )
     )
+
+    # ================= CLAIM SYSTEM =================
 
     app.add_handler(
         CallbackQueryHandler(
@@ -10309,9 +10333,12 @@ def main():
         group=0
     )
 
+    # ================= USERINFO SYSTEM =================
+
     app.add_handler(
         CallbackQueryHandler(
-            userinfo_buttons
+            userinfo_buttons,
+            pattern="^userinfo"
         )
     )
 
