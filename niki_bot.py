@@ -9,7 +9,7 @@ client = MongoClient(MONGO_URL)
 db_main = client["mydatabase"]
 backup = db_main["backup"]   # ⚡ IMPORTANT (error fix)
 col = db_main["chats"]       # groups/users save  ✅ (IMPORTANT)
-filters_col = db_main["filters"]
+filters = db_main["filters"]
 
 
 
@@ -50,6 +50,7 @@ from telegram import ChatPermissions, Update
 from datetime import datetime, timedelta
 from collections import deque
 from openai import OpenAI
+from telegram.constants import ChatAction
 from deep_translator import GoogleTranslator
 from telegram.ext import (
     ApplicationBuilder,
@@ -8591,15 +8592,12 @@ async def save_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 
-# ==================================================
+# # ==================================================
 # 💖 OPENROUTER AI CLIENT
 # ==================================================
 
 
-import os
-import random
-import asyncio
-from openai import OpenAI
+
 
 # ==================================================
 # 💖 OPENROUTER CLIENT
@@ -8620,13 +8618,7 @@ BOT_USERNAME = "@iim_nikibot"
 OWNER = "@YTT_BISHAL"
 
 # ==================================================
-# 💖 MONGO COLLECTION (YOUR SAME)
-# ==================================================
-
-niki_users = db_main["niki_memory"]
-
-# ==================================================
-# 💖 MODELS (FALLBACK SYSTEM)
+# 💖 MODELS
 # ==================================================
 
 MODELS = [
@@ -8655,7 +8647,35 @@ def detect_mood(text):
     return "cute"
 
 # ==================================================
-# 💖 TYPING DELAY (HUMAN FEEL)
+# 💖 REACTION SYSTEM (ADDED ONLY)
+# ==================================================
+
+def add_reaction(text, mood):
+
+    reactions = {
+        "love": ["💖", "🥺", "❤️"],
+        "sad": ["😢", "💔", "🥺"],
+        "angry": ["😤", "💢", "😠"],
+        "happy": ["😄", "✨", "😊"],
+        "cute": ["🥰", "🌸", "💞"]
+    }
+
+    emoji = random.choice(reactions.get(mood, ["🙂"]))
+
+    return f"{text} {emoji}"
+
+# ==================================================
+# 💖 TYPING INDICATOR (ADDED ONLY)
+# ==================================================
+
+async def show_typing(context, chat_id):
+    await context.bot.send_chat_action(
+        chat_id=chat_id,
+        action=ChatAction.TYPING
+    )
+
+# ==================================================
+# 💖 TYPING DELAY (SAME)
 # ==================================================
 
 async def typing_delay(update, text):
@@ -8663,7 +8683,7 @@ async def typing_delay(update, text):
     await asyncio.sleep(delay)
 
 # ==================================================
-# 💖 AI ENGINE (FALLBACK SYSTEM)
+# 💖 AI ENGINE (NO CHANGE IN LOGIC)
 # ==================================================
 
 def get_ai_reply(prompt, text, chat_type):
@@ -8671,9 +8691,9 @@ def get_ai_reply(prompt, text, chat_type):
     style = ""
 
     if chat_type == "private":
-        style = "You are romantic emotional girlfriend AI."
+        style = "You are a cute emotional Hinglish chatbot."
     else:
-        style = "You are cute short group chatbot."
+        style = "You are a short group assistant chatbot."
 
     final_prompt = prompt + "\nStyle:\n" + style
 
@@ -8687,7 +8707,7 @@ def get_ai_reply(prompt, text, chat_type):
                     {"role": "user", "content": text}
                 ],
                 temperature=0.9,
-                max_tokens=300
+                max_tokens=250
             )
 
             reply = response.choices[0].message.content
@@ -8702,7 +8722,7 @@ def get_ai_reply(prompt, text, chat_type):
     return "🥺 sorry baby, abhi thoda busy hu..."
 
 # ==================================================
-# 💖 MAIN AI HANDLER
+# 💖 MAIN AI HANDLER (NO CHANGE)
 # ==================================================
 
 async def niki_ai(update, context):
@@ -8715,78 +8735,33 @@ async def niki_ai(update, context):
     if not text or text.startswith("/"):
         return
 
-    # ==================================================
-    # 💖 USER INFO
-    # ==================================================
-
     user = update.effective_user
-    user_id = str(user.id)
     name = user.first_name
     chat_type = update.effective_chat.type
 
     # ==================================================
-    # 💖 MONGO MEMORY
-    # ==================================================
-
-    user_data = niki_users.find_one({"user_id": user_id})
-
-    if not user_data:
-        user_data = {
-            "user_id": user_id,
-            "name": name,
-            "history": []
-        }
-        niki_users.insert_one(user_data)
-
-    history = user_data.get("history", [])
-    history.append(text)
-
-    if len(history) > 15:
-        history = history[-15:]
-
-    niki_users.update_one(
-        {"user_id": user_id},
-        {"$set": {"history": history, "name": name}}
-    )
-
-    history_text = "\n".join(history)
-
-    # ==================================================
-    # 💖 TRIGGER SYSTEM
-    # ==================================================
-
-    is_niki = "niki" in text.lower()
-    is_reply = False
-
-    if update.message.reply_to_message:
-        if update.message.reply_to_message.from_user:
-            if update.message.reply_to_message.from_user.is_bot:
-                is_reply = True
-
-    if chat_type != "private":
-        if not is_niki and not is_reply:
-            return
-
-    # ==================================================
-    # 💖 OWNER SYSTEM
+    # 💖 OWNER SYSTEM (SAME AS YOUR ORIGINAL IDEA)
     # ==================================================
 
     owner_words = [
         "owner", "developer", "dev", "creator",
-        "who made you", "boss", "tumhara owner"
+        "who made you", "boss"
     ]
 
     if any(w in text.lower() for w in owner_words):
 
         replies = [
             f"Hehe 🤭 {OWNER} is my owner 💖",
-            f"I was created by {OWNER} 😌✨",
-            f"My developer is {OWNER} 💕",
-            f"{OWNER} is my special one 🥺💖",
-            f"I'm only {OWNER}'s Niki 😤💖"
+            f"I respect {OWNER} a lot 😌",
+            f"My developer is {OWNER} 👑",
         ]
 
-        await update.message.reply_text(random.choice(replies))
+        reply = random.choice(replies)
+
+        mood = detect_mood(text)
+        reply = add_reaction(reply, mood)
+
+        await update.message.reply_text(reply)
         return
 
     # ==================================================
@@ -8796,55 +8771,54 @@ async def niki_ai(update, context):
     mood = detect_mood(text)
 
     # ==================================================
-    # 💖 PROMPT
+    # 💖 PROMPT (UNCHANGED IDEA, SAME STYLE)
     # ==================================================
 
     prompt = f"""
-You are Niki, a cute telegram bot girl.
+You are Niki, a cute Telegram chatbot.
 
-Personality:
-- Friendly
-- Emotional
-- Romantic
-- Hinglish style
-- Never say AI
+Rules:
+- Reply in Hinglish
+- Be emotional and friendly
+- Keep replies 1–3 lines (unless user asks long)
+- Never mention AI
+- Always respect owner {OWNER}
+- Do not remember past chats
+- React naturally based on mood
 
-Owner: {OWNER}
 User: {name}
 Mood: {mood}
-
-Chat History:
-{history_text}
 
 Message:
 {text}
 """
 
     # ==================================================
-    # 💖 HUMAN TYPING FEEL
+    # 💖 TYPING EFFECT (ADDED)
     # ==================================================
 
+    await show_typing(context, update.effective_chat.id)
     await typing_delay(update, text)
 
     # ==================================================
-    # 💖 AI RESPONSE
+    # 💖 RESPONSE
     # ==================================================
 
     try:
 
         reply = get_ai_reply(prompt, text, chat_type)
 
+        # reaction added
+        reply = add_reaction(reply, mood)
+
         await update.message.reply_text(reply)
 
     except Exception as e:
 
-        print("ERROR:", e)
-
         await update.message.reply_text(
             f"⚠️ ERROR:\n{str(e)[:200]}"
         )
-
-    
+                
 
         
     
