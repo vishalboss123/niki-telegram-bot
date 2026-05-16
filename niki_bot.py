@@ -768,12 +768,11 @@ def save_data():
 
     # 💖 JSON SAVE
     with open(DATA_FILE, "w") as f:
-        json.dump(safe_data, f, indent=2, default=str)
-
+        json.dump(safe_data, f, indent=2, default=lambda o: None)
     # 💖 MONGO SAVE
     backup.update_one(
         {"_id": "main_data"},
-        {"$set": {"data": safe_data}},
+        {"$set": {"data": json.loads(json.dumps(safe_data, default=lambda o: None))}},
         upsert=True
     )
 # ------------------ USER HELP ------------------
