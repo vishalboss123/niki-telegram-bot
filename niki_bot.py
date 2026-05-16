@@ -8592,11 +8592,9 @@ async def save_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 
-
-# # ==================================================
+# ==================================================
 # 💖 OPENROUTER AI CLIENT
 # ==================================================
-
 
 
 
@@ -8648,8 +8646,24 @@ def detect_mood(text):
     return "cute"
 
 # ==================================================
-# 💖 REACTION SYSTEM (ADDED ONLY)
+# 💖 REACTION SYSTEM (FIXED)
 # ==================================================
+
+def add_reaction(text, mood):
+
+    reactions = {
+        "love": ["❤️", "💖", "🥰", "😍", "😘", "💕", "💞", "❣️", "😋", "💓", "💝"],
+        "sad": ["😢", "💔", "🥺", "😒", "😔"],
+        "angry": ["😤", "💢", "😠", "😡", "🤬"],
+        "happy": ["😄", "✨", "😊", "😁", "🥲", "😝", "😃", "😉", "🙃", "🙂"],
+        "cute": ["🥰", "🌸", "💞", "🫶🏻", "💘", "🙈"]
+    }
+
+    emoji = random.choice(
+        reactions.get(mood, ["🥰"])
+    )
+
+    return f"{text} {emoji}"
 
 # ==================================================
 # 💖 REAL TELEGRAM MESSAGE REACTION
@@ -8845,17 +8859,14 @@ async def niki_ai(update, context):
         return
 
     # ==================================================
-    # ==================================================
     # 💖 REAL TELEGRAM MESSAGE REACTION
     # ==================================================
+
     mood = detect_mood(text)
 
     # 💖 REAL MESSAGE REACTION
     await react_message(update, mood)
 
-
-
-    
     # ==================================================
     # 💖 PROMPT
     # ==================================================
@@ -8886,6 +8897,7 @@ Mood: {mood}
 Message:
 {text}
 """
+
     # ==================================================
     # 💖 TYPING EFFECT (ADDED)
     # ==================================================
@@ -8911,7 +8923,9 @@ Message:
         await update.message.reply_text(
             f"⚠️ ERROR:\n{str(e)[:200]}"
         )
-                
+
+
+
 
         
     
