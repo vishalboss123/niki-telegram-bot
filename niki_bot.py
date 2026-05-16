@@ -8651,19 +8651,31 @@ def detect_mood(text):
 # 💖 REACTION SYSTEM (ADDED ONLY)
 # ==================================================
 
-def add_reaction(text, mood):
+# ==================================================
+# 💖 REAL TELEGRAM MESSAGE REACTION
+# ==================================================
+
+async def react_message(update, mood):
 
     reactions = {
-        "love": ["❤️", "💖", "🥰", "😍", "😘", "💕", "💞", "❣️", "😋", "💓", "💝"],
+        "love": ["❤️", "💖", "🥰", "😍", "😘", "💕", "💞", "❣️", "💓", "💝"],
         "sad": ["😢", "💔", "🥺", "😒", "😔"],
         "angry": ["😤", "💢", "😠", "😡", "🤬"],
         "happy": ["😄", "✨", "😊", "😁", "🥲", "😝", "😃", "😉", "🙃", "🙂"],
         "cute": ["🥰", "🌸", "💞", "🫶🏻", "💘", "🙈"]
     }
 
-    emoji = random.choice(reactions.get(mood, ["🙂"]))
+    emoji = random.choice(
+        reactions.get(mood, ["🥰"])
+    )
 
-    return f"{text} {emoji}"
+    try:
+        await update.message.set_reaction(
+            reaction=emoji
+        )
+
+    except Exception as e:
+        print("Reaction Error:", e)
 
 # ==================================================
 # 💖 TYPING INDICATOR (ADDED ONLY)
@@ -8833,14 +8845,17 @@ async def niki_ai(update, context):
         return
 
     # ==================================================
-    # 💖 MOOD
     # ==================================================
-
+    # 💖 REAL TELEGRAM MESSAGE REACTION
+    # ==================================================
     mood = detect_mood(text)
 
     # 💖 REAL MESSAGE REACTION
     await react_message(update, mood)
 
+
+
+    
     # ==================================================
     # 💖 PROMPT
     # ==================================================
