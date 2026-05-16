@@ -51,6 +51,7 @@ from datetime import datetime, timedelta
 from collections import deque
 from openai import OpenAI
 from telegram.constants import ChatAction
+from telegram.ext import ChatJoinRequestHandler
 from deep_translator import GoogleTranslator
 from telegram.ext import (
     ApplicationBuilder,
@@ -10180,10 +10181,12 @@ def main():
     app.add_handler(ChatMemberHandler(track_join, ChatMemberHandler.CHAT_MEMBER), group=-1)
     app.add_handler(ChatJoinRequestHandler(join_request_welcome))
 
-    app.add_handler(MessageHandler(
-        filters.StatusUpdate.NEW_CHAT_MEMBERS,
-        welcome_new_member
-    ))
+    app.add_handler(
+        MessageHandler(
+            filters.StatusUpdate.NEW_CHAT_MEMBERS,
+            welcome_new_member
+        )
+    )
      
     # ---------------- Command Handlers ----------------
     app.add_handler(CommandHandler("start", start))
@@ -10336,7 +10339,8 @@ def main():
 
     app.add_handler(
         CallbackQueryHandler(
-            button_router
+            button_router,
+            pattern="^router_"
         )
     )
 
