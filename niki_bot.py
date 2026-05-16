@@ -8653,11 +8653,11 @@ def detect_mood(text):
 def add_reaction(text, mood):
 
     reactions = {
-        "love": ["💖", "🥺", "❤️"],
-        "sad": ["😢", "💔", "🥺"],
-        "angry": ["😤", "💢", "😠"],
-        "happy": ["😄", "✨", "😊"],
-        "cute": ["🥰", "🌸", "💞"]
+        "love": ["❤️", "💖", "🥰", "😍", "😘", "💕", "💞", "❣️", "😋", "💓", "💝"],
+        "sad": ["😢", "💔", "🥺", "😒", "😔"],
+        "angry": ["😤", "💢", "😠", "😡", "🤬"],
+        "happy": ["😄", "✨", "😊", "😁", "🥲", "😝", "😃", "😉", "🙃", "🙂"],
+        "cute": ["🥰", "🌸", "💞", "🫶🏻", "💘", "🙈"]
     }
 
     emoji = random.choice(reactions.get(mood, ["🙂"]))
@@ -8721,10 +8721,11 @@ def get_ai_reply(prompt, text, chat_type):
 
     return "🥺 sorry baby, abhi thoda busy hu..."
 
-    # ==================================================
-    # 💖 MAIN AI HANDLER
-    # ==================================================
-    async def niki_ai(update, context):
+# ==================================================
+# 💖 MAIN AI HANDLER
+# ==================================================
+
+async def niki_ai(update, context):
 
     if not update.message:
         return
@@ -8836,9 +8837,8 @@ def get_ai_reply(prompt, text, chat_type):
 
     mood = detect_mood(text)
 
-    # 💖 REAL TELEGRAM REACTION
+    # 💖 REAL MESSAGE REACTION
     await react_message(update, mood)
-
 
     # ==================================================
     # 💖 PROMPT
@@ -8870,7 +8870,6 @@ Mood: {mood}
 Message:
 {text}
 """
-
     # ==================================================
     # 💖 TYPING EFFECT (ADDED)
     # ==================================================
