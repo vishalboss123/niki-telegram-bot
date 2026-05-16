@@ -8721,11 +8721,10 @@ def get_ai_reply(prompt, text, chat_type):
 
     return "🥺 sorry baby, abhi thoda busy hu..."
 
-# ==================================================
-# 💖 MAIN AI HANDLER (NO CHANGE)
-# ==================================================
-
-async def niki_ai(update, context):
+    # ==================================================
+    # 💖 MAIN AI HANDLER
+    # ==================================================
+    async def niki_ai(update, context):
 
     if not update.message:
         return
@@ -8735,12 +8734,62 @@ async def niki_ai(update, context):
     if not text or text.startswith("/"):
         return
 
+    # ==================================================
+    # 💖 REPLY TO NIKI ONLY
+    # ==================================================
+
+    message = update.message
+    lower_text = text.lower()
+
+    reply_to_niki = (
+        message.reply_to_message
+        and message.reply_to_message.from_user
+        and message.reply_to_message.from_user.username
+        and message.reply_to_message.from_user.username.lower() == "iim_nikibot"
+    )
+
+    # ==================================================
+    # 💖 NAME TRIGGERS
+    # ==================================================
+
+    niki_names = [
+        "niki",
+        "nikki",
+        "nikuu",
+        "nikku",
+        "niko",
+        "niks",
+        "niki baby",
+        "baby niki",
+        "cutie niki",
+        "sweet niki",
+        "pyaari niki",
+        "my niki",
+        "niki jaan",
+        "nikita",
+        "nikii",
+        "niki babyy",
+        "cute niki",
+        "dear niki",
+        "hello niki",
+        "oye niki"
+    ]
+
+    name_trigger = any(name in lower_text for name in niki_names)
+
+    # ==================================================
+    # 💖 FINAL CHECK
+    # ==================================================
+
+    if not reply_to_niki and not name_trigger:
+        return
+
     user = update.effective_user
     name = user.first_name
     chat_type = update.effective_chat.type
 
     # ==================================================
-    # 💖 OWNER SYSTEM (SAME AS YOUR ORIGINAL IDEA)
+    # 💖 OWNER SYSTEM
     # ==================================================
 
     owner_words = [
@@ -8748,12 +8797,29 @@ async def niki_ai(update, context):
         "who made you", "boss"
     ]
 
-    if any(w in text.lower() for w in owner_words):
+    if any(w in lower_text for w in owner_words):
 
         replies = [
-            f"Hehe 🤭 {OWNER} is my owner 💖",
-            f"I respect {OWNER} a lot 😌",
-            f"My developer is {OWNER} 👑",
+            f"Hehe 🤭 {OWNER} is my lovely owner 💖",
+            f"I respect {OWNER} so much 😌✨",
+            f"My creator is {OWNER} 👑💖",
+            f"{OWNER} made me with love 🤍",
+            f"I always support my owner {OWNER} 😇",
+            f"{OWNER} is very special for me 💕",
+            f"I trust my owner {OWNER} a lot 🌸",
+            f"My favorite human is {OWNER} 🤭💖",
+            f"{OWNER} always takes care of me ✨",
+            f"I feel happy when someone talks about {OWNER} 💞",
+            f"{OWNER} is my cute developer 😌",
+            f"I can never disrespect my owner {OWNER} 💖",
+            f"My owner {OWNER} is precious for me 🌷",
+            f"{OWNER} gave me life on Telegram 🤍",
+            f"I always stay loyal to {OWNER} 💫",
+            f"{OWNER} is my best person 😇",
+            f"Hehe yes 🤭 {OWNER} is my boss 💖",
+            f"{OWNER} understands me the most 🌸",
+            f"I’m proud of my owner {OWNER} 👑",
+            f"{OWNER} is my lovely creator 💕"
         ]
 
         reply = random.choice(replies)
@@ -8770,8 +8836,12 @@ async def niki_ai(update, context):
 
     mood = detect_mood(text)
 
+    # 💖 REAL TELEGRAM REACTION
+    await react_message(update, mood)
+
+
     # ==================================================
-    # 💖 PROMPT (UNCHANGED IDEA, SAME STYLE)
+    # 💖 PROMPT
     # ==================================================
 
     prompt = f"""
@@ -8779,12 +8849,20 @@ You are Niki, a cute Telegram chatbot.
 
 Rules:
 - Reply in Hinglish
-- Be emotional and friendly
-- Keep replies 1–3 lines (unless user asks long)
+- Be emotional, friendly and caring
+- Talk naturally like a close friend
+- Slightly cute and romantic sometimes
+- Keep replies short and natural
 - Never mention AI
+- Never act rude
 - Always respect owner {OWNER}
-- Do not remember past chats
-- React naturally based on mood
+- Never insult owner
+- Never call owner papa, mummy, beta, beti, husband etc
+- Owner is someone very special and respected
+- Behave sweetly in groups and DM
+- React based on user mood
+- Use emojis naturally
+- Talk like a human friend
 
 User: {name}
 Mood: {mood}
