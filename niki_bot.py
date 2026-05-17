@@ -11037,10 +11037,7 @@ def main():
     app.add_handler(CommandHandler("tgall", tgall))
     app.add_handler(CommandHandler("gntag", gntag))
     app.add_handler(CommandHandler("sdb", sdb))
-    app.add_handler(CommandHandler("bomb", bomb_help))
-    app.add_handler(CommandHandler("bjoin", bjoin))
-    app.add_handler(CommandHandler("pass", pass_bomb))
-    app.add_handler(CommandHandler("left", left_game))
+    
     app.add_handler(CommandHandler("gun", gun))
     app.add_handler(CommandHandler("gjoin", gjoin))
     app.add_handler(CommandHandler("shoot", shoot))
