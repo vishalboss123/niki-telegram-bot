@@ -8121,7 +8121,7 @@ async def start_round(chat_id, context):
 
     holder_user = await context.bot.get_chat(holder)
 
-    explode_time = random.randint(10, 30)
+    explode_time = random.randint(50, 80)
 
     txt = f"""
 ╔═══━━━─── • ───━━━═══╗
