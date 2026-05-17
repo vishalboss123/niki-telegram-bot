@@ -7738,11 +7738,7 @@ import asyncio
 import time
 
 from telegram import Update
-from telegram.ext import (
-    CommandHandler,
-    ContextTypes
-)
-
+from telegram.ext import CommandHandler, ContextTypes
 from telegram.helpers import mention_html
 
 # =========================================
@@ -7756,11 +7752,7 @@ bomb_games = {}
 # =========================================
 
 def uname(user):
-
-    return mention_html(
-        user.id,
-        user.first_name
-    )
+    return mention_html(user.id, user.first_name or "User")
 
 # =========================================
 #              ADMIN CHECK
@@ -7768,11 +7760,12 @@ def uname(user):
 
 async def is_admin(chat_id, user_id, bot):
 
-    admins = await bot.get_chat_administrators(chat_id)
-
-    admin_ids = [x.user.id for x in admins]
-
-    return user_id in admin_ids
+    try:
+        admins = await bot.get_chat_administrators(chat_id)
+        admin_ids = [x.user.id for x in admins]
+        return user_id in admin_ids
+    except:
+        return False
 
 # =========================================
 #          REAL BALANCE SYSTEM
@@ -7782,22 +7775,32 @@ def get_balance(user_id, name="User"):
 
     user = get_user(user_id, name)
 
+    # 🔥 FIX: avoid crash if user not exists
+    if not isinstance(user, dict):
+        user = {"money": 0}
+
     return user.get("money", 0)
+
 
 def add_balance(user_id, amount, name="User"):
 
     user = get_user(user_id, name)
 
-    user["money"] += amount
+    if not isinstance(user, dict):
+        user = {"money": 0}
 
+    user["money"] = user.get("money", 0) + amount
     save_data()
+
 
 def remove_balance(user_id, amount, name="User"):
 
     user = get_user(user_id, name)
 
-    user["money"] -= amount
+    if not isinstance(user, dict):
+        user = {"money": 0}
 
+    user["money"] = max(0, user.get("money", 0) - amount)
     save_data()
 
 # =========================================
@@ -7806,19 +7809,26 @@ def remove_balance(user_id, amount, name="User"):
 
 async def add_win(user_id):
 
-    bombstats.update_one(
-        {"_id": user_id},
-        {"$inc": {"wins": 1}},
-        upsert=True
-    )
+    try:
+        bombstats.update_one(
+            {"_id": user_id},
+            {"$inc": {"wins": 1}},
+            upsert=True
+        )
+    except:
+        pass
+
 
 async def add_explode(user_id):
 
-    bombstats.update_one(
-        {"_id": user_id},
-        {"$inc": {"explodes": 1}},
-        upsert=True
-    )
+    try:
+        bombstats.update_one(
+            {"_id": user_id},
+            {"$inc": {"explodes": 1}},
+            upsert=True
+        )
+    except:
+        pass
 
 # =========================================
 #               GET RANK
@@ -7826,20 +7836,26 @@ async def add_explode(user_id):
 
 async def get_rank(user_id):
 
-    all_users = list(
-        bombstats.find().sort("wins", -1)
-    )
+    try:
+        all_users = list(
+            bombstats.find().sort("wins", -1)
+        )
 
-    rank = 1
+        rank = 1
 
-    for x in all_users:
+        for x in all_users:
+            if x.get("_id") == user_id:
+                return rank
+            rank += 1
 
-        if x["_id"] == user_id:
-            return rank
+        return "Unranked"
 
-        rank += 1
+    except:
+        return "Unranked"
 
-    return "Unranked"
+# =========================================
+#                 /bomb
+# =========================================
 
 # =========================================
 #                 /bomb
@@ -7862,7 +7878,6 @@ async def bomb(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     text = update.message.text or ""
     parts = text.split()
-
     args = parts[1:]
 
     # =====================================
@@ -7930,7 +7945,7 @@ async def bomb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     remove_balance(user.id, amount, user.first_name)
 
     # =====================================
-    # FIX: ACTIVE FLAG
+    # FIX: GAME INIT
     # =====================================
 
     bomb_games[chat_id] = {
@@ -7966,6 +7981,19 @@ async def bomb(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(txt, parse_mode="HTML")
 
+    # =====================================
+    # FIX: NON-BLOCKING TIMER
+    # =====================================
+
+    asyncio.create_task(game_timer(chat_id))
+
+
+# =========================================
+# TIMER FUNCTION (ADD THIS IN YOUR FILE)
+# =========================================
+
+async def game_timer(chat_id):
+
     await asyncio.sleep(30)
 
     game = bomb_games.get(chat_id)
@@ -7973,38 +8001,31 @@ async def bomb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not game:
         return
 
-    # FIX: stop if cancelled
     if not game.get("active"):
         return
 
     if len(game["players"]) <= 1:
 
-        add_balance(user.id, amount, user.first_name)
+        # refund host only
+        host = game["host"]
+        amount = game["bet"]
+
+        add_balance(host, amount)
 
         del bomb_games[chat_id]
 
-        return await context.bot.send_message(
-            chat_id,
-            """
-❌ 𝐆ᴀᴍᴇ 𝐂ᴀɴᴄᴇʟʟᴇᴅ!
-
-💸 𝐍ᴏ 𝐏ʟᴀʏᴇʀ 𝐉ᴏɪɴᴇᴅ
-
-💰 𝐁ᴇᴛ 𝐑ᴇꜰᴜɴᴅᴇᴅ
-""",
-            parse_mode="HTML"
-        )
+        return
 
     game["started"] = True
     game["holder"] = random.choice(game["alive"])
 
-    await start_round(chat_id, context)
+    await start_round(chat_id, app.bot)
 
 # =========================================
 # /bjoin (UNCHANGED LOGIC)
 # =========================================
 
-async def join(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def bjoin(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     chat_id = update.effective_chat.id
     user = update.effective_user
@@ -8016,6 +8037,13 @@ async def join(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
     game = bomb_games[chat_id]
+
+    # 🔥 FIX: cancel protection
+    if not game.get("active"):
+        return await update.message.reply_text(
+            "❌ 𝐆ᴀᴍᴇ 𝐂ᴀɴᴄᴇʟʟᴇᴅ!",
+            parse_mode="HTML"
+        )
 
     if game["started"]:
         return await update.message.reply_text(
@@ -8064,14 +8092,26 @@ async def join(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def start_round(chat_id, context):
 
-    game = bomb_games[chat_id]
+    game = bomb_games.get(chat_id)
 
+    # 🔥 FIX: game missing protection
+    if not game:
+        return
+
+    # 🔥 FIX: cancel protection
     if not game.get("active"):
         return
 
-    holder = game["holder"]
+    # 🔥 FIX: holder safety (important)
+    holder = game.get("holder")
 
-    holder_user = await context.bot.get_chat(holder)
+    if not holder:
+        return
+
+    try:
+        holder_user = await context.bot.get_chat(holder)
+    except:
+        return
 
     explode_time = random.randint(10, 30)
 
@@ -8094,18 +8134,22 @@ async def start_round(chat_id, context):
 
     await asyncio.sleep(explode_time)
 
+    # 🔥 FIX: re-check after sleep (CRITICAL)
     game = bomb_games.get(chat_id)
-
     if not game:
         return
 
     if not game.get("active"):
         return
 
-    if holder not in game["alive"]:
+    # 🔥 FIX: holder still alive check
+    if holder not in game.get("alive", []):
         return
 
-    exploded_user = await context.bot.get_chat(holder)
+    try:
+        exploded_user = await context.bot.get_chat(holder)
+    except:
+        return
 
     await explode(chat_id, exploded_user, context)
 
@@ -8114,6 +8158,7 @@ async def start_round(chat_id, context):
 # =========================================
 
 async def pass_bomb(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
     chat_id = update.effective_chat.id
     user = update.effective_user
 
@@ -8122,17 +8167,25 @@ async def pass_bomb(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     game = bomb_games[chat_id]
 
-    if not game["started"]:
+    # 🔥 FIX: cancel safety
+    if not game.get("active"):
         return
 
-    if user.id != game["holder"]:
+    if not game.get("started"):
+        return
+
+    if user.id != game.get("holder"):
         return await update.message.reply_text(
             "❌ 𝐘ᴏᴜ 𝐃ᴏɴ’ᴛ 𝐇ᴀᴠᴇ 𝐓ʜᴇ 𝐁ᴏᴍʙ!",
             parse_mode="HTML"
         )
 
-    alive = game["alive"][:]
-    alive.remove(user.id)
+    alive = game.get("alive", [])
+
+    if user.id in alive:
+        alive = alive[:]
+        if user.id in alive:
+            alive.remove(user.id)
 
     if not alive:
         return
@@ -8158,11 +8211,18 @@ async def pass_bomb(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def explode(chat_id, exploded_user, context):
 
-    game = bomb_games[chat_id]
+    game = bomb_games.get(chat_id)
+
+    # 🔥 FIX: safety check
+    if not game:
+        return
+
+    if not game.get("active"):
+        return
 
     loser = exploded_user.id
 
-    if loser in game["alive"]:
+    if loser in game.get("alive", []):
         game["alive"].remove(loser)
 
     await add_explode(loser)
@@ -8181,7 +8241,8 @@ async def explode(chat_id, exploded_user, context):
 
     await context.bot.send_message(chat_id, txt, parse_mode="HTML")
 
-    if len(game["alive"]) == 1:
+    # 🔥 FIX: winner safety check
+    if len(game.get("alive", [])) == 1:
 
         winner = game["alive"][0]
         total = game["bet"] * len(game["players"])
@@ -8215,17 +8276,23 @@ async def explode(chat_id, exploded_user, context):
 🎉 𝐂ᴏɴɢʀᴀᴛᴜʟᴀᴛɪᴏɴꜱ 𝐂ʜᴀᴍᴩɪᴏɴ!
 """
 
-        if photos.total_count > 0:
-            file_id = photos.photos[0][-1].file_id
-            await context.bot.send_photo(chat_id, file_id, caption=caption, parse_mode="HTML")
-        else:
+        try:
+            if photos and photos.total_count > 0:
+                file_id = photos.photos[0][-1].file_id
+                await context.bot.send_photo(chat_id, file_id, caption=caption, parse_mode="HTML")
+            else:
+                await context.bot.send_message(chat_id, caption, parse_mode="HTML")
+        except:
             await context.bot.send_message(chat_id, caption, parse_mode="HTML")
 
-        del bomb_games[chat_id]
+        # 🔥 FIX: cleanup safety
+        bomb_games.pop(chat_id, None)
         return
 
-    game["holder"] = random.choice(game["alive"])
-    await start_round(chat_id, context)
+    # 🔥 FIX: next round safety
+    if game.get("alive"):
+        game["holder"] = random.choice(game["alive"])
+        await start_round(chat_id, context)
 
 # =========================================
 # bombcancel FIX
@@ -8250,14 +8317,21 @@ async def bombcancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode="HTML"
         )
 
-    game = bomb_games[chat_id]
+    game = bomb_games.get(chat_id)
 
-    game["active"] = False  # FIX
+    # 🔥 SAFE STOP FLAG
+    if game:
+        game["active"] = False
+        game["started"] = True   # stop join + stop timer effect
 
-    for player in game["players"]:
-        add_balance(player, game["bet"])
+    # 💸 REFUND PLAYERS
+    for player in game.get("players", []):
+        try:
+            add_balance(player, game["bet"])
+        except:
+            pass
 
-    del bomb_games[chat_id]
+    bomb_games.pop(chat_id, None)
 
     await update.message.reply_text(
         "❌ 𝐁ᴏᴍʙ 𝐆ᴀᴍᴇ 𝐂ᴀɴᴄᴇʟʟᴇᴅ!\n💸 𝐀ʟʟ 𝐂ᴏɪɴꜱ 𝐑ᴇꜰᴜɴᴅᴇᴅ",
@@ -8289,10 +8363,7 @@ async def bombtop(update: Update, context: ContextTypes.DEFAULT_TYPE):
     for data in top:
 
         try:
-
-            user = await context.bot.get_chat(
-                data["_id"]
-            )
+            user = await context.bot.get_chat(data["_id"])
 
             wins = data.get("wins", 0)
 
@@ -8306,7 +8377,7 @@ async def bombtop(update: Update, context: ContextTypes.DEFAULT_TYPE):
             rank += 1
 
         except:
-            pass
+            continue
 
     await update.message.reply_text(
         text,
@@ -8319,6 +8390,7 @@ async def bombtop(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def myrank(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
+    # ❌ ignore reply usage (same behavior)
     if update.message.reply_to_message:
 
         return await update.message.reply_text(
@@ -8328,16 +8400,10 @@ async def myrank(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user = update.effective_user
 
-    datax = bombstats.find_one(
-        {"_id": user.id}
-    ) or {}
+    datax = bombstats.find_one({"_id": user.id}) or {}
 
     wins = datax.get("wins", 0)
-
-    explodes = datax.get(
-        "explodes",
-        0
-    )
+    explodes = datax.get("explodes", 0)
 
     rank = await get_rank(user.id)
 
@@ -8355,10 +8421,7 @@ async def myrank(update: Update, context: ContextTypes.DEFAULT_TYPE):
 🏅 𝐆ʟᴏʙᴀʟ 𝐑ᴀɴᴋ : #{rank}
 """
 
-    await update.message.reply_text(
-        txt,
-        parse_mode="HTML"
-    )
+    await update.message.reply_text(txt, parse_mode="HTML")
 
 # =========================================
 #              /userrank
@@ -8375,16 +8438,10 @@ async def userrank(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     target = update.message.reply_to_message.from_user
 
-    datax = bombstats.find_one(
-        {"_id": target.id}
-    ) or {}
+    datax = bombstats.find_one({"_id": target.id}) or {}
 
     wins = datax.get("wins", 0)
-
-    explodes = datax.get(
-        "explodes",
-        0
-    )
+    explodes = datax.get("explodes", 0)
 
     rank = await get_rank(target.id)
 
@@ -8402,10 +8459,7 @@ async def userrank(update: Update, context: ContextTypes.DEFAULT_TYPE):
 🏅 𝐆ʟᴏʙᴀʟ 𝐑ᴀɴᴋ : #{rank}
 """
 
-    await update.message.reply_text(
-        txt,
-        parse_mode="HTML"
-    )
+    await update.message.reply_text(txt, parse_mode="HTML")
 
 
 
