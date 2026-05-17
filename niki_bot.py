@@ -4915,7 +4915,73 @@ async def ban_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "❌ 𝐁ᴀɴ 𝐅ᴀɪʟᴇᴅ"
         )
 
+# ================= TBAN =================
+async def tban_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
+    if not await is_admin(update, context):
+
+        return await update.message.reply_text(
+            "❌ 𝐀ᴅᴍɪɴ 𝐎ɴʟʏ 𝐂ᴏᴍᴍᴀɴᴅ"
+        )
+
+    if len(context.args) < 1:
+
+        return await update.message.reply_text(
+            "❌ 𝐔sᴇ : /tban 10m"
+        )
+
+    duration = parse_time(context.args[0])
+
+    if not duration:
+
+        return await update.message.reply_text(
+            "❌ 𝐈ɴᴠᴀʟɪᴅ 𝐓ɪᴍᴇ"
+        )
+
+    user = get_target_user(update)
+
+    if not user:
+
+        return await update.message.reply_text(
+            "❌ 𝐑ᴇᴘʟʏ 𝐔sᴇʀ 𝐓ᴏ 𝐁ᴀɴ"
+        )
+
+    if is_owner(user):
+
+        return await update.message.reply_text(
+            "😎 𝐎ᴡɴᴇʀ 𝐊ᴏ 𝐁ᴀɴ 𝐍ᴀʜɪ 𝐊ᴀʀ 𝐒ᴀᴋᴛᴇ"
+        )
+
+    until_time = datetime.utcnow() + duration
+
+    try:
+
+        await update.effective_chat.ban_member(
+            user.id,
+            until_date=until_time
+        )
+
+        await update.message.reply_text(f"""
+╔═══━━━─── • ───━━━═══╗
+       ⛔ 𝐓ʙᴀɴ 𝐒ʏsᴛᴇᴍ ⛔
+╚═══━━━─── • ───━━━═══╝
+
+👤 𝐔sᴇʀ : {user.mention_html()}
+⏳ 𝐃ᴜʀᴀᴛɪᴏɴ : {context.args[0]}
+🛡️ 𝐁ʏ : {update.effective_user.mention_html()}
+
+━━━━━━━━━━━━━━━━━━
+💀 𝐔sᴇʀ 𝐓ᴇᴍᴘᴏʀᴀʀɪʟʏ 𝐁ᴀɴɴᴇᴅ
+━━━━━━━━━━━━━━━━━━
+""", parse_mode="HTML")
+
+    except Exception as e:
+
+        print("TBAN ERROR:", e)
+
+        await update.message.reply_text(
+            "❌ 𝐓ʙᴀɴ 𝐅ᴀɪʟᴇᴅ"
+    )
 # ================= UNBAN =================
 async def unban_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
