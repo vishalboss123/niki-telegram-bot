@@ -8525,19 +8525,7 @@ async def userrank(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode="HTML"
     )
 
-# =========================================
-#               HANDLERS
-# =========================================
 
-app.add_handler(CommandHandler("bomb", bomb))
-app.add_handler(CommandHandler("bjoin", join))
-app.add_handler(CommandHandler("pass", pass_bomb))
-app.add_handler(CommandHandler("bombcancel", bombcancel))
-app.add_handler(CommandHandler("bombtop", bombtop))
-app.add_handler(CommandHandler("myrank", myrank))
-app.add_handler(CommandHandler("userrank", userrank))
-
-print("💣 𝐍ɪᴋɪ 𝐁ᴏᴍʙ 𝐆ᴀᴍᴇ 𝐑ᴜɴɴɪɴɢ...")   
 
 
             
