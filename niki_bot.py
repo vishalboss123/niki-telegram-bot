@@ -9,7 +9,7 @@ client = MongoClient(MONGO_URL)
 db_main = client["mydatabase"]
 backup = db_main["backup"]   # ⚡ IMPORTANT (error fix)
 col = db_main["chats"]       # groups/users save  ✅ (IMPORTANT)
-filters = db_main["filters"]
+filters_col = db["filters"]
 
 
 
