@@ -4785,23 +4785,66 @@ async def filter_checker(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 
-OWNER_USERNAME = "YTT_BISHAL"   # without @
+from telegram import ChatPermissions
+from datetime import datetime, timedelta
+import re
+
+OWNER_USERNAME = "YTT_BISHAL"
+
+
+# ================= OWNER CHECK =================
+def is_owner(user):
+
+    if not user:
+        return False
+
+    username = user.username.lower() if user.username else ""
+
+    return username == OWNER_USERNAME.lower()
+
+
+# ================= GET TARGET USER =================
+def get_target_user(update):
+
+    message = update.message
+
+    # reply user
+    if message.reply_to_message:
+        return message.reply_to_message.from_user
+
+    # mention
+    if message.entities:
+
+        for entity in message.entities:
+
+            if entity.type == "text_mention":
+                return entity.user
+
+    return None
 
 
 # ================= ADMIN CHECK =================
 async def is_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
     user_id = update.effective_user.id
     chat_id = update.effective_chat.id
 
-    member = await context.bot.get_chat_member(chat_id, user_id)
-    return member.status in ["administrator", "creator"]
+    member = await context.bot.get_chat_member(
+        chat_id,
+        user_id
+    )
 
-
+    return member.status in [
+        "administrator",
+        "creator"
+    ]
 
 
 # ================= TIME PARSER =================
 def parse_time(time_str):
+
     match = re.match(r"(\d+)([smhd])", time_str)
+
     if not match:
         return None
 
@@ -4810,153 +4853,299 @@ def parse_time(time_str):
 
     if unit == "s":
         return timedelta(seconds=value)
+
     elif unit == "m":
         return timedelta(minutes=value)
+
     elif unit == "h":
         return timedelta(hours=value)
+
     elif unit == "d":
         return timedelta(days=value)
 
 
 # ================= BAN =================
 async def ban_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not await is_admin(update, context):
-        return await update.message.reply_text("❌ Admin only command")
 
-    user = get_user(update, context)
+    if not await is_admin(update, context):
+
+        return await update.message.reply_text(
+            "❌ 𝐀ᴅᴍɪɴ 𝐎ɴʟʏ 𝐂ᴏᴍᴍᴀɴᴅ"
+        )
+
+    user = get_target_user(update)
+
     if not user:
-        return await update.message.reply_text("❌ User not found")
+
+        return await update.message.reply_text(
+            "❌ 𝐑ᴇᴘʟʏ 𝐔sᴇʀ 𝐓ᴏ 𝐁ᴀɴ"
+        )
 
     if is_owner(user):
-        return await update.message.reply_text("❌ Owner ko ban nahi kar sakte 😎")
+
+        return await update.message.reply_text(
+            "😎 𝐎ᴡɴᴇʀ 𝐊ᴏ 𝐁ᴀɴ 𝐍ᴀʜɪ 𝐊ᴀʀ 𝐒ᴀᴋᴛᴇ"
+        )
 
     try:
-        await update.effective_chat.ban_member(user.id)
-        await update.message.reply_text(f"🔨 {user.first_name} banned!")
-    except:
-        await update.message.reply_text("❌ Ban failed")
+
+        await update.effective_chat.ban_member(
+            user.id
+        )
+
+        await update.message.reply_text(f"""
+╔═══━━━─── • ───━━━═══╗
+     🔨 𝐁ᴀɴ 𝐒ʏsᴛᴇᴍ 🔨
+╚═══━━━─── • ───━━━═══╝
+
+👤 𝐔sᴇʀ : {user.mention_html()}
+⚡ 𝐀ᴄᴛɪᴏɴ : 𝐁ᴀɴɴᴇᴅ
+🛡️ 𝐁ʏ : {update.effective_user.mention_html()}
+
+━━━━━━━━━━━━━━━━━━
+💀 𝐔sᴇʀ 𝐇ᴀs 𝐁ᴇᴇɴ 𝐁ᴀɴɴᴇᴅ
+━━━━━━━━━━━━━━━━━━
+""", parse_mode="HTML")
+
+    except Exception as e:
+
+        print("BAN ERROR:", e)
+
+        await update.message.reply_text(
+            "❌ 𝐁ᴀɴ 𝐅ᴀɪʟᴇᴅ"
+        )
 
 
 # ================= UNBAN =================
 async def unban_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not await is_admin(update, context):
-        return await update.message.reply_text("❌ Admin only command")
 
-    user = get_user(update, context)
+    if not await is_admin(update, context):
+
+        return await update.message.reply_text(
+            "❌ 𝐀ᴅᴍɪɴ 𝐎ɴʟʏ 𝐂ᴏᴍᴍᴀɴᴅ"
+        )
+
+    user = get_target_user(update)
+
     if not user:
-        return await update.message.reply_text("❌ User not found")
+
+        return await update.message.reply_text(
+            "❌ 𝐑ᴇᴘʟʏ 𝐔sᴇʀ 𝐓ᴏ 𝐔ɴʙᴀɴ"
+        )
 
     try:
-        await update.effective_chat.unban_member(user.id)
-        await update.message.reply_text(f"✅ {user.first_name} unbanned!")
-    except:
-        await update.message.reply_text("❌ Unban failed")
+
+        await update.effective_chat.unban_member(
+            user.id
+        )
+
+        await update.message.reply_text(f"""
+╔═══━━━─── • ───━━━═══╗
+     ✅ 𝐔ɴʙᴀɴ 𝐒ʏsᴛᴇᴍ ✅
+╚═══━━━─── • ───━━━═══╝
+
+👤 𝐔sᴇʀ : {user.mention_html()}
+⚡ 𝐀ᴄᴛɪᴏɴ : 𝐔ɴʙᴀɴɴᴇᴅ
+🛡️ 𝐁ʏ : {update.effective_user.mention_html()}
+
+━━━━━━━━━━━━━━━━━━
+💖 𝐔sᴇʀ 𝐇ᴀs 𝐁ᴇᴇɴ 𝐔ɴʙᴀɴɴᴇᴅ
+━━━━━━━━━━━━━━━━━━
+""", parse_mode="HTML")
+
+    except Exception as e:
+
+        print("UNBAN ERROR:", e)
+
+        await update.message.reply_text(
+            "❌ 𝐔ɴʙᴀɴ 𝐅ᴀɪʟᴇᴅ"
+        )
 
 
 # ================= MUTE =================
 async def mute_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not await is_admin(update, context):
-        return await update.message.reply_text("❌ Admin only command")
 
-    user = get_user(update, context)
+    if not await is_admin(update, context):
+
+        return await update.message.reply_text(
+            "❌ 𝐀ᴅᴍɪɴ 𝐎ɴʟʏ 𝐂ᴏᴍᴍᴀɴᴅ"
+        )
+
+    user = get_target_user(update)
+
     if not user:
-        return await update.message.reply_text("❌ User not found")
+
+        return await update.message.reply_text(
+            "❌ 𝐑ᴇᴘʟʏ 𝐔sᴇʀ 𝐓ᴏ 𝐌ᴜᴛᴇ"
+        )
 
     if is_owner(user):
-        return await update.message.reply_text("❌ Owner ko mute nahi kar sakte 😎")
+
+        return await update.message.reply_text(
+            "😎 𝐎ᴡɴᴇʀ 𝐊ᴏ 𝐌ᴜᴛᴇ 𝐍ᴀʜɪ 𝐊ᴀʀ 𝐒ᴀᴋᴛᴇ"
+        )
 
     try:
+
         await update.effective_chat.restrict_member(
             user.id,
-            permissions=ChatPermissions(can_send_messages=False)
+            permissions=ChatPermissions(
+                can_send_messages=False
+            )
         )
-        await update.message.reply_text(f"🔇 {user.first_name} muted!")
-    except:
-        await update.message.reply_text("❌ Mute failed")
+
+        await update.message.reply_text(f"""
+╔═══━━━─── • ───━━━═══╗
+     🔇 𝐌ᴜᴛᴇ 𝐒ʏsᴛᴇᴍ 🔇
+╚═══━━━─── • ───━━━═══╝
+
+👤 𝐔sᴇʀ : {user.mention_html()}
+⚡ 𝐀ᴄᴛɪᴏɴ : 𝐌ᴜᴛᴇᴅ
+🛡️ 𝐁ʏ : {update.effective_user.mention_html()}
+
+━━━━━━━━━━━━━━━━━━
+🤐 𝐔sᴇʀ 𝐂ᴀɴ'ᴛ 𝐒ᴇɴᴅ 𝐌ᴇssᴀɢᴇs
+━━━━━━━━━━━━━━━━━━
+""", parse_mode="HTML")
+
+    except Exception as e:
+
+        print("MUTE ERROR:", e)
+
+        await update.message.reply_text(
+            "❌ 𝐌ᴜᴛᴇ 𝐅ᴀɪʟᴇᴅ"
+        )
 
 
 # ================= UNMUTE =================
 async def unmute_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not await is_admin(update, context):
-        return await update.message.reply_text("❌ Admin only command")
 
-    user = get_user(update, context)
+    if not await is_admin(update, context):
+
+        return await update.message.reply_text(
+            "❌ 𝐀ᴅᴍɪɴ 𝐎ɴʟʏ 𝐂ᴏᴍᴍᴀɴᴅ"
+        )
+
+    user = get_target_user(update)
+
     if not user:
-        return await update.message.reply_text("❌ User not found")
+
+        return await update.message.reply_text(
+            "❌ 𝐑ᴇᴘʟʏ 𝐔sᴇʀ 𝐓ᴏ 𝐔ɴᴍᴜᴛᴇ"
+        )
 
     try:
+
         await update.effective_chat.restrict_member(
             user.id,
             permissions=ChatPermissions(
                 can_send_messages=True,
-                can_send_media_messages=True,
+                can_send_audios=True,
+                can_send_documents=True,
+                can_send_photos=True,
+                can_send_videos=True,
+                can_send_video_notes=True,
+                can_send_voice_notes=True,
+                can_send_polls=True,
                 can_send_other_messages=True,
-                can_add_web_page_previews=True
+                can_add_web_page_previews=True,
+                can_invite_users=True
             )
         )
-        await update.message.reply_text(f"🔊 {user.first_name} unmuted!")
-    except:
-        await update.message.reply_text("❌ Unmute failed")
+
+        await update.message.reply_text(f"""
+╔═══━━━─── • ───━━━═══╗
+    🔊 𝐔ɴᴍᴜᴛᴇ 𝐒ʏsᴛᴇᴍ 🔊
+╚═══━━━─── • ───━━━═══╝
+
+👤 𝐔sᴇʀ : {user.mention_html()}
+⚡ 𝐀ᴄᴛɪᴏɴ : 𝐔ɴᴍᴜᴛᴇᴅ
+🛡️ 𝐁ʏ : {update.effective_user.mention_html()}
+
+━━━━━━━━━━━━━━━━━━
+💖 𝐔sᴇʀ 𝐂ᴀɴ 𝐒ᴇɴᴅ 𝐌ᴇssᴀɢᴇs 𝐀ɢᴀɪɴ
+━━━━━━━━━━━━━━━━━━
+""", parse_mode="HTML")
+
+    except Exception as e:
+
+        print("UNMUTE ERROR:", e)
+
+        await update.message.reply_text(
+            "❌ 𝐔ɴᴍᴜᴛᴇ 𝐅ᴀɪʟᴇᴅ"
+        )
 
 
-# ================= TIMED MUTE =================
+# ================= TMUTE =================
 async def tmute_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
     if not await is_admin(update, context):
-        return await update.message.reply_text("❌ Admin only command")
+
+        return await update.message.reply_text(
+            "❌ 𝐀ᴅᴍɪɴ 𝐎ɴʟʏ 𝐂ᴏᴍᴍᴀɴᴅ"
+        )
 
     if len(context.args) < 1:
-        return await update.message.reply_text("❌ Use: /tmute 10m")
+
+        return await update.message.reply_text(
+            "❌ 𝐔sᴇ : /tmute 10m"
+        )
 
     duration = parse_time(context.args[0])
-    if not duration:
-        return await update.message.reply_text("❌ Invalid time")
 
-    user = get_user(update, context)
+    if not duration:
+
+        return await update.message.reply_text(
+            "❌ 𝐈ɴᴠᴀʟɪᴅ 𝐓ɪᴍᴇ"
+        )
+
+    user = get_target_user(update)
+
     if not user:
-        return await update.message.reply_text("❌ User not found")
+
+        return await update.message.reply_text(
+            "❌ 𝐑ᴇᴘʟʏ 𝐔sᴇʀ 𝐓ᴏ 𝐌ᴜᴛᴇ"
+        )
 
     if is_owner(user):
-        return await update.message.reply_text("❌ Owner ko mute nahi kar sakte 😎")
+
+        return await update.message.reply_text(
+            "😎 𝐎ᴡɴᴇʀ 𝐊ᴏ 𝐌ᴜᴛᴇ 𝐍ᴀʜɪ 𝐊ᴀʀ 𝐒ᴀᴋᴛᴇ"
+        )
 
     until_time = datetime.utcnow() + duration
 
     try:
+
         await update.effective_chat.restrict_member(
             user.id,
-            permissions=ChatPermissions(can_send_messages=False),
+            permissions=ChatPermissions(
+                can_send_messages=False
+            ),
             until_date=until_time
         )
-        await update.message.reply_text(f"⏳ {user.first_name} muted for {context.args[0]}")
-    except:
-        await update.message.reply_text("❌ Timed mute failed")
 
+        await update.message.reply_text(f"""
+╔═══━━━─── • ───━━━═══╗
+    ⏳ 𝐓ᴍᴜᴛᴇ 𝐒ʏsᴛᴇᴍ ⏳
+╚═══━━━─── • ───━━━═══╝
 
-# ================= TIMED BAN =================
-async def tban_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not await is_admin(update, context):
-        return await update.message.reply_text("❌ Admin only command")
+👤 𝐔sᴇʀ : {user.mention_html()}
+🔇 𝐌ᴜᴛᴇᴅ : {context.args[0]}
+🛡️ 𝐁ʏ : {update.effective_user.mention_html()}
 
-    if len(context.args) < 1:
-        return await update.message.reply_text("❌ Use: /tban 10m")
+━━━━━━━━━━━━━━━━━━
+🤐 𝐔sᴇʀ 𝐓ᴇᴍᴘᴏʀᴀʀɪʟʏ 𝐌ᴜᴛᴇᴅ
+━━━━━━━━━━━━━━━━━━
+""", parse_mode="HTML")
 
-    duration = parse_time(context.args[0])
-    if not duration:
-        return await update.message.reply_text("❌ Invalid time")
+    except Exception as e:
 
-    user = get_user(update, context)
-    if not user:
-        return await update.message.reply_text("❌ User not found")
+        print("TMUTE ERROR:", e)
 
-    if is_owner(user):
-        return await update.message.reply_text("❌ Owner ko ban nahi kar sakte 😎")
-
-    until_time = datetime.utcnow() + duration
-
-    try:
-        await update.effective_chat.ban_member(user.id, until_date=until_time)
-        await update.message.reply_text(f"⛔ {user.first_name} banned for {context.args[0]}")
-    except:
-        await update.message.reply_text("❌ Timed ban failed")    
+        await update.message.reply_text(
+            "❌ 𝐓ᴍᴜᴛᴇ 𝐅ᴀɪʟᴇᴅ"
+        )
 
  
 
@@ -8700,6 +8889,12 @@ async def save_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # ==================================================
+# 💖 OPENROUTER AI CLIENT
+# ==================================================
+
+from telegram.constants import ChatAction
+
+# ==================================================
 # 💖 OPENROUTER CLIENT
 # ==================================================
 
@@ -8728,6 +8923,12 @@ MODELS = [
 ]
 
 # ==================================================
+# 💖 MEMORY COLLECTION
+# ==================================================
+
+memory_col = db["niki_memory"]
+
+# ==================================================
 # 💖 MOOD DETECTION
 # ==================================================
 
@@ -8737,52 +8938,64 @@ def detect_mood(text):
 
     if any(w in text for w in ["love", "pyar", "jaan", "baby", "kiss"]):
         return "love"
+
     if any(w in text for w in ["sad", "cry", "alone", "broken"]):
         return "sad"
+
     if any(w in text for w in ["angry", "gussa", "hate"]):
         return "angry"
+
     if any(w in text for w in ["happy", "lol", "hehe"]):
         return "happy"
 
     return "cute"
 
 # ==================================================
-# 💖 REACTION SYSTEM (FIXED)
-# ==================================================
-
-def add_reaction(text, mood):
-
-    reactions = {
-        "love": ["❤️", "💖", "🥰", "😍", "😘", "💕", "💞", "❣️", "😋", "💓", "💝"],
-        "sad": ["😢", "💔", "🥺", "😒", "😔"],
-        "angry": ["😤", "💢", "😠", "😡", "🤬"],
-        "happy": ["😄", "✨", "😊", "😁", "🥲", "😝", "😃", "😉", "🙃", "🙂"],
-        "cute": ["🥰", "🌸", "💞", "🫶🏻", "💘", "🙈"]
-    }
-
-    emoji = random.choice(
-        reactions.get(mood, ["🥰"])
-    )
-
-    return f"{text} {emoji}"
-
-# ==================================================
 # 💖 REAL TELEGRAM MESSAGE REACTION
 # ==================================================
 
-async def react_message(update, mood):
+async def react_message(update, mood, text=""):
 
-    reactions = {
-        "love": ["❤️", "💖", "🥰", "😍", "😘", "💕", "💞", "❣️", "💓", "💝"],
-        "sad": ["😢", "💔", "🥺", "😒", "😔"],
-        "angry": ["😤", "💢", "😠", "😡", "🤬"],
-        "happy": ["😄", "✨", "😊", "😁", "🥲", "😝", "😃", "😉", "🙃", "🙂"],
-        "cute": ["🥰", "🌸", "💞", "🫶🏻", "💘", "🙈"]
-    }
+    text = text.lower()
 
-    emoji = random.choice(
-        reactions.get(mood, ["🥰"])
-    )
+    # 💖 CUSTOM MESSAGE BASED REACTION
+    if any(w in text for w in ["love", "pyar", "jaan", "baby", "kiss"]):
+
+        emoji = random.choice(
+            ["❤️", "💖", "🥰", "😍", "😘", "💕", "💞", "❣️", "💓", "💝"]
+        )
+
+    elif any(w in text for w in ["sad", "cry", "alone", "broken", "miss", "hurt"]):
+
+        emoji = random.choice(
+            ["😢", "💔", "🥺", "😔", "😭"]
+        )
+
+    elif any(w in text for w in ["angry", "gussa", "hate", "mad"]):
+
+        emoji = random.choice(
+            ["😤", "💢", "😠", "😡", "🤬"]
+        )
+
+    elif any(w in text for w in ["happy", "lol", "hehe", "fun", "wow"]):
+
+        emoji = random.choice(
+            ["😄", "✨", "😊", "😁", "🥳", "😝", "😃"]
+        )
+
+    else:
+
+        reactions = {
+            "love": ["❤️", "💖", "🥰", "😍", "😘", "💕", "💞", "❣️", "💓", "💝"],
+            "sad": ["😢", "💔", "🥺", "😒", "😔"],
+            "angry": ["😤", "💢", "😠", "😡", "🤬"],
+            "happy": ["😄", "✨", "😊", "😁", "🥲", "😝", "😃", "😉", "🙃", "🙂"],
+            "cute": ["🥰", "🌸", "💞", "🫶🏻", "💘", "🙈"]
+        }
+
+        emoji = random.choice(
+            reactions.get(mood, ["🥰"])
+        )
 
     try:
         await update.message.set_reaction(
@@ -8793,47 +9006,111 @@ async def react_message(update, mood):
         print("Reaction Error:", e)
 
 # ==================================================
-# 💖 TYPING INDICATOR (ADDED ONLY)
+# 💖 TYPING INDICATOR
 # ==================================================
 
 async def show_typing(context, chat_id):
+
     await context.bot.send_chat_action(
         chat_id=chat_id,
         action=ChatAction.TYPING
     )
 
 # ==================================================
-# 💖 TYPING DELAY (SAME)
+# 💖 TYPING DELAY
 # ==================================================
 
 async def typing_delay(update, text):
+
     delay = min(len(text) * 0.02, 2.5)
     await asyncio.sleep(delay)
 
 # ==================================================
-# 💖 AI ENGINE (NO CHANGE IN LOGIC)
+# 💖 MEMORY SYSTEM
 # ==================================================
 
-def get_ai_reply(prompt, text, chat_type):
+def get_memory(user_id):
+
+    data = memory_col.find_one(
+        {"_id": str(user_id)}
+    )
+
+    if data:
+        return data.get("messages", [])
+
+    return []
+
+def save_memory(user_id, role, content):
+
+    old = get_memory(user_id)
+
+    old.append({
+        "role": role,
+        "content": content
+    })
+
+    # only last 6 msgs
+    old = old[-6:]
+
+    memory_col.update_one(
+        {"_id": str(user_id)},
+        {
+            "$set": {
+                "messages": old
+            }
+        },
+        upsert=True
+    )
+
+# ==================================================
+# 💖 AI ENGINE
+# ==================================================
+
+def get_ai_reply(prompt, text, chat_type, history=None):
 
     style = ""
 
     if chat_type == "private":
-        style = "You are a cute emotional Hinglish chatbot."
+
+        style = (
+            "You are a cute emotional Hinglish chatbot. "
+            "Reply naturally like a human friend. "
+            "Remember previous messages and reply according to context. "
+            "Talk emotionally and intelligently."
+        )
+
     else:
-        style = "You are a short group assistant chatbot."
+
+        style = (
+            "You are a short group assistant chatbot."
+        )
 
     final_prompt = prompt + "\nStyle:\n" + style
+
+    messages = [
+        {
+            "role": "system",
+            "content": final_prompt
+        }
+    ]
+
+    # 💖 MEMORY HISTORY
+    if history:
+        for msg in history:
+            messages.append(msg)
+
+    messages.append({
+        "role": "user",
+        "content": text
+    })
 
     for model in MODELS:
 
         try:
+
             response = client_ai.chat.completions.create(
                 model=model,
-                messages=[
-                    {"role": "system", "content": final_prompt},
-                    {"role": "user", "content": text}
-                ],
+                messages=messages,
                 temperature=0.9,
                 max_tokens=250
             )
@@ -8844,6 +9121,7 @@ def get_ai_reply(prompt, text, chat_type):
                 return reply.strip()
 
         except Exception as e:
+
             print("MODEL FAIL:", model, e)
             continue
 
@@ -8871,10 +9149,12 @@ async def niki_ai(update, context):
     lower_text = text.lower()
 
     reply_to_niki = (
+
         message.reply_to_message
         and message.reply_to_message.from_user
         and message.reply_to_message.from_user.username
         and message.reply_to_message.from_user.username.lower() == "iim_nikibot"
+
     )
 
     # ==================================================
@@ -8904,7 +9184,22 @@ async def niki_ai(update, context):
         "oye niki"
     ]
 
-    name_trigger = any(name in lower_text for name in niki_names)
+    name_trigger = any(
+        name in lower_text
+        for name in niki_names
+    )
+
+    user = update.effective_user
+    name = user.first_name
+    chat_type = update.effective_chat.type
+
+    # ==================================================
+    # 💖 DM AUTO CHAT
+    # ==================================================
+
+    if chat_type == "private":
+        reply_to_niki = True
+        name_trigger = True
 
     # ==================================================
     # 💖 FINAL CHECK
@@ -8913,17 +9208,17 @@ async def niki_ai(update, context):
     if not reply_to_niki and not name_trigger:
         return
 
-    user = update.effective_user
-    name = user.first_name
-    chat_type = update.effective_chat.type
-
     # ==================================================
     # 💖 OWNER SYSTEM
     # ==================================================
 
     owner_words = [
-        "owner", "developer", "dev", "creator",
-        "who made you", "boss"
+        "owner",
+        "developer",
+        "dev",
+        "creator",
+        "who made you",
+        "boss"
     ]
 
     if any(w in lower_text for w in owner_words):
@@ -8951,22 +9246,21 @@ async def niki_ai(update, context):
             f"{OWNER} is my lovely creator 💕"
         ]
 
+
         reply = random.choice(replies)
 
         mood = detect_mood(text)
-        reply = add_reaction(reply, mood)
 
         await update.message.reply_text(reply)
         return
 
     # ==================================================
-    # 💖 REAL TELEGRAM MESSAGE REACTION
+    # 💖 REACTION
     # ==================================================
 
     mood = detect_mood(text)
 
-    # 💖 REAL MESSAGE REACTION
-    await react_message(update, mood)
+    await react_message(update, mood, text)
 
     # ==================================================
     # 💖 PROMPT
@@ -8991,6 +9285,8 @@ Rules:
 - React based on user mood
 - Use emojis naturally
 - Talk like a human friend
+- Remember previous conversation
+- Reply according to user context
 
 User: {name}
 Mood: {mood}
@@ -9000,10 +9296,14 @@ Message:
 """
 
     # ==================================================
-    # 💖 TYPING EFFECT (ADDED)
+    # 💖 TYPING EFFECT
     # ==================================================
 
-    await show_typing(context, update.effective_chat.id)
+    await show_typing(
+        context,
+        update.effective_chat.id
+    )
+
     await typing_delay(update, text)
 
     # ==================================================
@@ -9012,11 +9312,32 @@ Message:
 
     try:
 
-        reply = get_ai_reply(prompt, text, chat_type)
+        # 💖 LOAD MEMORY
+        history = get_memory(user.id)
 
-        # reaction added
-        reply = add_reaction(reply, mood)
+        # 💖 AI REPLY
+        reply = get_ai_reply(
+            prompt,
+            text,
+            chat_type,
+            history
+        )
 
+        # 💖 SAVE USER MEMORY
+        save_memory(
+            user.id,
+            "user",
+            text
+        )
+
+        # 💖 SAVE BOT MEMORY
+        save_memory(
+            user.id,
+            "assistant",
+            reply
+        )
+
+        # 💖 SEND REPLY
         await update.message.reply_text(reply)
 
     except Exception as e:
@@ -9024,13 +9345,7 @@ Message:
         await update.message.reply_text(
             f"⚠️ ERROR:\n{str(e)[:200]}"
         )
-
-
-
-
-        
     
-
     
 #======================payment======================
 from telegram import (
