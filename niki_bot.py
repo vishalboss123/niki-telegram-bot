@@ -8754,9 +8754,90 @@ async def shoot(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # ================= TIMER =================
+# ================= TIMER =================
 async def gun_timer(chat_id, context):
 
-    await asyncio.sleep(60)
+    # ================= 10 SEC ALERT =================
+    await asyncio.sleep(10)
+
+    if chat_id not in gun_games:
+        return
+
+    await context.bot.send_message(
+        chat_id,
+        """
+╔═══━━━─── • ───━━━═══╗
+      🔥 𝐒𝐇𝐎𝐎𝐓 𝐅𝐀𝐒𝐓 🔥
+╚═══━━━─── • ───━━━═══╝
+
+⚡ Aʀᴇʏʏ Jʟᴅɪ /shoot Sᴘᴀᴍ Kʀᴏ 😈
+
+🔫 Jɪᴛɴᴀ Jʏᴀᴅᴀ Sʜᴏᴏᴛ
+🏆 Uᴛɴᴀ Hɪɢʜ Cʜᴀɴᴄᴇ Tᴏ Wɪɴ!
+"""
+    )
+
+    # ================= 20 SEC MORE =================
+    await asyncio.sleep(20)
+
+    if chat_id not in gun_games:
+        return
+
+    await context.bot.send_message(
+        chat_id,
+        """
+╔═══━━━─── • ───━━━═══╗
+      ⚔️ 𝐃𝐔𝐄𝐋 𝐑𝐔𝐍𝐍𝐈𝐍𝐆 ⚔️
+╚═══━━━─── • ───━━━═══╝
+
+💥 Gᴀᴍᴇ Aʙʜɪ Bʜɪ Cʜᴀʟ Rʜᴀ Hᴇ!
+
+🔥 Sᴘᴀᴍ /shoot Aᴜʀ Fᴀsᴛ Kʀᴏ 😈
+"""
+    )
+
+    # ================= LAST 20 SEC ALERT =================
+    await asyncio.sleep(20)
+
+    if chat_id not in gun_games:
+        return
+
+    await context.bot.send_message(
+        chat_id,
+        """
+╔═══━━━─── • ───━━━═══╗
+      🚨 𝐋𝐀𝐒𝐓 𝟐𝟎 𝐒𝐄𝐂 🚨
+╚═══━━━─── • ───━━━═══╝
+
+⚡ Aʙ Sɪʀғ 20 Sᴇᴄ Bᴀᴋɪ Hᴇ!
+
+🔫 Fᴀsᴛ /shoot Sᴘᴀᴍ Kʀᴏ 😳
+"""
+    )
+
+    # ================= LAST 10 SEC ALERT =================
+    await asyncio.sleep(10)
+
+    if chat_id not in gun_games:
+        return
+
+    await context.bot.send_message(
+        chat_id,
+        """
+╔═══━━━─── • ───━━━═══╗
+      ⏰ 𝐋𝐀𝐒𝐓 𝟏𝟎 𝐒𝐄𝐂 ⏰
+╚═══━━━─── • ───━━━═══╝
+
+🚨 Lᴀsᴛ 10 Sᴇᴄ!
+
+💥 Sᴘᴀᴍ /shoot Nᴏᴡ 🔫
+
+🏆 Wɪɴɴᴇʀ Sᴏᴏɴ Dᴇᴄɪᴅᴇ Hᴏɢᴀ...
+"""
+    )
+
+    # ================= GAME END =================
+    await asyncio.sleep(10)
 
     if chat_id not in gun_games:
         return
@@ -8769,6 +8850,7 @@ async def gun_timer(chat_id, context):
     s1 = game["shots"][p1]
     s2 = game["shots"][p2]
 
+    # ================= DRAW =================
     if s1 > s2:
         winner = p1
         winner_name = game["creator_name"]
@@ -8793,15 +8875,17 @@ async def gun_timer(chat_id, context):
             chat_id,
             """
 ╔═══━━━─── • ───━━━═══╗
-        🤝 𝐃𝐑𝐀𝐖 🤝
+         🤝 𝐃𝐑𝐀𝐖 🤝
 ╚═══━━━─── • ───━━━═══╝
 
-⚔️ 𝐁ᴏᴛʜ 𝐏ʟᴀʏᴇʀꜱ 𝐅ɪʀᴇᴅ 𝐄Qᴜᴀʟ 𝐒ʜᴏᴛꜱ!
+⚔️ Bᴏᴛʜ Pʟᴀʏᴇʀs Fɪʀᴇᴅ
+𝐄Qᴜᴀʟ Sʜᴏᴛs 😳
 
-💰 𝐁ᴇᴛ 𝐑ᴇꜰᴜɴᴅᴇᴅ.
+💰 Bᴇᴛ Rᴇғᴜɴᴅᴇᴅ!
 """
         )
 
+    # ================= WINNER =================
     reward = game["amount"] * 2
 
     wdata = get_user(winner, winner_name)
@@ -8839,9 +8923,7 @@ async def gun_timer(chat_id, context):
 💰 𝐖ᴏɴ:
 ₹{reward}
 
-💎 𝐀ᴅᴅᴇᴅ 𝐓ᴏ 𝐑ᴇᴀʟ 𝐁ᴀʟᴀɴᴄᴇ!
-
-🔥 𝐆ᴜɴ 𝐊ɪɴɢ!
+🔥 𝐆ᴜɴ 𝐊ɪɴɢ 👑
 """
 
     if photos.total_count > 0:
