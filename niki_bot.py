@@ -11030,7 +11030,7 @@ def main():
     app.add_handler(CommandHandler("gjoin", gjoin))
     app.add_handler(CommandHandler("shoot", shoot))
     app.add_handler(CommandHandler("bomb", bomb))
-    app.add_handler(CommandHandler("bjoin", join))
+    app.add_handler(CommandHandler("bjoin", bjoin))
     app.add_handler(CommandHandler("pass", pass_bomb))
     app.add_handler(CommandHandler("bombcancel", bombcancel))
     app.add_handler(CommandHandler("bombtop", bombtop))
