@@ -808,10 +808,16 @@ def is_protected(user_data):
     now = time.time()
     return user_data.get("protection_until", 0) > now
 # ------------------ DAILY COMMAND ------------------
-# ------------------ DAILY COMMAND ------------------
+
 import time
 import random
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+
+from telegram import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    Update
+)
+
 from telegram.ext import ContextTypes
 
 pending_daily = {}
@@ -833,6 +839,7 @@ async def daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # ==================================================
     # 💓 GROUP → DM REDIRECT
     # ==================================================
+
     if update.effective_chat.type != "private":
 
         keyboard = InlineKeyboardMarkup([
@@ -854,62 +861,71 @@ async def daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # ==================================================
     # ⏳ COOLDOWN
     # ==================================================
+
     if now - user_data.get("last_daily", 0) < 86400:
-        remain = 86400 - (now - user_data.get("last_daily", 0))
+
+        remain = 86400 - (
+            now - user_data.get("last_daily", 0)
+        )
 
         await update.message.reply_text(
-            f"⏳ Aʟʀᴇᴀᴅʏ Cʟᴀɪᴍᴇᴅ!\n🕒 Tʀʏ Aғᴛᴇʀ {format_time(remain)}"
+            f"⏳ Aʟʀᴇᴀᴅʏ Cʟᴀɪᴍᴇᴅ!\n"
+            f"🕒 Tʀʏ Aғᴛᴇʀ {format_time(remain)}"
         )
         return
 
     # ==================================================
     # 💎 PREMIUM USER
     # ==================================================
+
     if user_data.get("premium", False):
 
-        pending_daily[user.id] = {
-            "premium": True,
-            "time": now
-        }
+        reward = 5000
 
-        keyboard = InlineKeyboardMarkup([
-            [
-                InlineKeyboardButton(
-                    "💓 Claim Premium Reward",
-                    callback_data=f"claim_{user.id}"
-                )
-            ]
-        ])
+        # ✅ DIRECT BALANCE ADD
+        user_data["money"] = (
+            user_data.get("money", 0)
+            + reward
+        )
+
+        user_data["last_daily"] = time.time()
+
+        save_data()
 
         await update.message.reply_text(
             "╔═══━━━─── • ───━━━═══╗\n"
-            "      💓 𝐏ʀᴇᴍɪᴜᴍ 𝐃ᴀɪʟʏ 💓\n"
+            "      💎 𝐏ʀᴇᴍɪᴜᴍ 𝐃ᴀɪʟʏ 💎\n"
             "╚═══━━━─── • ───━━━═══╝\n\n"
 
             "✨ 𝐏ʀᴇᴍɪᴜᴍ 𝐔sᴇʀ 𝐃ᴇᴛᴇᴄᴛᴇᴅ 😈\n\n"
 
-            "💰 𝐘ᴏᴜ 𝐑ᴇᴄᴇɪᴠᴇᴅ ₹5000\n"
+            f"💰 ₹{reward} 𝐀ᴅᴅᴇᴅ 𝐓ᴏ 𝐘ᴏᴜʀ 𝐁ᴀʟᴀɴᴄᴇ\n\n"
+
+            f"🏦 𝐍ᴇᴡ 𝐁ᴀʟᴀɴᴄᴇ: ₹{user_data['money']}\n\n"
+
             "⚡ Nᴏ Vᴇʀɪғɪᴄᴀᴛɪᴏɴ RᴇQᴜɪʀᴇᴅ\n"
             "🔥 Fᴀsᴛ Pʀᴇᴍɪᴜᴍ Cʟᴀɪᴍ Sᴜᴄᴄᴇss"
         )
+
         return
 
     # ==================================================
     # 🤖 NORMAL USER
     # ==================================================
+
     a = random.randint(1, 9)
     b = random.randint(1, 9)
 
     pending_daily[user.id] = {
-        "answer": a + b,
-        "time": now,
-        "premium": False
+        "answer": str(a + b),
+        "solved": False,
+        "time": now
     }
 
     keyboard = InlineKeyboardMarkup([
         [
             InlineKeyboardButton(
-                "🎁 Cʟᴀɪᴍ Yᴏᴜʀ Rᴇᴡᴀʀᴅ",
+                "🎁 Cʟᴀɪᴍ Rᴇᴡᴀʀᴅ",
                 callback_data=f"claim_{user.id}"
             )
         ]
@@ -917,17 +933,54 @@ async def daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(
         "╔═══━━━─── • ───━━━═══╗\n"
-        "      🤖 𝐃ᴀɪʟʏ 𝐑ᴇᴡᴀʀᴅ 𝐕ᴇʀɪғɪᴄᴀᴛɪᴏɴ 🤖\n"
+        "      🤖 𝐃ᴀɪʟʏ 𝐕ᴇʀɪғɪᴄᴀᴛɪᴏɴ 🤖\n"
         "╚═══━━━─── • ───━━━═══╝\n\n"
 
         "🧠 𝐒ᴏʟᴠᴇ 𝐓ʜɪs 𝐐ᴜᴇsᴛɪᴏɴ:\n"
         f"➤ {a} + {b} = ?\n\n"
 
+        "✍️ 𝐅ɪʀsᴛ 𝐒ᴇɴᴅ 𝐓ʜᴇ 𝐀ɴsᴡᴇʀ 𝐈ɴ 𝐂ʜᴀᴛ\n"
+        "🎁 𝐓ʜᴇɴ 𝐂ʟɪᴄᴋ 𝐂ʟᴀɪᴍ 𝐑ᴇᴡᴀʀᴅ\n\n"
+
         "💡 𝐇ɪɢʜᴇʀ 𝐁ᴀʟᴀɴᴄᴇ 𝐖ᴀɴᴛ?\n"
-        "👉 Use /pay to unlock premium rewards 💓",
+        "👉 Use /pay To Unlock Premium 💓"
+        
+        "💓 Uᴘɢʀᴀᴅᴇ Tᴏ Pʀᴇᴍɪᴜᴍ Fᴏʀ Hɪɢʜᴇʀ Dᴀɪʟʏ Rᴇᴡᴀʀᴅ Aɴᴅ Sᴋɪᴘ Vᴇʀɪꜰɪᴄᴀᴛɪᴏɴ → /pay",
+
         reply_markup=keyboard
     )
 
+# ==================================================
+# 💬 ANSWER DETECT
+# ==================================================
+
+async def daily_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not update.message:
+        return
+
+    user = update.effective_user
+    text = update.message.text.strip()
+
+    if user.id not in pending_daily:
+        return
+
+    data = pending_daily[user.id]
+
+    # already solved
+    if data.get("solved"):
+        return
+
+    # ✅ correct answer
+    if text == data["answer"]:
+
+        data["solved"] = True
+
+        await update.message.reply_text(
+            "✅ 𝐕ᴇʀɪғɪᴄᴀᴛɪᴏɴ 𝐂ᴏᴍᴘʟᴇᴛᴇ 😈\n\n"
+            "🎁 𝐍ᴏᴡ 𝐂ʟɪᴄᴋ 'Claim Reward'"
+            "💓 Uᴘɢʀᴀᴅᴇ Tᴏ Pʀᴇᴍɪᴜᴍ Fᴏʀ Hɪɢʜᴇʀ Dᴀɪʟʏ Rᴇᴡᴀʀᴅ Aɴᴅ Sᴋɪᴘ Vᴇʀɪꜰɪᴄᴀᴛɪᴏɴ → /pay"
+        )
 
 # ==================================================
 # 🔘 CLAIM CALLBACK
@@ -936,62 +989,60 @@ async def daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def claim_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     query = update.callback_query
+
     await query.answer()
 
     user = query.from_user
 
     if user.id not in pending_daily:
-        await query.edit_message_text("❌ Nᴏ Pᴇɴᴅɪɴɢ Vᴇʀɪғɪᴄᴀᴛɪᴏɴ")
         return
 
     data = pending_daily[user.id]
-    user_data = get_user(user.id, user.first_name)
 
-    if not data.get("premium"):
-        if time.time() - data["time"] < 10:
-            await query.answer("⏳ Wᴀɪᴛ 10 Sᴇᴄ!", show_alert=True)
-            return
+    # ❌ answer not solved
+    if not data.get("solved"):
 
-    if data.get("premium"):
-        reward = 5000
-    else:
-        reward = 1500
+        return await query.answer(
+            f"⚠️ First Send Answer: {data['answer']}",
+            show_alert=True
+        )
 
-    # ✅ REAL BALANCE ADD
-    user_data["money"] = user_data.get("money", 0) + reward
+    user_data = get_user(
+        user.id,
+        user.first_name
+    )
 
-    # ✅ SAVE DAILY TIME
+    reward = 1500
+
+    # ✅ BALANCE ADD
+    user_data["money"] = (
+        user_data.get("money", 0)
+        + reward
+    )
+
     user_data["last_daily"] = time.time()
 
     save_data()
+
     del pending_daily[user.id]
 
-    # ==================================================
-    # 💰 UPDATED NORMAL MESSAGE
-    # ==================================================
-    if data.get("premium"):
-        msg = (
-            "💎 Premium Reward Added Successfully ⚡\n\n"
-            f"💰 ₹{reward} Added To Your Balance"
-        )
-    else:
-        msg = (
-            "╔═══━━━─── • ───━━━═══╗\n"
-            "      💰 𝐃ᴀɪʟʏ 𝐑ᴇᴡᴀʀᴅ 𝐒ᴜᴄᴄᴇss 💰\n"
-            "╚═══━━━─── • ───━━━═══╝\n\n"
+    await query.edit_message_text(
+        "╔═══━━━─── • ───━━━═══╗\n"
+        "      💰 𝐃ᴀɪʟʏ 𝐑ᴇᴡᴀʀᴅ 💰\n"
+        "╚═══━━━─── • ───━━━═══╝\n\n"
 
-            "🎉 𝐂ᴏɴɢʀᴀᴛᴜʟᴀᴛɪᴏɴs!\n"
-            f"💸 𝐘ᴏᴜ 𝐑ᴇᴄᴇɪᴠᴇᴅ ₹{reward}\n\n"
+        "🎉 𝐂ᴏɴɢʀᴀᴛᴜʟᴀᴛɪᴏɴs!\n\n"
 
-            "⚡ 𝐑ᴇᴡᴀʀᴅ 𝐀ᴅᴅᴇᴅ 𝐒ᴜᴄᴄᴇssғᴜʟʟʏ\n\n"
+        f"💸 ₹{reward} 𝐀ᴅᴅᴇᴅ\n\n"
 
-            f"🏦 𝐍ᴇᴡ 𝐁ᴀʟᴀɴᴄᴇ: ₹{user_data['money']}\n\n"
+        f"🏦 𝐍ᴇᴡ 𝐁ᴀʟᴀɴᴄᴇ: ₹{user_data['money']}\n\n"
 
-            "💡 𝐖ᴀɴᴛ 𝐇ɪɢʜᴇʀ 𝐁ᴀʟᴀɴᴄᴇ?\n"
-            "👉 𝐔sᴇ /pay 𝐓ᴏ 𝐔ɴʟᴏᴄᴋ 𝐏ʀᴇᴍɪᴜᴍ 💓\n\n"
+        "💓 Uᴘɢʀᴀᴅᴇ Tᴏ Pʀᴇᴍɪᴜᴍ → /pay"
+        "💓 Uᴘɢʀᴀᴅᴇ Tᴏ Pʀᴇᴍɪᴜᴍ Fᴏʀ Hɪɢʜᴇʀ Dᴀɪʟʏ Rᴇᴡᴀʀᴅ Aɴᴅ Sᴋɪᴘ Vᴇʀɪꜰɪᴄᴀᴛɪᴏɴ → /pay"
+        
+)
 
-            "💓 Uᴘɢʀᴀᴅᴇ Tᴏ Pʀᴇᴍɪᴜᴍ Fᴏʀ Hɪɢʜᴇʀ Dᴀɪʟʏ Rᴇᴡᴀʀᴅ Aɴᴅ Sᴋɪᴘ Vᴇʀɪꜰɪᴄᴀᴛɪᴏɴ → /pay"
-       )
+
 
     
 
