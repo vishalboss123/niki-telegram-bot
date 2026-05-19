@@ -11273,15 +11273,7 @@ def main():
         )
     )
 
-    # ================= CLAIM SYSTEM =================
-
-    app.add_handler(
-        CallbackQueryHandler(
-            claim_callback,
-            pattern="^claim_"
-        ),
-        group=0
-    )
+    
 
     # ================= DAILY VERIFY =================
 
