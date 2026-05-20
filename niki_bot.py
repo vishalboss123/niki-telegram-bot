@@ -4265,10 +4265,32 @@ async def member_update_welcome(update: Update, context: ContextTypes.DEFAULT_TY
 async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     import asyncio, random
+    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
     user = update.effective_user
     user_id = str(user.id)
     mention = f"<a href='tg://user?id={user_id}'>{user.first_name}</a>"
+
+    chat = update.effective_chat
+
+    # 🚫 GROUP CHECK + BUTTON
+    if chat.type != "private":
+
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton(
+                "💌 Start Magic in DM ✨",
+                url="https://t.me/iim_nikibot?start=magic"
+            )]
+        ])
+
+        await update.message.reply_text(
+            "⚠️ <b>This command only works in DM (Private Chat)</b>\n\n"
+            "💻 Magic system is not allowed in groups!\n\n"
+            "👇 Click below to start magic in DM ✨",
+            reply_markup=keyboard,
+            parse_mode="HTML"
+        )
+        return
 
     msg = await update.message.reply_text("💻 Initializing hack...")
 
@@ -4281,13 +4303,12 @@ async def magic(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     for step in steps:
         await asyncio.sleep(1.2)
-
         try:
             await msg.edit_text(f"💻 {step}")
         except:
-            continue  # safe continue (no crash)
+            pass
 
-    # ================= USER FIX =================
+    # ================= USER =================
 
     u = get_user(user_id, user.first_name)
 
