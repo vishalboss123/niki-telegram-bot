@@ -930,7 +930,7 @@ async def daily(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [
             InlineKeyboardButton(
                 "💖 Cʟɪᴄᴋ Tᴏ Eɴᴛᴇʀ Nɪᴋɪ Wᴏʀʟᴅ",
-                url="https://t.me/nikiworld"
+                url="https://t.me/YTN_BISHAL"
             )
         ]
 
