@@ -12402,33 +12402,9 @@ async def reply_whisper(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
-# =========================================================
-#                     HANDLERS
-# =========================================================
 
-app.add_handler(
 
-    MessageHandler(
-        filters.TEXT & ~filters.COMMAND,
-        niki_whisper
-    )
-)
 
-app.add_handler(
-
-    CallbackQueryHandler(
-        open_whisper,
-        pattern="^openwhisper_"
-    )
-)
-
-app.add_handler(
-
-    CallbackQueryHandler(
-        reply_whisper,
-        pattern="^replywhisper_"
-    )
-)
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
