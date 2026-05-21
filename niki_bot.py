@@ -10981,67 +10981,52 @@ async def ping(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ✅ Winner DP + Auto Pin
 # ✅ Hack Loading Animation
 
-
 # =========================================================
 #                    GAME STORAGE
 # =========================================================
 
 hack_games = {}
 
+
 # =========================================================
 #                   USER MENTION
 # =========================================================
 
 def uname(user):
+    return mention_html(user.id, user.first_name)
 
-    return mention_html(
-        user.id,
-        user.first_name
-    )
 
 # =========================================================
 #                 BALANCE SYSTEM
 # =========================================================
 
 def get_balance(user_id):
-
     user = get_user(user_id, "Player")
-
     return user.get("money", 0)
 
-# =========================================================
 
 def add_balance(user_id, amount):
-
     user = get_user(user_id, "Player")
-
-    user["money"] += amount
-
+    user["money"] = user.get("money", 0) + amount
     save_data()
 
-# =========================================================
 
 def remove_balance(user_id, amount):
-
     user = get_user(user_id, "Player")
-
-    user["money"] -= amount
-
+    user["money"] = user.get("money", 0) - amount
     save_data()
+
 
 # =========================================================
 #                 PASSWORD GENERATOR
 # =========================================================
 
 def generate_password(length):
+    return "".join(random.choice("0123456789") for _ in range(length))
 
-    return "".join(
-        random.choice("0123456789")
-        for _ in range(length)
-    )
 
 # =========================================================
-#               HACKS & GLITCHES
+#               HACKS & GLITCHES (SAFE FIXED)
 # =========================================================
 
 def calculate_result(secret, guess):
@@ -11052,12 +11037,11 @@ def calculate_result(secret, guess):
     secret_used = []
     guess_used = []
 
-    for i in range(len(secret)):
+    # SAFE LOOP (avoid index crash)
+    for i in range(min(len(secret), len(guess))):
 
         if guess[i] == secret[i]:
-
             hacks += 1
-
             secret_used.append(i)
             guess_used.append(i)
 
@@ -11072,13 +11056,11 @@ def calculate_result(secret, guess):
                 continue
 
             if guess[i] == secret[j]:
-
                 glitches += 1
                 secret_used.append(j)
                 break
 
     return hacks, glitches
-
 # =========================================================
 #                    NEXT TURN
 # =========================================================
@@ -11095,14 +11077,24 @@ async def next_turn(chat_id, context):
         if p["active"]
     ]
 
-    # =====================================================
-    #            AUTO WIN IF 1 PLAYER LEFT
-    # =====================================================
-
     active_players = [
         p for p in game["players"]
         if p["active"]
     ]
+
+    # ================= FIX START =================
+    game["turn_active"] = True
+
+    if "turn_id" not in game:
+        game["turn_id"] = 0
+
+    game["turn_id"] += 1
+    current_turn_id = game["turn_id"]
+    # ================= FIX END =================
+
+    # =====================================================
+    #            AUTO WIN IF 1 PLAYER LEFT
+    # =====================================================
 
     if len(active_players) == 1:
 
@@ -11124,23 +11116,23 @@ async def next_turn(chat_id, context):
 
         caption = (
             "╔══════════════════╗\n"
-            "   🏆 AUTO HACK WIN\n"
+            "   🏆 𝘼𝙐𝙏𝙊 𝙃𝘼𝘾𝙆 𝙒𝙄𝙉\n"
             "╚══════════════════╝\n\n"
 
-            f"👑 Last Hacker:\n"
+            f"👑 𝙇𝙖𝙨𝙩 𝙃𝙖𝙘𝙠𝙚𝙧:\n"
             f"{winner['name']}\n\n"
 
-            f"💰 Reward:\n"
+            f"💰 𝙍𝙚𝙬𝙖𝙧𝙙:\n"
             f"➥ {prize}\n\n"
 
-            f"🏦 New Balance:\n"
+            f"🏦 𝙉𝙚𝙬 𝘽𝙖𝙡𝙖𝙣𝙘𝙚:\n"
             f"➥ {balance}\n\n"
 
             "━━━━━━━━━━━━━━━━━━\n\n"
 
-            "💻 All Other Hackers Eliminated\n"
-            "🛰 System Access Granted\n"
-            "⚡ Last Hacker Standing"
+            "💻 𝘼𝙡𝙡 𝙊𝙩𝙝𝙚𝙧 𝙃𝙖𝙘𝙠𝙚𝙧𝙨 𝙀𝙡𝙞𝙢𝙞𝙣𝙖𝙩𝙚𝙙\n"
+            "🛰 𝙎𝙮𝙨𝙩𝙚𝙢 𝘼𝙘𝙘𝙚𝙨𝙨 𝙂𝙧𝙖𝙣𝙩𝙚𝙙\n"
+            "⚡ 𝙇𝙖𝙨𝙩 𝙃𝙖𝙘𝙠𝙚𝙧 𝙎𝙩𝙖𝙣𝙙𝙞𝙣𝙜"
         )
 
         photos = await context.bot.get_user_profile_photos(
@@ -11168,19 +11160,17 @@ async def next_turn(chat_id, context):
             )
 
         try:
-
             await context.bot.pin_chat_message(
                 chat_id=chat_id,
                 message_id=sent.message_id
             )
-
         except:
             pass
 
         del hack_games[chat_id]
         return
 
-    # =====================================================
+# =====================================================
     #                 NO PLAYERS LEFT
     # =====================================================
 
@@ -11200,9 +11190,10 @@ async def next_turn(chat_id, context):
         return
 
     # =====================================================
+    #               TURN INDEX SAFE CHECK
+    # =====================================================
 
     if game["turn_index"] >= len(game["players"]):
-
         game["turn_index"] = 0
 
     player = game["players"][game["turn_index"]]
@@ -11211,35 +11202,40 @@ async def next_turn(chat_id, context):
         chat_id=chat_id,
         text=(
             "╔══════════════════╗\n"
-            "     🎯 YOUR TURN\n"
+            "     🎯 𝙔𝙊𝙐𝙍 𝙏𝙐𝙍𝙉\n"
             "╚══════════════════╝\n\n"
 
-            f"👤 Hacker:\n"
+            f"👤 𝙃𝙖𝙘𝙠𝙚𝙧:\n"
             f"{player['name']}\n\n"
 
-            "⏳ Time Limit:\n"
+            "⏳ 𝙏𝙞𝙢𝙚 𝙇𝙞𝙢𝙞𝙩:\n"
             "➥ 60 Seconds\n\n"
 
             "━━━━━━━━━━━━━━━━━━\n\n"
 
-            "💻 Type Your Hack:\n\n"
+            "💻 𝙏𝙮𝙥𝙚 𝙔𝙤𝙪𝙧 𝙃𝙖𝙘𝙠:\n\n"
 
             f"/guess {'1'*game['digits']}\n\n"
 
-            "⚡ Fail To Respond = Skip"
+            "⚡ 𝙁𝙖𝙞𝙡 𝙏𝙤 𝙍𝙚𝙨𝙥𝙤𝙣𝙙 = 𝙎𝙠𝙞𝙥"
         ),
         parse_mode="HTML"
     )
 
+    # ================= FIX START =================
+    current_turn_id = game.get("turn_id", 0)
+
     asyncio.create_task(
-        turn_timer(chat_id, player["id"], context)
+        turn_timer(chat_id, player["id"], current_turn_id, context)
     )
+    # ================= FIX END =================
+
 
 # =========================================================
-#                    TURN TIMER
+#                    TURN TIMER (FIXED SAFE)
 # =========================================================
 
-async def turn_timer(chat_id, user_id, context):
+async def turn_timer(chat_id, user_id, turn_id, context):
 
     await asyncio.sleep(60)
 
@@ -11248,16 +11244,32 @@ async def turn_timer(chat_id, user_id, context):
     if not game:
         return
 
+    # ❌ IGNORE OLD TURN TIMER
+    if game.get("turn_id") != turn_id:
+        return
+
+    # ❌ IF TURN ALREADY CHANGED
+    if not game.get("turn_active", True):
+        return
+
+    # ❌ SAFETY CHECK PLAYER EXISTENCE
+    if game["turn_index"] >= len(game["players"]):
+        return
+
     current = game["players"][game["turn_index"]]
 
     if current["id"] != user_id:
         return
 
-    current["skips"] += 1
+    # ================= TURN END =================
+    game["turn_active"] = False
 
-    # =====================================================
+    current["skips"] = current.get("skips", 0) + 1
+# =====================================================
     #                     REMOVE PLAYER
     # =====================================================
+
+    current["skips"] = current.get("skips", 0)
 
     if current["skips"] >= 2:
 
@@ -11266,12 +11278,12 @@ async def turn_timer(chat_id, user_id, context):
         await context.bot.send_message(
             chat_id=chat_id,
             text=(
-                "⚠️ <b>HACKER REMOVED</b>\n\n"
+                "⚠️ <b>𝙃𝘼𝘾𝙆𝙀𝙍 𝙍𝙀𝙈𝙊𝙑𝙀𝘿</b>\n\n"
 
                 f"👤 {current['name']}\n"
-                "missed 2 turns.\n\n"
+                "𝙢𝙞𝙨𝙨𝙚𝙙 2 𝙩𝙪𝙧𝙣𝙨.\n\n"
 
-                "🚫 No refund."
+                "🚫 𝙉𝙤 𝙧𝙚𝙛𝙪𝙣𝙙."
             ),
             parse_mode="HTML"
         )
@@ -11282,16 +11294,26 @@ async def turn_timer(chat_id, user_id, context):
             chat_id=chat_id,
             text=(
                 f"⏳ {current['name']} "
-                f"missed their turn.\n\n"
+                f"𝙢𝙞𝙨𝙨𝙚𝙙 𝙩𝙝𝙚𝙞𝙧 𝙩𝙪𝙧𝙣.\n\n"
 
-                f"⚠️ Skips: {current['skips']}/2"
+                f"⚠️ 𝙎𝙠𝙞𝙥𝙨: {current['skips']}/2"
             ),
             parse_mode="HTML"
         )
 
+    # =====================================================
+    #               SAFE TURN MOVE FIX
+    # =====================================================
+
     game["turn_index"] += 1
 
+    if game["turn_index"] >= len(game["players"]):
+        game["turn_index"] = 0
+
     await next_turn(chat_id, context)
+# =========================================================
+#                       /hack
+# =========================================================
 
 # =========================================================
 #                       /hack
@@ -11314,21 +11336,21 @@ async def hack(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return await update.message.reply_text(
             (
                 "╔══════════════════╗\n"
-                "  ❌ INVALID COMMAND\n"
+                "  ❌ 𝙄𝙉𝙑𝘼𝙇𝙄𝘿 𝘾𝙊𝙈𝙈𝘼𝙉𝘿\n"
                 "╚══════════════════╝\n\n"
 
-                "💡 Usage:\n"
+                "💡 𝙐𝙨𝙖𝙜𝙚:\n"
                 "/hack <amount> <digits>\n\n"
 
                 "━━━━━━━━━━━━━━━━━━\n\n"
 
-                "🔐 Digit Limit:\n"
-                "3 ➠ 6 Digits\n\n"
+                "🔐 𝘿𝙞𝙜𝙞𝙩 𝙇𝙞𝙢𝙞𝙩:\n"
+                "3 ➠ 6 𝘿𝙞𝙜𝙞𝙩𝙨\n\n"
 
-                "💰 Minimum Entry:\n"
+                "💰 𝙈𝙞𝙣𝙞𝙢𝙪𝙢 𝙀𝙣𝙩𝙧𝙮:\n"
                 "500\n\n"
 
-                "🧠 Example:\n"
+                "🧠 𝙀𝙭𝙖𝙢𝙥𝙡𝙚:\n"
                 "/hack 500 6"
             )
         )
@@ -11372,43 +11394,50 @@ async def hack(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         "started": False,
 
-        "guesses_left": 200
+        "guesses_left": 200,
+
+        "turn_active": False,
+        "turn_id": 0
     }
 
     await update.message.reply_text(
         (
             "╔══════════════════╗\n"
-            "     💻 HACK LOBBY\n"
+            "     💻 𝙃𝘼𝘾𝙆 𝙇𝙊𝘽𝘽𝙔\n"
             "╚══════════════════╝\n\n"
 
-            f"👑 Host:\n"
+            f"👑 𝙃𝙤𝙨𝙩:\n"
             f"{uname(update.effective_user)}\n\n"
 
-            f"💰 Entry Fee:\n"
+            f"💰 𝙀𝙣𝙩𝙧𝙮 𝙁𝙚𝙚:\n"
             f"➥ {amount}\n\n"
 
-            f"🔐 Passcode Length:\n"
-            f"➥ {digits} Digits\n\n"
+            f"🔐 𝙋𝙖𝙨𝙨𝙘𝙤𝙙𝙚 𝙇𝙚𝙣𝙜𝙩𝙝:\n"
+            f"➥ {digits} 𝘿𝙞𝙜𝙞𝙩𝙨\n\n"
 
-            "👥 Minimum Hackers:\n"
-            "➥ 2 Players\n\n"
+            "👥 𝙈𝙞𝙣𝙞𝙢𝙪𝙢 𝙃𝙖𝙘𝙠𝙚𝙧𝙨:\n"
+            "➥ 2 𝙋𝙡𝙖𝙮𝙚𝙧𝙨\n\n"
 
-            "🎯 Current Pool:\n"
+            "🎯 𝘾𝙪𝙧𝙧𝙚𝙣𝙩 𝙋𝙤𝙤𝙡:\n"
             "➥ 0\n\n"
 
             "━━━━━━━━━━━━━━━━━━\n\n"
 
-            "📡 Hack Server: Online\n"
-            "🛰 Target Security: Locked\n"
-            "⚡ Waiting For Hackers\n\n"
+            "📡 𝙃𝙖𝙘𝙠 𝙎𝙚𝙧𝙫𝙚𝙧: 𝙊𝙣𝙡𝙞𝙣𝙚\n"
+            "🛰 𝙏𝙖𝙧𝙜𝙚𝙩 𝙎𝙚𝙘𝙪𝙧𝙞𝙩𝙮: 𝙇𝙤𝙘𝙠𝙚𝙙\n"
+            "⚡ 𝙒𝙖𝙞𝙩𝙞𝙣𝙜 𝙁𝙤𝙧 𝙃𝙖𝙘𝙠𝙚𝙧𝙨\n\n"
 
             "━━━━━━━━━━━━━━━━━━\n\n"
 
-            f"👉 Join Using:\n"
+            f"👉 𝙅𝙤𝙞𝙣 𝙐𝙨𝙞𝙣𝙜:\n"
             f"/register {amount}"
         ),
         parse_mode="HTML"
     )
+
+# =========================================================
+#                    /register
+# =========================================================
 
 # =========================================================
 #                    /register
@@ -11424,13 +11453,13 @@ async def register(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not game:
 
         return await update.message.reply_text(
-            "❌ No active hack lobby."
+            "❌ 𝙉𝙤 𝙖𝙘𝙩𝙞𝙫𝙚 𝙝𝙖𝙘𝙠 𝙡𝙤𝙗𝙗𝙮."
         )
 
     if game["started"]:
 
         return await update.message.reply_text(
-            "🚫 Hack already started."
+            "🚫 𝙃𝙖𝙘𝙠 𝙖𝙡𝙧𝙚𝙖𝙙𝙮 𝙨𝙩𝙖𝙧𝙩𝙚𝙙."
         )
 
     args = context.args
@@ -11438,7 +11467,7 @@ async def register(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if len(args) != 1:
 
         return await update.message.reply_text(
-            f"💡 Use:\n/register {game['entry_fee']}"
+            f"💡 𝙐𝙨𝙚:\n/register {game['entry_fee']}"
         )
 
     try:
@@ -11448,15 +11477,15 @@ async def register(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except:
 
         return await update.message.reply_text(
-            "❌ Invalid amount."
+            "❌ 𝙄𝙣𝙫𝙖𝙡𝙞𝙙 𝙖𝙢𝙤𝙪𝙣𝙩."
         )
 
     if amount != game["entry_fee"]:
 
         return await update.message.reply_text(
             (
-                "❌ Wrong entry amount.\n\n"
-                f"👉 Use:\n/register {game['entry_fee']}"
+                "❌ 𝙒𝙧𝙤𝙣𝙜 𝙚𝙣𝙩𝙧𝙮 𝙖𝙢𝙤𝙪𝙣𝙩.\n\n"
+                f"👉 𝙐𝙨𝙚:\n/register {game['entry_fee']}"
             )
         )
 
@@ -11469,10 +11498,10 @@ async def register(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if p["id"] == user.id:
 
             return await update.message.reply_text(
-                "⚠️ You already joined."
+                "⚠️ 𝙔𝙤𝙪 𝙖𝙡𝙧𝙚𝙖𝙙𝙮 𝙟𝙤𝙞𝙣𝙚𝙙."
             )
 
-    # =====================================================
+# =====================================================
     #                    BALANCE CHECK
     # =====================================================
 
@@ -11480,10 +11509,10 @@ async def register(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         return await update.message.reply_text(
             (
-                "❌ Insufficient Balance\n\n"
+                "❌ 𝙄𝙣𝙨𝙪𝙛𝙛𝙞𝙘𝙞𝙚𝙣𝙩 𝘽𝙖𝙡𝙖𝙣𝙘𝙚\n\n"
 
-                f"💰 Need: {amount}\n"
-                f"🏦 You Have: {get_balance(user.id)}"
+                f"💰 𝙉𝙚𝙚𝙙: {amount}\n"
+                f"🏦 𝙔𝙤𝙪 𝙃𝙖𝙫𝙚: {get_balance(user.id)}"
             )
         )
 
@@ -11509,35 +11538,39 @@ async def register(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         (
             "╔══════════════════╗\n"
-            "   👤 HACKER JOINED\n"
+            "   👤 𝙃𝘼𝘾𝙆𝙀𝙍 𝙅𝙊𝙄𝙉𝙀𝘿\n"
             "╚══════════════════╝\n\n"
 
-            f"🕶 Hacker:\n"
+            f"🕶 𝙃𝙖𝙘𝙠𝙚𝙧:\n"
             f"{uname(user)}\n\n"
 
-            f"💰 Entry Deducted:\n"
+            f"💰 𝙀𝙣𝙩𝙧𝙮 𝘿𝙚𝙙𝙪𝙘𝙩𝙚𝙙:\n"
             f"➥ {amount}\n\n"
 
-            f"👥 Total Hackers:\n"
+            f"👥 𝙏𝙤𝙩𝙖𝙡 𝙃𝙖𝙘𝙠𝙚𝙧𝙨:\n"
             f"➥ {total}\n\n"
 
-            f"🏆 Prize Pool:\n"
+            f"🏆 𝙋𝙧𝙞𝙯𝙚 𝙋𝙤𝙤𝙡:\n"
             f"➥ {prize}\n\n"
 
             "━━━━━━━━━━━━━━━━━━\n\n"
 
-            "📡 Hack Seat Reserved\n"
-            "⚡ Access Granted\n\n"
+            "📡 𝙃𝙖𝙘𝙠 𝙎𝙚𝙖𝙩 𝙍𝙚𝙨𝙚𝙧𝙫𝙚𝙙\n"
+            "⚡ 𝘼𝙘𝙘𝙚𝙨𝙨 𝙂𝙧𝙖𝙣𝙩𝙚𝙙\n\n"
 
             "━━━━━━━━━━━━━━━━━━\n\n"
 
-            "🚀 If You Want To Start Hack\n"
-            "👑 Host Can Type:\n\n"
+            "🚀 𝙄𝙛 𝙔𝙤𝙪 𝙒𝙖𝙣𝙩 𝙏𝙤 𝙎𝙩𝙖𝙧𝙩 𝙃𝙖𝙘𝙠\n"
+            "👑 𝙃𝙤𝙨𝙩 𝘾𝙖𝙣 𝙏𝙮𝙥𝙚:\n\n"
 
             "/starthack"
         ),
         parse_mode="HTML"
     )
+
+# =========================================================
+#                   /starthack
+# =========================================================
 
 # =========================================================
 #                   /starthack
@@ -11553,22 +11586,20 @@ async def starthack(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not game:
 
         return await update.message.reply_text(
-            "❌ No active hack lobby."
+            "❌ 𝙉𝙤 𝙖𝙘𝙩𝙞𝙫𝙚 𝙝𝙖𝙘𝙠 𝙡𝙤𝙗𝙗𝙮."
         )
 
     # HOST ONLY
     if user_id != game["host"]:
 
         return await update.message.reply_text(
-            (
-                "🚫 Only Host Can Start Hack."
-            )
+            "🚫 𝙊𝙣𝙡𝙮 𝙃𝙤𝙨𝙩 𝘾𝙖𝙣 𝙎𝙩𝙖𝙧𝙩 𝙃𝙖𝙘𝙠."
         )
 
     if game["started"]:
 
         return await update.message.reply_text(
-            "⚠️ Hack already started."
+            "⚠️ 𝙃𝙖𝙘𝙠 𝙖𝙡𝙧𝙚𝙖𝙙𝙮 𝙨𝙩𝙖𝙧𝙩𝙚𝙙."
         )
 
     total = len(game["players"])
@@ -11582,21 +11613,28 @@ async def starthack(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return await update.message.reply_text(
             (
                 "╔══════════════════╗\n"
-                "   ❌ START FAILED\n"
+                "   ❌ 𝙎𝙏𝘼𝙍𝙏 𝙁𝘼𝙄𝙇𝙀𝘿\n"
                 "╚══════════════════╝\n\n"
 
-                "👥 Minimum 2 Hackers Needed\n\n"
+                "👥 𝙈𝙞𝙣𝙞𝙢𝙪𝙢 2 𝙃𝙖𝙘𝙠𝙚𝙧𝙨 𝙉𝙚𝙚𝙙𝙚𝙙\n\n"
 
                 "━━━━━━━━━━━━━━━━━━\n\n"
 
-                f"📡 Current Hackers:\n"
+                f"📡 𝘾𝙪𝙧𝙧𝙚𝙣𝙩 𝙃𝙖𝙘𝙠𝙚𝙧𝙨:\n"
                 f"➥ {total}/2\n\n"
 
-                "⚡ Invite More Hackers."
+                "⚡ 𝙄𝙣𝙫𝙞𝙩𝙚 𝙈𝙤𝙧𝙚 𝙃𝙖𝙘𝙠𝙚𝙧𝙨"
             )
         )
 
+    # ================= FIX (UNCHANGED LOGIC) =================
     game["started"] = True
+    game["turn_index"] = 0
+    game["guesses_left"] = game.get("guesses_left", 200)
+
+    game["turn_active"] = False
+    game["turn_id"] = 0
+    # =========================================================
 
     prize = (
         game["entry_fee"] *
@@ -11606,33 +11644,36 @@ async def starthack(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         (
             "╔══════════════════╗\n"
-            "   🚀 HACK STARTED\n"
+            "   🚀 𝙃𝘼𝘾𝙆 𝙎𝙏𝘼𝙍𝙏𝙀𝘿\n"
             "╚══════════════════╝\n\n"
 
-            f"🔐 Passcode:\n"
-            f"➥ {game['digits']} Digits\n\n"
+            f"🔐 𝙋𝙖𝙨𝙨𝙘𝙤𝙙𝙚:\n"
+            f"➥ {game['digits']} 𝘿𝙞𝙜𝙞𝙩𝙨\n\n"
 
-            f"👥 Hackers:\n"
+            f"👥 𝙃𝙖𝙘𝙠𝙚𝙧𝙨:\n"
             f"➥ {total}\n\n"
 
-            f"🏆 Prize Pool:\n"
+            f"🏆 𝙋𝙧𝙞𝙯𝙚 𝙋𝙤𝙤𝙡:\n"
             f"➥ {prize}\n\n"
 
             "━━━━━━━━━━━━━━━━━━\n\n"
 
-            "🛰 Firewall Active\n"
-            "⚡ Security Locked\n"
-            "💻 Begin Hacking...\n\n"
+            "🛰 𝙁𝙞𝙧𝙚𝙬𝙖𝙡𝙡 𝘼𝙘𝙩𝙞𝙫𝙚\n"
+            "⚡ 𝙎𝙚𝙘𝙪𝙧𝙞𝙩𝙮 𝙇𝙤𝙘𝙠𝙚𝙙\n"
+            "💻 𝘽𝙚𝙜𝙞𝙣 𝙃𝙖𝙘𝙠𝙞𝙣𝙜...\n\n"
 
             "━━━━━━━━━━━━━━━━━━\n\n"
 
-            f"👉 Use:\n"
+            f"👉 𝙐𝙨𝙚:\n"
             f"/guess {'1'*game['digits']}"
         ),
         parse_mode="HTML"
     )
 
     await next_turn(chat_id, context)
+# =========================================================
+#                      /guess
+# =========================================================
 
 # =========================================================
 #                      /guess
@@ -11656,7 +11697,7 @@ async def guess(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if len(args) != 1:
 
         return await update.message.reply_text(
-            f"💡 Use:\n/guess {'1'*game['digits']}"
+            f"💡 𝙐𝙨𝙚:\n/guess {'1'*game['digits']}"
         )
 
     guess_code = args[0]
@@ -11664,17 +11705,17 @@ async def guess(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not guess_code.isdigit():
 
         return await update.message.reply_text(
-            "❌ Digits only."
+            "❌ 𝘿𝙞𝙜𝙞𝙩𝙨 𝙤𝙣𝙡𝙮."
         )
 
     if len(guess_code) != game["digits"]:
 
         return await update.message.reply_text(
             (
-                "🚫 Invalid Guess\n\n"
+                "🚫 𝙄𝙣𝙫𝙖𝙡𝙞𝙙 𝙂𝙪𝙚𝙨𝙨\n\n"
 
-                f"🔐 Enter exactly "
-                f"{game['digits']} digits."
+                f"🔐 𝙀𝙣𝙩𝙚𝙧 𝙚𝙭𝙖𝙘𝙩𝙡𝙮 "
+                f"{game['digits']} 𝙙𝙞𝙜𝙞𝙩𝙨."
             )
         )
 
@@ -11683,18 +11724,27 @@ async def guess(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user.id != current["id"]:
 
         return await update.message.reply_text(
-            "❌ It's not your turn."
+            "❌ 𝙄𝙩'𝙨 𝙣𝙤𝙩 𝙮𝙤𝙪𝙧 𝙩𝙪𝙧𝙣."
         )
 
     secret = game["password"]
 
-    # =====================================================
+    # ================= FIX ADD START =================
+    game["turn_active"] = False
+
+    if "turn_id" not in game:
+        game["turn_id"] = 0
+
+    game["turn_id"] += 1
+    # ================= FIX ADD END =================
+
+# =====================================================
     #                  HACK LOADING
     # =====================================================
 
     loading = await update.message.reply_text(
         (
-            "💻 Initializing Hack...\n"
+            "💻 𝙄𝙣𝙞𝙩𝙞𝙖𝙡𝙞𝙯𝙞𝙣𝙜 𝙃𝙖𝙘𝙠...\n"
             "▰▱▱▱▱▱▱▱▱▱ 10%"
         )
     )
@@ -11703,7 +11753,7 @@ async def guess(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await loading.edit_text(
         (
-            "🛰 Bypassing Firewall...\n"
+            "🛰 𝘽𝙮𝙥𝙖𝙨𝙨𝙞𝙣𝙜 𝙁𝙞𝙧𝙚𝙬𝙖𝙡𝙡...\n"
             "▰▰▰▱▱▱▱▱▱▱ 30%"
         )
     )
@@ -11712,7 +11762,7 @@ async def guess(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await loading.edit_text(
         (
-            "🔍 Decrypting Passcode...\n"
+            "🔍 𝘿𝙚𝙘𝙧𝙮𝙥𝙩𝙞𝙣𝙜 𝙋𝙖𝙨𝙨𝙘𝙤𝙙𝙚...\n"
             "▰▰▰▰▰▰▱▱▱▱ 60%"
         )
     )
@@ -11721,7 +11771,7 @@ async def guess(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await loading.edit_text(
         (
-            "⚡ Cracking Security...\n"
+            "⚡ 𝘾𝙧𝙖𝙘𝙠𝙞𝙣𝙜 𝙎𝙚𝙘𝙪𝙧𝙞𝙩𝙮...\n"
             "▰▰▰▰▰▰▰▰▰▱ 90%"
         )
     )
@@ -11730,7 +11780,7 @@ async def guess(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await loading.edit_text(
         (
-            "✅ Hack Completed\n"
+            "✅ 𝙃𝙖𝙘𝙠 𝘾𝙤𝙢𝙥𝙡𝙚𝙩𝙚𝙙\n"
             "▰▰▰▰▰▰▰▰▰▰ 100%"
         )
     )
@@ -11754,27 +11804,27 @@ async def guess(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         caption = (
             "╔══════════════════╗\n"
-            "   🏆 HACK COMPLETED\n"
+            "   🏆 𝙃𝘼𝘾𝙆 𝘾𝙊𝙈𝙋𝙇𝙀𝙏𝙀𝘿\n"
             "╚══════════════════╝\n\n"
 
-            f"👑 Winner:\n"
+            f"👑 𝙒𝙞𝙣𝙣𝙚𝙧:\n"
             f"{uname(user)}\n\n"
 
-            f"💰 Reward:\n"
+            f"💰 𝙍𝙚𝙬𝙖𝙧𝙙:\n"
             f"➥ {prize}\n\n"
 
-            f"🏦 New Balance:\n"
+            f"🏦 𝙉𝙚𝙬 𝘽𝙖𝙡𝙖𝙣𝙘𝙚:\n"
             f"➥ {balance}\n\n"
 
-            f"🔓 Secret Code:\n"
+            f"🔓 𝙎𝙚𝙘𝙧𝙚𝙩 𝘾𝙤𝙙𝙚:\n"
             f"<code>{secret}</code>\n\n"
 
             "━━━━━━━━━━━━━━━━━━\n\n"
 
-            "💻 Security Breach Successful\n"
-            "🛰 Access Granted\n"
-            "⚡ System Down\n"
-            "🔒 Hack Session Ended"
+            "💻 𝙎𝙚𝙘𝙪𝙧𝙞𝙩𝙮 𝘽𝙧𝙚𝙖𝙘𝙝 𝙎𝙪𝙘𝙘𝙚𝙨𝙨𝙛𝙪𝙡\n"
+            "🛰 𝘼𝙘𝙘𝙚𝙨𝙨 𝙂𝙧𝙖𝙣𝙩𝙚𝙙\n"
+            "⚡ 𝙎𝙮𝙨𝙩𝙚𝙢 𝘿𝙤𝙬𝙣\n"
+            "🔒 𝙃𝙖𝙘𝙠 𝙎𝙚𝙨𝙨𝙞𝙤𝙣 𝙀𝙣𝙙𝙚𝙙"
         )
 
         photos = await context.bot.get_user_profile_photos(
@@ -11814,7 +11864,7 @@ async def guess(update: Update, context: ContextTypes.DEFAULT_TYPE):
         del hack_games[chat_id]
         return
 
-    # =====================================================
+# =====================================================
     #                  NORMAL RESULT
     # =====================================================
 
@@ -11828,27 +11878,27 @@ async def guess(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await loading.edit_text(
         (
             "╔══════════════════╗\n"
-            "     💻 HACK RESULT\n"
+            "   💻 𝙃𝘼𝘾𝙆 𝙍𝙀𝙎𝙐𝙇𝙏\n"
             "╚══════════════════╝\n\n"
 
-            f"👤 Hacker:\n"
+            f"👤 𝙃𝙖𝙘𝙠𝙚𝙧:\n"
             f"{uname(user)}\n\n"
 
-            f"🟩 Hacks:\n"
+            f"🟩 𝙃𝙖𝙘𝙠𝙨:\n"
             f"➥ {hacks}\n\n"
 
-            f"🟨 Glitches:\n"
+            f"🟨 𝙂𝙡𝙞𝙩𝙘𝙝𝙚𝙨:\n"
             f"➥ {glitches}\n\n"
 
             "━━━━━━━━━━━━━━━━━━\n\n"
 
-            "📡 Security Pattern Analyzed\n"
-            "🛰 Firewall Damaged\n"
-            "⚡ Another Attack Required\n\n"
+            "📡 𝙎𝙚𝙘𝙪𝙧𝙞𝙩𝙮 𝙋𝙖𝙩𝙩𝙚𝙧𝙣 𝘼𝙣𝙖𝙡𝙮𝙯𝙚𝙙\n"
+            "🛰 𝙁𝙞𝙧𝙚𝙬𝙖𝙡𝙡 𝘿𝙖𝙢𝙖𝙜𝙚𝙙\n"
+            "⚡ 𝘼𝙣𝙤𝙩𝙝𝙚𝙧 𝘼𝙩𝙩𝙖𝙘𝙠 𝙍𝙚𝙦𝙪𝙞𝙧𝙚𝙙\n\n"
 
             "━━━━━━━━━━━━━━━━━━\n\n"
 
-            f"⏳ Guesses Left:\n"
+            f"⏳ 𝙂𝙪𝙚𝙨𝙨𝙚𝙨 𝙇𝙚𝙛𝙩:\n"
             f"➥ {game['guesses_left']}"
         ),
         parse_mode="HTML"
@@ -11862,8 +11912,8 @@ async def guess(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         await update.message.reply_text(
             (
-                "🔒 Guess Limit Reached\n\n"
-                "💻 Hack Failed."
+                "🔒 𝙂𝙪𝙚𝙨𝙨 𝙇𝙞𝙢𝙞𝙩 𝙍𝙚𝙖𝙘𝙝𝙚𝙙\n\n"
+                "💻 𝙃𝙖𝙘𝙠 𝙁𝙖𝙞𝙡𝙚𝙙."
             )
         )
 
@@ -11889,20 +11939,20 @@ async def players(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return await update.message.reply_text(
             (
                 "╔══════════════════╗\n"
-                "     ❌ NO HACK GAME\n"
+                "     ❌ 𝙉𝙊 𝙃𝘼𝘾𝙆 𝙂𝘼𝙈𝙀\n"
                 "╚══════════════════╝\n\n"
 
-                "💻 No Active Hack Session\n"
-                "📡 Server Idle\n\n"
+                "💻 𝙉𝙤 𝘼𝙘𝙩𝙞𝙫𝙚 𝙃𝙖𝙘𝙠 𝙎𝙚𝙨𝙨𝙞𝙤𝙣\n"
+                "📡 𝙎𝙚𝙧𝙫𝙚𝙧 𝙄𝙙𝙡𝙚\n\n"
 
                 "━━━━━━━━━━━━━━━━━━\n\n"
 
-                "🚀 Start New Game:\n\n"
+                "🚀 𝙎𝙩𝙖𝙧𝙩 𝙉𝙚𝙬 𝙂𝙖𝙢𝙚:\n\n"
                 "/hack 500 6"
             )
         )
 
-    text = "👥 <b>ACTIVE HACKERS</b>\n\n"
+    text = "👥 <b>𝘼𝘾𝙏𝙄𝙑𝙀 𝙃𝘼𝘾𝙆𝙀𝙍𝙎</b>\n\n"
 
     for i, p in enumerate(game["players"], start=1):
 
@@ -11914,6 +11964,7 @@ async def players(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text,
         parse_mode="HTML"
     )
+
 
 # =========================================================
 #                     /hackinfo
@@ -11928,7 +11979,7 @@ async def hackinfo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not game:
 
         return await update.message.reply_text(
-            "❌ No active hack."
+            "❌ 𝙉𝙤 𝙖𝙘𝙩𝙞𝙫𝙚 𝙝𝙖𝙘𝙠."
         )
 
     prize = (
@@ -11938,22 +11989,25 @@ async def hackinfo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     current = game["players"][game["turn_index"]]
 
-    text = (
-        "💻 <b>HACK INFO</b>\n\n"
+    # SAFE FIX (avoid crash if player list empty)
+    current_name = current["name"] if current else "N/A"
 
-        f"🔐 Digits: {game['digits']}\n"
-        f"💰 Prize Pool: {prize}\n"
-        f"👥 Players: {len(game['players'])}\n"
-        f"🎯 Current Turn:\n"
-        f"{current['name']}\n"
-        f"⏳ Guesses Left: "
-        f"{game['guesses_left']}"
+    text = (
+        "💻 <b>𝙃𝘼𝘾𝙆 𝙄𝙉𝙁𝙊</b>\n\n"
+
+        f"🔐 𝘿𝙞𝙜𝙞𝙩𝙨: {game['digits']}\n"
+        f"💰 𝙋𝙧𝙞𝙯𝙚 𝙋𝙤𝙤𝙡: {prize}\n"
+        f"👥 𝙋𝙡𝙖𝙮𝙚𝙧𝙨: {len(game['players'])}\n"
+        f"🎯 𝘾𝙪𝙧𝙧𝙚𝙣𝙩 𝙏𝙪𝙧𝙣:\n"
+        f"{current_name}\n"
+        f"⏳ 𝙂𝙪𝙚𝙨𝙨𝙚𝙨 𝙇𝙚𝙛𝙩: {game['guesses_left']}"
     )
 
     await update.message.reply_text(
         text,
         parse_mode="HTML"
     )
+
 
 # =========================================================
 #                     /endhack
@@ -11969,7 +12023,7 @@ async def endhack(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not game:
 
         return await update.message.reply_text(
-            "❌ No active hack game."
+            "❌ 𝙉𝙤 𝙖𝙘𝙩𝙞𝙫𝙚 𝙝𝙖𝙘𝙠 𝙜𝙖𝙢𝙚."
         )
 
     member = await context.bot.get_chat_member(
@@ -11988,10 +12042,7 @@ async def endhack(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ):
 
         return await update.message.reply_text(
-            (
-                "🚫 Only Host Or Admin "
-                "Can End Hack."
-            )
+            "🚫 𝙊𝙣𝙡𝙮 𝙃𝙤𝙨𝙩 𝙊𝙧 𝘼𝙙𝙢𝙞𝙣 𝘾𝙖𝙣 𝙀𝙣𝙙 𝙃𝙖𝙘𝙠."
         )
 
     del hack_games[chat_id]
@@ -11999,11 +12050,11 @@ async def endhack(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         (
             "╔══════════════════╗\n"
-            "    🛑 HACK ENDED\n"
+            "   🛑 𝙃𝘼𝘾𝙆 𝙀𝙉𝘿𝙀𝘿\n"
             "╚══════════════════╝\n\n"
 
-            "💻 Hack Session Closed\n"
-            "📡 Server Offline"
+            "💻 𝙃𝙖𝙘𝙠 𝙎𝙚𝙨𝙨𝙞𝙤𝙣 𝘾𝙡𝙤𝙨𝙚𝙙\n"
+            "📡 𝙎𝙚𝙧𝙫𝙚𝙧 𝙊𝙛𝙛𝙡𝙞𝙣𝙚"
         )
     )
 
