@@ -12057,8 +12057,378 @@ async def endhack(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "📡 𝙎𝙚𝙧𝙫𝙚𝙧 𝙊𝙛𝙛𝙡𝙞𝙣𝙚"
         )
     )
+    
+
+# =========================================================
+#                🌌 NIKI ADVANCED WHISPER 🌌
+# =========================================================
+# FEATURES:
+# ✅ Baka Style Whisper
+# ✅ Username + User ID Support
+# ✅ Popup Whisper
+# ✅ Anonymous Whisper
+# ✅ Auto Expire System
+# ✅ One Time Whisper
+# ✅ Reply Whisper
+# ✅ Stylish Buttons
+# ✅ Anti Others Open
+# ✅ Group Friendly
+# =========================================================
+
+import uuid
+import time
+
+from telegram import (
+    Update,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup
+)
+
+from telegram.ext import (
+    ContextTypes,
+    MessageHandler,
+    CallbackQueryHandler,
+    filters
+)
+
+# =========================================================
+#                    WHISPER STORAGE
+# =========================================================
+
+whispers = {}
+
+WHISPER_EXPIRE = 600  # 10 minutes
 
 
+# =========================================================
+#                 AUTO DELETE EXPIRED
+# =========================================================
+
+def cleanup_whispers():
+
+    now = time.time()
+
+    expired = []
+
+    for wid, data in whispers.items():
+
+        if now - data["time"] > WHISPER_EXPIRE:
+            expired.append(wid)
+
+    for wid in expired:
+        whispers.pop(wid, None)
+
+
+# =========================================================
+#                   CREATE WHISPER
+# =========================================================
+
+async def niki_whisper(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    cleanup_whispers()
+
+    if not update.message or not update.message.text:
+        return
+
+    text = update.message.text.strip()
+
+    # -----------------------------------
+    # BOT TAG CHECK
+    # Example:
+    # @iim_nikibot @username hello
+    # @iim_nikibot 123456 hello
+    # -----------------------------------
+
+    if not text.lower().startswith("@iim_nikibot"):
+        return
+
+    args = text.split(maxsplit=2)
+
+    if len(args) < 3:
+
+        return await update.message.reply_text(
+            "❌ Usage:\n"
+            "@iim_nikibot @username message\n\n"
+            "or\n\n"
+            "@iim_nikibot userid message"
+        )
+
+    target = args[1]
+    whisper_text = args[2]
+
+    # =====================================================
+    # ANONYMOUS CHECK
+    # use: -a
+    # =====================================================
+
+    anonymous = False
+
+    if whisper_text.startswith("-a "):
+
+        anonymous = True
+        whisper_text = whisper_text[3:]
+
+    # =====================================================
+    # TARGET SYSTEM
+    # =====================================================
+
+    target_username = None
+    target_id = None
+
+    if target.startswith("@"):
+
+        target_username = target.replace("@", "").lower()
+
+    elif target.isdigit():
+
+        target_id = int(target)
+
+    else:
+
+        return await update.message.reply_text(
+            "❌ Invalid target user."
+        )
+
+    # =====================================================
+    # CREATE WHISPER ID
+    # =====================================================
+
+    whisper_id = str(uuid.uuid4())[:10]
+
+    whispers[whisper_id] = {
+
+        "text": whisper_text,
+
+        "target_username": target_username,
+        "target_id": target_id,
+
+        "sender_name": update.effective_user.first_name,
+        "sender_id": update.effective_user.id,
+
+        "anonymous": anonymous,
+
+        "time": time.time(),
+
+        "opened": False
+    }
+
+    # =====================================================
+    # BUTTONS
+    # =====================================================
+
+    keyboard = InlineKeyboardMarkup([
+
+        [
+            InlineKeyboardButton(
+                "💌 Open Whisper",
+                callback_data=f"openwhisper_{whisper_id}"
+            )
+        ],
+
+        [
+            InlineKeyboardButton(
+                "↩️ Reply",
+                callback_data=f"replywhisper_{whisper_id}"
+            )
+        ]
+
+    ])
+
+    # =====================================================
+    # TARGET DISPLAY
+    # =====================================================
+
+    if target_username:
+
+        target_show = f"@{target_username}"
+
+    else:
+
+        target_show = f"<code>{target_id}</code>"
+
+    # =====================================================
+    # SEND MESSAGE
+    # =====================================================
+
+    await update.message.reply_text(
+
+        text=(
+            "╔═════ 💌 ═════╗\n"
+            "      🌌 NIKI WHISPER 🌌\n"
+            "╚══════════════╝\n\n"
+
+            f"👤 Whisper For: {target_show}\n"
+            f"⏳ Expires: 10 Minutes\n"
+            f"🔒 Privacy Protected\n\n"
+
+            "✨ Click button to open whisper."
+        ),
+
+        parse_mode="HTML",
+        reply_markup=keyboard
+    )
+
+
+# =========================================================
+#                   OPEN WHISPER
+# =========================================================
+
+async def open_whisper(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    cleanup_whispers()
+
+    query = update.callback_query
+    user = query.from_user
+
+    data_id = query.data.split("_")[1]
+
+    data = whispers.get(data_id)
+
+    # =====================================================
+    # NOT FOUND
+    # =====================================================
+
+    if not data:
+
+        return await query.answer(
+            "❌ Whisper expired.",
+            show_alert=True
+        )
+
+    # =====================================================
+    # CHECK TARGET
+    # =====================================================
+
+    allowed = False
+
+    # USERNAME CHECK
+
+    if data["target_username"]:
+
+        if user.username:
+
+            if user.username.lower() == data["target_username"]:
+                allowed = True
+
+    # USER ID CHECK
+
+    if data["target_id"]:
+
+        if user.id == data["target_id"]:
+            allowed = True
+
+    # =====================================================
+    # ACCESS DENIED
+    # =====================================================
+
+    if not allowed:
+
+        return await query.answer(
+            "❌ This whisper isn't for you.",
+            show_alert=True
+        )
+
+    # =====================================================
+    # ONE TIME OPEN
+    # =====================================================
+
+    if data["opened"]:
+
+        return await query.answer(
+            "❌ Whisper already opened.",
+            show_alert=True
+        )
+
+    data["opened"] = True
+
+    # =====================================================
+    # SENDER
+    # =====================================================
+
+    if data["anonymous"]:
+
+        sender = "🎭 Anonymous"
+
+    else:
+
+        sender = data["sender_name"]
+
+    # =====================================================
+    # SHOW WHISPER
+    # =====================================================
+
+    await query.answer(
+
+        text=(
+            f"💌 {data['text']}\n\n"
+            f"👤 From: {sender}"
+        ),
+
+        show_alert=True
+    )
+
+
+# =========================================================
+#                  REPLY WHISPER
+# =========================================================
+
+async def reply_whisper(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+
+    wid = query.data.split("_")[1]
+
+    data = whispers.get(wid)
+
+    if not data:
+
+        return await query.answer(
+            "❌ Whisper expired.",
+            show_alert=True
+        )
+
+    sender_id = data["sender_id"]
+
+    await query.answer()
+
+    await query.message.reply_text(
+
+        f"💌 Reply Whisper To:\n"
+        f"<code>{sender_id}</code>\n\n"
+        f"Example:\n"
+        f"@iim_nikibot {sender_id} hello",
+
+        parse_mode="HTML"
+    )
+
+
+# =========================================================
+#                     HANDLERS
+# =========================================================
+
+app.add_handler(
+
+    MessageHandler(
+        filters.TEXT & ~filters.COMMAND,
+        niki_whisper
+    )
+)
+
+app.add_handler(
+
+    CallbackQueryHandler(
+        open_whisper,
+        pattern="^openwhisper_"
+    )
+)
+
+app.add_handler(
+
+    CallbackQueryHandler(
+        reply_whisper,
+        pattern="^replywhisper_"
+    )
+)
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
@@ -12348,7 +12718,23 @@ def main():
             daily_verify,
             pattern="^daily_verify_"
         )
-     )
+    )
+    #===================WHISPER =========================
+    app.add_handler(
+
+        CallbackQueryHandler(
+            open_whisper,
+            pattern="^openwhisper_"
+        )
+    )
+
+    app.add_handler(
+
+        CallbackQueryHandler(
+            reply_whisper,
+            pattern="^replywhisper_"
+        )
+    )
     # ================= USERINFO SYSTEM =================
 
     app.add_handler(
@@ -12389,7 +12775,15 @@ def main():
         MessageHandler(filters.TEXT & ~filters.COMMAND, handle),
         group=4
     )
-
+    
+    # 💌 WHISPER SYSTEM
+    app.add_handler(
+        MessageHandler(
+            filters.TEXT & ~filters.COMMAND,
+            niki_whisper
+        ),
+        group=2
+    )
     # 💖 LOVE FLOW
     app.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, love_flow),
