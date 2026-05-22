@@ -1,6 +1,7 @@
 # ==============dequeMONGO SETUP (FINAL CLEAN) =================
 from pymongo import MongoClient
 
+ 
 MONGO_URL = "mongodb+srv://vishal:VISHAL123@vishal07.espy0qo.mongodb.net/?appName=Vishal07"
 
 client = MongoClient(MONGO_URL)
@@ -51,6 +52,8 @@ from collections import deque
 from telegram.ext import InlineQueryHandler
 from openai import OpenAI
 from telegram.constants import ChatAction
+from datetime import datetime, timezone
+from telegram import ChatPermissions
 from telegram.helpers import mention_html
 from telegram.ext import ChatJoinRequestHandler
 from deep_translator import GoogleTranslator
@@ -4867,29 +4870,22 @@ def parse_time(time_str):
 async def ban_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if not await is_admin(update, context):
-
-        return await update.message.reply_text(
-            "❌ 𝐀ᴅᴍɪɴ 𝐎ɴʟʏ 𝐂ᴏᴍᴍᴀɴᴅ"
-        )
+        return await update.message.reply_text("❌ 𝐀ᴅᴍɪɴ 𝐎ɴʟʏ 𝐂ᴏᴍᴍᴀɴᴅ")
 
     user = get_target_user(update)
 
     if not user:
-
-        return await update.message.reply_text(
-            "❌ 𝐑ᴇᴘʟʏ 𝐔sᴇʀ 𝐓ᴏ 𝐁ᴀɴ"
-        )
+        return await update.message.reply_text("❌ 𝐑ᴇᴘʟʏ 𝐔sᴇʀ 𝐓ᴏ 𝐁ᴀɴ")
 
     if is_owner(user):
-
-        return await update.message.reply_text(
-            "😎 𝐎ᴡɴᴇʀ 𝐊ᴏ 𝐁ᴀɴ 𝐍ᴀʜɪ 𝐊ᴀʀ 𝐒ᴀᴋᴛᴇ"
-        )
+        return await update.message.reply_text("😎 𝐎ᴡɴᴇʀ 𝐊ᴏ 𝐁ᴀɴ 𝐍ᴀʜɪ 𝐊ᴀʀ 𝐒ᴀᴋᴛᴇ")
 
     try:
+        chat_id = update.effective_chat.id
 
-        await update.effective_chat.ban_member(
-            user.id
+        await context.bot.ban_chat_member(
+            chat_id=chat_id,
+            user_id=user.id
         )
 
         await update.message.reply_text(f"""
@@ -4907,56 +4903,38 @@ async def ban_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 """, parse_mode="HTML")
 
     except Exception as e:
-
         print("BAN ERROR:", e)
-
-        await update.message.reply_text(
-            "❌ 𝐁ᴀɴ 𝐅ᴀɪʟᴇᴅ"
-        )
+        await update.message.reply_text("❌ 𝐁ᴀɴ 𝐅ᴀɪʟᴇᴅ")
 
 # ================= TBAN =================
+
 async def tban_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if not await is_admin(update, context):
-
-        return await update.message.reply_text(
-            "❌ 𝐀ᴅᴍɪɴ 𝐎ɴʟʏ 𝐂ᴏᴍᴍᴀɴᴅ"
-        )
+        return await update.message.reply_text("❌ 𝐀ᴅᴍɪɴ 𝐎ɴʟʏ 𝐂ᴏᴍᴍᴀɴᴅ")
 
     if len(context.args) < 1:
-
-        return await update.message.reply_text(
-            "❌ 𝐔sᴇ : /tban 10m"
-        )
+        return await update.message.reply_text("❌ 𝐔sᴇ : /tban 10m")
 
     duration = parse_time(context.args[0])
 
     if not duration:
-
-        return await update.message.reply_text(
-            "❌ 𝐈ɴᴠᴀʟɪᴅ 𝐓ɪᴍᴇ"
-        )
+        return await update.message.reply_text("❌ 𝐈ɴᴠᴀʟɪᴅ 𝐓ɪᴍᴇ")
 
     user = get_target_user(update)
 
     if not user:
-
-        return await update.message.reply_text(
-            "❌ 𝐑ᴇᴘʟʏ 𝐔sᴇʀ 𝐓ᴏ 𝐁ᴀɴ"
-        )
+        return await update.message.reply_text("❌ 𝐑ᴇᴘʟʏ 𝐔sᴇʀ 𝐓ᴏ 𝐁ᴀɴ")
 
     if is_owner(user):
+        return await update.message.reply_text("😎 𝐎ᴡɴᴇʀ 𝐊ᴏ 𝐁ᴀɴ 𝐍ᴀʜɪ 𝐊ᴀʀ 𝐒ᴀᴋᴛᴇ")
 
-        return await update.message.reply_text(
-            "😎 𝐎ᴡɴᴇʀ 𝐊ᴏ 𝐁ᴀɴ 𝐍ᴀʜɪ 𝐊ᴀʀ 𝐒ᴀᴋᴛᴇ"
-        )
-
-    until_time = datetime.utcnow() + duration
+    until_time = datetime.now(timezone.utc) + duration
 
     try:
-
-        await update.effective_chat.ban_member(
-            user.id,
+        await context.bot.ban_chat_member(
+            chat_id=update.effective_chat.id,
+            user_id=user.id,
             until_date=until_time
         )
 
@@ -4975,33 +4953,23 @@ async def tban_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 """, parse_mode="HTML")
 
     except Exception as e:
-
         print("TBAN ERROR:", e)
-
-        await update.message.reply_text(
-            "❌ 𝐓ʙᴀɴ 𝐅ᴀɪʟᴇᴅ"
-    )
+        await update.message.reply_text("❌ 𝐓ʙᴀɴ 𝐅ᴀɪʟᴇᴅ")
 # ================= UNBAN =================
 async def unban_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if not await is_admin(update, context):
-
-        return await update.message.reply_text(
-            "❌ 𝐀ᴅᴍɪɴ 𝐎ɴʟʏ 𝐂ᴏᴍᴍᴀɴᴅ"
-        )
+        return await update.message.reply_text("❌ 𝐀ᴅᴍɪɴ 𝐎ɴʟʏ 𝐂ᴏᴍᴍᴀɴᴅ")
 
     user = get_target_user(update)
 
     if not user:
-
-        return await update.message.reply_text(
-            "❌ 𝐑ᴇᴘʟʏ 𝐔sᴇʀ 𝐓ᴏ 𝐔ɴʙᴀɴ"
-        )
+        return await update.message.reply_text("❌ 𝐑ᴇᴘʟʏ 𝐔sᴇʀ 𝐓ᴏ 𝐔ɴʙᴀɴ")
 
     try:
-
-        await update.effective_chat.unban_member(
-            user.id
+        await context.bot.unban_chat_member(
+            chat_id=update.effective_chat.id,
+            user_id=user.id
         )
 
         await update.message.reply_text(f"""
@@ -5019,43 +4987,38 @@ async def unban_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 """, parse_mode="HTML")
 
     except Exception as e:
-
         print("UNBAN ERROR:", e)
-
-        await update.message.reply_text(
-            "❌ 𝐔ɴʙᴀɴ 𝐅ᴀɪʟᴇᴅ"
-        )
-
+        await update.message.reply_text("❌ 𝐔ɴʙᴀɴ 𝐅ᴀɪʟᴇᴅ")
 
 # ================= MUTE =================
+
+
 async def mute_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if not await is_admin(update, context):
-
-        return await update.message.reply_text(
-            "❌ 𝐀ᴅᴍɪɴ 𝐎ɴʟʏ 𝐂ᴏᴍᴍᴀɴᴅ"
-        )
+        return await update.message.reply_text("❌ 𝐀ᴅᴍɪɴ 𝐎ɴʟʏ 𝐂ᴏᴍᴍᴀɴᴅ")
 
     user = get_target_user(update)
 
     if not user:
-
-        return await update.message.reply_text(
-            "❌ 𝐑ᴇᴘʟʏ 𝐔sᴇʀ 𝐓ᴏ 𝐌ᴜᴛᴇ"
-        )
+        return await update.message.reply_text("❌ 𝐑ᴇᴘʟʏ 𝐔sᴇʀ 𝐓ᴏ 𝐌ᴜᴛᴇ")
 
     if is_owner(user):
-
-        return await update.message.reply_text(
-            "😎 𝐎ᴡɴᴇʀ 𝐊ᴏ 𝐌ᴜᴛᴇ 𝐍ᴀʜɪ 𝐊ᴀʀ 𝐒ᴀᴋᴛᴇ"
-        )
+        return await update.message.reply_text("😎 𝐎ᴡɴᴇʀ 𝐊ᴏ 𝐌ᴜᴛᴇ 𝐍ᴀʜɪ 𝐊ᴀʀ 𝐒ᴀᴋᴛᴇ")
 
     try:
-
-        await update.effective_chat.restrict_member(
-            user.id,
+        await context.bot.restrict_chat_member(
+            chat_id=update.effective_chat.id,
+            user_id=user.id,
             permissions=ChatPermissions(
-                can_send_messages=False
+                can_send_messages=False,
+                can_send_media_messages=False,
+                can_send_polls=False,
+                can_send_other_messages=False,
+                can_add_web_page_previews=False,
+                can_change_info=False,
+                can_invite_users=False,
+                can_pin_messages=False
             )
         )
 
@@ -5074,35 +5037,27 @@ async def mute_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 """, parse_mode="HTML")
 
     except Exception as e:
-
         print("MUTE ERROR:", e)
-
-        await update.message.reply_text(
-            "❌ 𝐌ᴜᴛᴇ 𝐅ᴀɪʟᴇᴅ"
-        )
+        await update.message.reply_text("❌ 𝐌ᴜᴛᴇ 𝐅ᴀɪʟᴇᴅ")
 
 
 # ================= UNMUTE =================
+
+
 async def unmute_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if not await is_admin(update, context):
-
-        return await update.message.reply_text(
-            "❌ 𝐀ᴅᴍɪɴ 𝐎ɴʟʏ 𝐂ᴏᴍᴍᴀɴᴅ"
-        )
+        return await update.message.reply_text("❌ 𝐀ᴅᴍɪɴ 𝐎ɴʟʏ 𝐂ᴏᴍᴍᴀɴᴅ")
 
     user = get_target_user(update)
 
     if not user:
-
-        return await update.message.reply_text(
-            "❌ 𝐑ᴇᴘʟʏ 𝐔sᴇʀ 𝐓ᴏ 𝐔ɴᴍᴜᴛᴇ"
-        )
+        return await update.message.reply_text("❌ 𝐑ᴇᴘʟʏ 𝐔sᴇʀ 𝐓ᴏ 𝐔ɴᴍᴜᴛᴇ")
 
     try:
-
-        await update.effective_chat.restrict_member(
-            user.id,
+        await context.bot.restrict_chat_member(
+            chat_id=update.effective_chat.id,
+            user_id=user.id,
             permissions=ChatPermissions(
                 can_send_messages=True,
                 can_send_audios=True,
@@ -5133,59 +5088,46 @@ async def unmute_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 """, parse_mode="HTML")
 
     except Exception as e:
-
         print("UNMUTE ERROR:", e)
-
-        await update.message.reply_text(
-            "❌ 𝐔ɴᴍᴜᴛᴇ 𝐅ᴀɪʟᴇᴅ"
-        )
+        await update.message.reply_text("❌ 𝐔ɴᴍᴜᴛᴇ 𝐅ᴀɪʟᴇᴅ")
 
 
 # ================= TMUTE =================
+
+
 async def tmute_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if not await is_admin(update, context):
-
-        return await update.message.reply_text(
-            "❌ 𝐀ᴅᴍɪɴ 𝐎ɴʟʏ 𝐂ᴏᴍᴍᴀɴᴅ"
-        )
+        return await update.message.reply_text("❌ 𝐀ᴅᴍɪɴ 𝐎ɴʟʏ 𝐂ᴏᴍᴍᴀɴᴅ")
 
     if len(context.args) < 1:
-
-        return await update.message.reply_text(
-            "❌ 𝐔sᴇ : /tmute 10m"
-        )
+        return await update.message.reply_text("❌ 𝐔sᴇ : /tmute 10m")
 
     duration = parse_time(context.args[0])
 
     if not duration:
-
-        return await update.message.reply_text(
-            "❌ 𝐈ɴᴠᴀʟɪᴅ 𝐓ɪᴍᴇ"
-        )
+        return await update.message.reply_text("❌ 𝐈ɴᴠᴀʟɪᴅ 𝐓ɪᴍᴇ")
 
     user = get_target_user(update)
 
     if not user:
-
-        return await update.message.reply_text(
-            "❌ 𝐑ᴇᴘʟʏ 𝐔sᴇʀ 𝐓ᴏ 𝐌ᴜᴛᴇ"
-        )
+        return await update.message.reply_text("❌ 𝐑ᴇᴘʟʏ 𝐔sᴇʀ 𝐓ᴏ 𝐌ᴜᴛᴇ")
 
     if is_owner(user):
+        return await update.message.reply_text("😎 𝐎ᴡɴᴇʀ 𝐊ᴏ 𝐌ᴜᴛᴇ 𝐍ᴀʜɪ 𝐊ᴀʀ 𝐒ᴀᴋᴛᴇ")
 
-        return await update.message.reply_text(
-            "😎 𝐎ᴡɴᴇʀ 𝐊ᴏ 𝐌ᴜᴛᴇ 𝐍ᴀʜɪ 𝐊ᴀʀ 𝐒ᴀᴋᴛᴇ"
-        )
-
-    until_time = datetime.utcnow() + duration
+    until_time = datetime.now(timezone.utc) + duration
 
     try:
-
-        await update.effective_chat.restrict_member(
-            user.id,
+        await context.bot.restrict_chat_member(
+            chat_id=update.effective_chat.id,
+            user_id=user.id,
             permissions=ChatPermissions(
-                can_send_messages=False
+                can_send_messages=False,
+                can_send_media_messages=False,
+                can_send_polls=False,
+                can_send_other_messages=False,
+                can_add_web_page_previews=False
             ),
             until_date=until_time
         )
@@ -5196,7 +5138,7 @@ async def tmute_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 ╚═══━━━─── • ───━━━═══╝
 
 👤 𝐔sᴇʀ : {user.mention_html()}
-🔇 𝐌ᴜᴛᴇᴅ : {context.args[0]}
+🔇 𝐃ᴜʀᴀᴛɪᴏɴ : {context.args[0]}
 🛡️ 𝐁ʏ : {update.effective_user.mention_html()}
 
 ━━━━━━━━━━━━━━━━━━
@@ -5205,12 +5147,8 @@ async def tmute_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 """, parse_mode="HTML")
 
     except Exception as e:
-
         print("TMUTE ERROR:", e)
-
-        await update.message.reply_text(
-            "❌ 𝐓ᴍᴜᴛᴇ 𝐅ᴀɪʟᴇᴅ"
-        )
+        await update.message.reply_text("❌ 𝐓ᴍᴜᴛᴇ 𝐅ᴀɪʟᴇᴅ")
 
  
 
@@ -12659,7 +12597,321 @@ async def owner(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"⚠️ Error: {e}"
         )
 
-            
+
+#=========================admin =========================
+from telegram import Update
+from telegram.ext import Application, CommandHandler, ContextTypes
+
+
+OWNER_ID = (OWNER_ID)
+
+warn_db = {}
+admin_power = {}
+
+# =========================================================
+# 🌌 NIKI STYLE UI
+# =========================================================
+
+def ui(text):
+    return f"""
+🌌 𝙉𝙄𝙆𝙄 𝘼𝘿𝙈𝙄𝙉 𝘽𝙊𝙏
+━━━━━━━━━━━━━━
+{text}
+━━━━━━━━━━━━━━
+"""
+
+def user_mention(user):
+    return f"<a href='tg://user?id={user.id}'>{user.first_name}</a>"
+
+# =========================================================
+# 👤 GET REPLY USER
+# =========================================================
+
+def get_user(update):
+    return update.message.reply_to_message.from_user if update.message.reply_to_message else None
+
+# =====================================================
+# ⚠️ WARN SYSTEM
+# =========================================================
+
+async def warn(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    user = get_user(update)
+    if not user:
+        return
+
+    chat = update.effective_chat.id
+
+    warn_db.setdefault(chat, {})
+    warn_db[chat][user.id] = warn_db[chat].get(user.id, 0) + 1
+
+    count = warn_db[chat][user.id]
+
+    await update.message.reply_text(
+        ui(f"⚠️ WARN ISSUED\n👤 {user_mention(user)}\n📊 COUNT: {count}/3"),
+        parse_mode="HTML"
+    )
+
+
+async def warns(update, context):
+
+    user = get_user(update)
+    if not user:
+        return
+
+    chat = update.effective_chat.id
+    count = warn_db.get(chat, {}).get(user.id, 0)
+
+    await update.message.reply_text(
+        ui(f"📊 WARN STATUS\n👤 {user_mention(user)}\n⚠️ TOTAL: {count}"),
+        parse_mode="HTML"
+    )
+
+
+async def unwarn(update, context):
+
+    user = get_user(update)
+    if not user:
+        return
+
+    chat = update.effective_chat.id
+
+    if chat in warn_db and user.id in warn_db[chat]:
+        warn_db[chat][user.id] = max(0, warn_db[chat][user.id] - 1)
+
+    await update.message.reply_text(
+        ui(f"♻️ 1 WARN REMOVED\n👤 {user_mention(user)}"),
+        parse_mode="HTML"
+    )
+
+# =========================================================
+# 👢 KICK
+# =========================================================
+
+async def kicked(update, context):
+
+    user = get_user(update)
+    if not user:
+        return
+
+    chat = update.effective_chat.id
+
+    await context.bot.ban_chat_member(chat, user.id)
+    await context.bot.unban_chat_member(chat, user.id)
+
+    await update.message.reply_text(
+        ui(f"👢 USER KICKED\n👤 {user_mention(user)}"),
+        parse_mode="HTML"
+    )
+
+# =========================================================
+# 👑 PROMOTE / DEMOTE
+# =========================================================
+
+async def promote(update, context):
+
+    user = get_user(update)
+    if not user:
+        return
+
+    level = int(context.args[0]) if context.args else 1
+    admin_power[user.id] = level
+
+    await context.bot.promote_chat_member(
+        update.effective_chat.id,
+        user.id,
+        can_manage_chat=True,
+        can_delete_messages=True,
+        can_invite_users=True,
+        can_pin_messages=True,
+        can_restrict_members=True
+    )
+
+    await update.message.reply_text(
+        ui(f"👑 PROMOTED\n👤 {user_mention(user)}\n⚡ LEVEL: {level}"),
+        parse_mode="HTML"
+    )
+
+
+async def demote(update, context):
+
+    user = get_user(update)
+    if not user:
+        return
+
+    admin_power[user.id] = 0
+
+    await context.bot.promote_chat_member(
+        update.effective_chat.id,
+        user.id,
+        can_manage_chat=False,
+        can_delete_messages=False,
+        can_invite_users=False,
+        can_pin_messages=False,
+        can_restrict_members=False
+    )
+
+    await update.message.reply_text(
+        ui(f"❌ DEMOTED\n👤 {user_mention(user)}"),
+        parse_mode="HTML"
+    )
+
+# =========================================================
+# ➕ ADD / ➖ REMOVE POWER
+# =========================================================
+
+async def add(update, context):
+
+    user = get_user(update)
+    if not user:
+        return
+
+    power = int(context.args[0]) if context.args else 1
+    admin_power[user.id] = power
+
+    await update.message.reply_text(
+        ui(f"➕ POWER ADDED\n👤 {user_mention(user)}\n⚡ LEVEL: {power}"),
+        parse_mode="HTML"
+    )
+
+
+async def remove(update, context):
+
+    user = get_user(update)
+    if not user:
+        return
+
+    admin_power[user.id] = 0
+
+    await update.message.reply_text(
+        ui(f"➖ POWER REMOVED\n👤 {user_mention(user)}"),
+        parse_mode="HTML"
+    )
+
+# =========================================================
+# ❌ DEMOTE ALL
+# =========================================================
+
+async def demote_all(update, context):
+
+    admin_power.clear()
+
+    await update.message.reply_text(
+        ui("❌ ALL ADMIN POWERS REMOVED"),
+        parse_mode="HTML"
+    )
+
+# =========================================================
+# 🏷️ TITLE
+# =========================================================
+
+async def title(update, context):
+
+    user = get_user(update)
+    if not user:
+        return
+
+    title_text = " ".join(context.args)
+
+    await context.bot.promote_chat_member(
+        update.effective_chat.id,
+        user.id,
+        can_manage_chat=True,
+        custom_title=title_text
+    )
+
+    await update.message.reply_text(
+        ui(f"🏷️ TITLE SET\n👤 {user_mention(user)}\n💠 {title_text}"),
+        parse_mode="HTML"
+    )
+
+# =========================================================
+# ✅ ACCEPT / ❌ REJECT
+# =========================================================
+
+async def accept(update, context):
+
+    count = context.args[0] if context.args else "1"
+
+    await update.message.reply_text(
+        ui(f"✅ ACCEPTED REQUESTS\n📥 COUNT: {count}"),
+        parse_mode="HTML"
+    )
+
+
+async def reject(update, context):
+
+    count = context.args[0] if context.args else "1"
+
+    await update.message.reply_text(
+        ui(f"❌ REJECTED REQUESTS\n📥 COUNT: {count}"),
+        parse_mode="HTML"
+    )
+
+# =========================================================
+# 📌 PIN / UNPIN
+# =========================================================
+
+async def pin(update, context):
+
+    if not update.message.reply_to_message:
+        return
+
+    await context.bot.pin_chat_message(
+        update.effective_chat.id,
+        update.message.reply_to_message.message_id
+    )
+
+    await update.message.reply_text(ui("📌 MESSAGE PINNED"))
+
+
+async def unpin(update, context):
+
+    await context.bot.unpin_all_chat_messages(update.effective_chat.id)
+
+    await update.message.reply_text(ui("📌 ALL UNPINNED"))
+
+# =========================================================
+# 🗑️ DELETE
+# =========================================================
+
+async def d(update, context):
+
+    if update.message.reply_to_message:
+        await update.message.reply_to_message.delete()
+
+    await update.message.delete()
+
+# =========================================================
+# 📖 HELP
+# =========================================================
+
+async def help_cmd(update, context):
+
+    await update.message.reply_text(ui("""
+🛡️ Admin Commands (.prefix only):
+.warns username/userid/reply - Get all warnings of a user
+.warn username/userid/reply - Warn a user (3 = ban)
+.unwarn username/userid/reply - Remove 1 warning
+.kicked username/userid/reply - Kick from group
+.promote username/userid/reply 0/1/2/3 - Promote replied user to admin
+.demote username/userid/reply - Demote admin
+.add username/userid/reply power - add admin power
+.remove username/userid/reply power - remove admin power
+.demote_all demote all baka promoted admins
+.title username/userid/reply title's name - Set custom title
+.accept counts - Accept pending join requests
+.reject counts - Decline pending join requests
+.pin [reply] - Pin a message
+.unpin - Unpin the current message
+.d - delete a message
+.help - Show this help
+
+Note: You can use '.' or '!' as prefix.
+Note: . or / both supported
+"""), parse_mode="HTML")
+
+
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
@@ -12733,7 +12985,7 @@ def main():
     app.add_handler(CommandHandler("check", check))
     app.add_handler(CommandHandler("own", own))
     app.add_handler(CommandHandler("items", items))
-    app.add_handler(CommandHandler("help", help))
+    
     app.add_handler(CommandHandler("guess", guess))
     app.add_handler(CommandHandler("dice", dice))
     app.add_handler(CommandHandler("mongo", mongo_check))
@@ -12862,6 +13114,30 @@ def main():
     app.add_handler(CommandHandler("hackinfo", hackinfo))
     app.add_handler(CommandHandler("endhack", endhack))   
     app.add_handler(CommandHandler("owner", owner))
+    app.add_handler(CommandHandler("warn", warn))
+    app.add_handler(CommandHandler("warns", warns))
+    app.add_handler(CommandHandler("unwarn", unwarn))
+
+    app.add_handler(CommandHandler("kick", kick))
+
+    app.add_handler(CommandHandler("promote", promote))
+    app.add_handler(CommandHandler("demote", demote))
+
+    app.add_handler(CommandHandler("add", add))
+    app.add_handler(CommandHandler("remove", remove))
+    app.add_handler(CommandHandler("demote_all", demote_all))
+
+    app.add_handler(CommandHandler("title", title))
+
+    app.add_handler(CommandHandler("accept", accept))
+    app.add_handler(CommandHandler("reject", reject))
+
+    app.add_handler(CommandHandler("pin", pin))
+    app.add_handler(CommandHandler("unpin", unpin))
+
+    app.add_handler(CommandHandler("d", d))
+
+    app.add_handler(CommandHandler("help", help_cmd))
     app.add_handler(CommandHandler("userinfo", userinfo))
     
     # ================= WORD GAME CALLBACK =================
