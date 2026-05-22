@@ -12443,6 +12443,222 @@ async def reply_whisper(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
+# =====================================================
+#                 👑 NIKI OWNER COMMAND 👑
+# =====================================================
+
+from telegram import Update
+from telegram.ext import ContextTypes, CommandHandler
+
+# =====================================================
+#                    OWNER COMMAND
+# =====================================================
+
+async def owner(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    chat = update.effective_chat
+
+    try:
+
+        admins = await context.bot.get_chat_administrators(chat.id)
+
+        owner_user = None
+
+        for admin in admins:
+
+            if admin.status == "creator":
+                owner_user = admin.user
+                break
+
+        if not owner_user:
+
+            await update.message.reply_text(
+                "❌ Group owner not found."
+            )
+            return
+
+        # ==============================
+        # OWNER NAME
+        # ==============================
+
+        owner_name = owner_user.first_name
+
+        # ==============================
+        # STYLISH OWNER MESSAGE
+        # ==============================
+
+        text = f"""
+╔╦━━━═══━━━─── • 🌌 • ───━━━═══━━━╦╗
+║
+║         ⚜️ 𓆩 𝐍 𝐈 𝐊 𝐈 • 𝐑 𝐎 𝐘 𝐀 𝐋 • 𝐄 𝐌 𝐏 𝐈 𝐑 𝐄 𓆪 ⚜️
+║
+╚╩━━━═══━━━─── • 👑 • ───━━━═══━━━╩╝
+
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⠿⠛⠉⠉⠉⠉⠉⠉⠉👑⚜️👑⠉⠉⠉⠉⠉⠉⠉⠛⠿⣿⣿
+⣿⡏        🔥 𝐄𝐌𝐏𝐄𝐑𝐎𝐑 • 𝐎𝐅 • 𝐓𝐇𝐄 • 𝐑𝐎𝐘𝐀𝐋 • 𝐆𝐑𝐎𝐔𝐏 🔥        ⢹⣿
+⣿⣧⣀⣀⣀⣀⣀⣀⣀⚔️⣀⣀⣀⣀⣀⣀⣀⣤⣿
+
+╔════━━━═══⚜️═══━━━════╗
+         👑 𝐓𝐇𝐄 • 𝐂𝐑𝐎𝐖𝐍𝐄𝐃 • 𝐒𝐔𝐏𝐑𝐄𝐌𝐄 👑
+╚════━━━═══⚜️═══━━━════╝
+
+                 ✦━━━ 🌹 ━━━✦
+             👑 𓆩 {owner_name} 𓆪 👑
+                 ✦━━━ 🌹 ━━━✦
+
+╭━━━━━━━━━━━━🔥━━━━━━━━━━━━╮
+         ⚡️ 𝐈𝐌𝐏𝐄𝐑𝐈𝐀𝐋 • 𝐑𝐎𝐘𝐀𝐋 • 𝐃𝐄𝐂𝐑𝐄𝐄 ⚡️
+╰━━━━━━━━━━━━🔥━━━━━━━━━━━━╯
+
+💠 𝐓𝐡𝐞 𝐂𝐫𝐨𝐰𝐧 𝐒𝐭𝐚𝐧𝐝𝐬 𝐀𝐛𝐨𝐯𝐞 𝐀𝐥𝐥 𝐓𝐡𝐫𝐨𝐧𝐞𝐬
+⚔️ 𝐎𝐧𝐞 𝐒𝐨𝐮𝐥 • 𝐎𝐧𝐞 𝐑𝐮𝐥𝐞𝐫 • 𝐎𝐧𝐞 𝐄𝐦𝐩𝐢𝐫𝐞
+🔥 𝐄𝐯𝐞𝐫𝐲 𝐎𝐫𝐝𝐞𝐫 𝐂𝐚𝐫𝐫𝐢𝐞𝐬 𝐓𝐡𝐞 𝐅𝐢𝐫𝐞 𝐎𝐟 𝐏𝐨𝐰𝐞𝐫
+🌌 𝐓𝐡𝐞 𝐍𝐈𝐊𝐈 𝐄𝐌𝐏𝐈𝐑𝐄 𝐑𝐄𝐈𝐆𝐍𝐒 𝐅𝐎𝐑𝐄𝐕𝐄𝐑
+💎 𝐑𝐨𝐲𝐚𝐥𝐭𝐲 𝐈𝐬 𝐖𝐫𝐢𝐭𝐭𝐞𝐧 𝐈𝐧 𝐓𝐡𝐞 𝐂𝐫𝐨𝐰𝐧
+👑 𝐍𝐨 𝐎𝐧𝐞 𝐃𝐚𝐫𝐞𝐬 𝐓𝐨 𝐂𝐡𝐚𝐥𝐥𝐞𝐧𝐠𝐞 𝐓𝐡𝐞 𝐓𝐡𝐫𝐨𝐧𝐞
+🌹 𝐑𝐞𝐬𝐩𝐞𝐜𝐭 𝐈𝐬 𝐓𝐡𝐞 𝐋𝐚𝐰 𝐎𝐟 𝐓𝐡𝐢𝐬 𝐊𝐢𝐧𝐠𝐝𝐨𝐦
+⚡️ 𝐓𝐡𝐞 𝐂𝐫𝐨𝐰𝐧'𝐬 𝐅𝐢𝐫𝐞 𝐍𝐞𝐯𝐞𝐫 𝐅𝐚𝐝𝐞𝐬
+🜲 𝐋𝐞𝐠𝐞𝐧𝐝𝐬 𝐀𝐫𝐞 𝐁𝐨𝐫𝐧 𝐔𝐧𝐝𝐞𝐫 𝐓𝐡𝐢𝐬 𝐓𝐡𝐫𝐨𝐧𝐞
+☠️ 𝐀𝐥𝐥 𝐄𝐧𝐞𝐦𝐢𝐞𝐬 𝐊𝐧𝐞𝐞𝐥 𝐁𝐞𝐟𝐨𝐫𝐞 𝐓𝐡𝐞 𝐂𝐫𝐨𝐰𝐧
+
+╔═══════━━━👑━━━═══════╗
+          ⚜️ 𝐀𝐋𝐋 • 𝐇𝐀𝐈𝐋 ⚜️
+      🔥 𝐓𝐇𝐄 • 𝐑𝐎𝐘𝐀𝐋 • 𝐄𝐌𝐏𝐄𝐑𝐎𝐑 🔥
+╚═══════━━━👑━━━═══════╝
+
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+
+╔═━━━═══━━━─── • ⚡️ • ───━━━═══━━━═╗
+      🌌 𝐏𝐎𝐖𝐄𝐑 • 𝐅𝐈𝐑𝐄 • 𝐂𝐑𝐎𝐖𝐍 • 𝐄𝐌𝐏𝐈𝐑𝐄 🌌
+╚═━━━═══━━━─── • 👑 • ───━━━═══━━━═╝
+"""
+
+        # ==============================
+        # SEND MESSAGE
+        # ==============================
+
+        await update.message.reply_text(
+            text,
+            parse_mode="HTML"
+        )
+
+    except Exception as e:
+
+        await update.message.reply_text(
+            f"⚠️ Error: {e}"
+        )
+
+# =====================================================
+#                  HANDLER ADD
+# =====================================================
+
+# =====================================================
+#                 👑 NIKI OWNER COMMAND 👑
+# =====================================================
+
+from telegram import Update
+from telegram.ext import ContextTypes, CommandHandler
+
+# =====================================================
+#                    OWNER COMMAND
+# =====================================================
+
+async def owner(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    chat = update.effective_chat
+
+    try:
+
+        admins = await context.bot.get_chat_administrators(chat.id)
+
+        owner_user = None
+
+        for admin in admins:
+
+            if admin.status == "creator":
+                owner_user = admin.user
+                break
+
+        if not owner_user:
+
+            await update.message.reply_text(
+                "❌ Group owner not found."
+            )
+            return
+
+        # ==============================
+        # OWNER NAME
+        # ==============================
+
+        owner_name = owner_user.first_name
+
+        # ==============================
+        # STYLISH OWNER MESSAGE
+        # ==============================
+
+        text = f"""
+╔╦━━━═══━━━─── • 🌌 • ───━━━═══━━━╦╗
+║
+║         ⚜️ 𓆩 𝐍 𝐈 𝐊 𝐈 • 𝐑 𝐎 𝐘 𝐀 𝐋 • 𝐄 𝐌 𝐏 𝐈 𝐑 𝐄 𓆪 ⚜️
+║
+╚╩━━━═══━━━─── • 👑 • ───━━━═══━━━╩╝
+
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⠿⠛⠉⠉⠉⠉⠉⠉⠉👑⚜️👑⠉⠉⠉⠉⠉⠉⠉⠛⠿⣿⣿
+⣿⡏        🔥 𝐄𝐌𝐏𝐄𝐑𝐎𝐑 • 𝐎𝐅 • 𝐓𝐇𝐄 • 𝐑𝐎𝐘𝐀𝐋 • 𝐆𝐑𝐎𝐔𝐏 🔥        ⢹⣿
+⣿⣧⣀⣀⣀⣀⣀⣀⣀⚔️⣀⣀⣀⣀⣀⣀⣀⣤⣿
+
+╔════━━━═══⚜️═══━━━════╗
+         👑 𝐓𝐇𝐄 • 𝐂𝐑𝐎𝐖𝐍𝐄𝐃 • 𝐒𝐔𝐏𝐑𝐄𝐌𝐄 👑
+╚════━━━═══⚜️═══━━━════╝
+
+                 ✦━━━ 🌹 ━━━✦
+             👑 𓆩 {owner_name} 𓆪 👑
+                 ✦━━━ 🌹 ━━━✦
+
+╭━━━━━━━━━━━━🔥━━━━━━━━━━━━╮
+         ⚡️ 𝐈𝐌𝐏𝐄𝐑𝐈𝐀𝐋 • 𝐑𝐎𝐘𝐀𝐋 • 𝐃𝐄𝐂𝐑𝐄𝐄 ⚡️
+╰━━━━━━━━━━━━🔥━━━━━━━━━━━━╯
+
+💠 𝐓𝐡𝐞 𝐂𝐫𝐨𝐰𝐧 𝐒𝐭𝐚𝐧𝐝𝐬 𝐀𝐛𝐨𝐯𝐞 𝐀𝐥𝐥 𝐓𝐡𝐫𝐨𝐧𝐞𝐬
+⚔️ 𝐎𝐧𝐞 𝐒𝐨𝐮𝐥 • 𝐎𝐧𝐞 𝐑𝐮𝐥𝐞𝐫 • 𝐎𝐧𝐞 𝐄𝐦𝐩𝐢𝐫𝐞
+🔥 𝐄𝐯𝐞𝐫𝐲 𝐎𝐫𝐝𝐞𝐫 𝐂𝐚𝐫𝐫𝐢𝐞𝐬 𝐓𝐡𝐞 𝐅𝐢𝐫𝐞 𝐎𝐟 𝐏𝐨𝐰𝐞𝐫
+🌌 𝐓𝐡𝐞 𝐍𝐈𝐊𝐈 𝐄𝐌𝐏𝐈𝐑𝐄 𝐑𝐄𝐈𝐆𝐍𝐒 𝐅𝐎𝐑𝐄𝐕𝐄𝐑
+💎 𝐑𝐨𝐲𝐚𝐥𝐭𝐲 𝐈𝐬 𝐖𝐫𝐢𝐭𝐭𝐞𝐧 𝐈𝐧 𝐓𝐡𝐞 𝐂𝐫𝐨𝐰𝐧
+👑 𝐍𝐨 𝐎𝐧𝐞 𝐃𝐚𝐫𝐞𝐬 𝐓𝐨 𝐂𝐡𝐚𝐥𝐥𝐞𝐧𝐠𝐞 𝐓𝐡𝐞 𝐓𝐡𝐫𝐨𝐧𝐞
+🌹 𝐑𝐞𝐬𝐩𝐞𝐜𝐭 𝐈𝐬 𝐓𝐡𝐞 𝐋𝐚𝐰 𝐎𝐟 𝐓𝐡𝐢𝐬 𝐊𝐢𝐧𝐠𝐝𝐨𝐦
+⚡️ 𝐓𝐡𝐞 𝐂𝐫𝐨𝐰𝐧'𝐬 𝐅𝐢𝐫𝐞 𝐍𝐞𝐯𝐞𝐫 𝐅𝐚𝐝𝐞𝐬
+🜲 𝐋𝐞𝐠𝐞𝐧𝐝𝐬 𝐀𝐫𝐞 𝐁𝐨𝐫𝐧 𝐔𝐧𝐝𝐞𝐫 𝐓𝐡𝐢𝐬 𝐓𝐡𝐫𝐨𝐧𝐞
+☠️ 𝐀𝐥𝐥 𝐄𝐧𝐞𝐦𝐢𝐞𝐬 𝐊𝐧𝐞𝐞𝐥 𝐁𝐞𝐟𝐨𝐫𝐞 𝐓𝐡𝐞 𝐂𝐫𝐨𝐰𝐧
+
+╔═══════━━━👑━━━═══════╗
+          ⚜️ 𝐀𝐋𝐋 • 𝐇𝐀𝐈𝐋 ⚜️
+      🔥 𝐓𝐇𝐄 • 𝐑𝐎𝐘𝐀𝐋 • 𝐄𝐌𝐏𝐄𝐑𝐎𝐑 🔥
+╚═══════━━━👑━━━═══════╝
+
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+
+╔═━━━═══━━━─── • ⚡️ • ───━━━═══━━━═╗
+      🌌 𝐏𝐎𝐖𝐄𝐑 • 𝐅𝐈𝐑𝐄 • 𝐂𝐑𝐎𝐖𝐍 • 𝐄𝐌𝐏𝐈𝐑𝐄 🌌
+╚═━━━═══━━━─── • 👑 • ───━━━═══━━━═╝
+"""
+
+        # ==============================
+        # SEND MESSAGE
+        # ==============================
+
+        await update.message.reply_text(
+            text,
+            parse_mode="HTML"
+        )
+
+    except Exception as e:
+
+        await update.message.reply_text(
+            f"⚠️ Error: {e}"
+        )
+
             
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -12644,7 +12860,8 @@ def main():
     app.add_handler(CommandHandler("guess", guess))
     app.add_handler(CommandHandler("players", players))
     app.add_handler(CommandHandler("hackinfo", hackinfo))
-    app.add_handler(CommandHandler("endhack", endhack))
+    app.add_handler(CommandHandler("endhack", endhack))   
+    app.add_handler(CommandHandler("owner", owner))
     app.add_handler(CommandHandler("userinfo", userinfo))
     
     # ================= WORD GAME CALLBACK =================
