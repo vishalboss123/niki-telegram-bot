@@ -12099,7 +12099,7 @@ from telegram.ext import (
 
 whispers = {}
 
-WHISPER_EXPIRE = 600
+WHISPER_EXPIRE = 86400
 
 # =========================================================
 #                  CLEANUP EXPIRED
@@ -12293,7 +12293,7 @@ async def inline_whisper(update: Update, context: ContextTypes.DEFAULT_TYPE):
         input_message_content=InputTextMessageContent(
 
             "╔═════ 💌 ═════╗\n"
-            "      🌌 NIKI WHISPER 🌌\n"
+            "🌌 NIKI WHISPER 🌌\n"
             "╚══════════════╝\n\n"
 
             f"👤 Whisper For: {target_show}\n"
