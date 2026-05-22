@@ -48,6 +48,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram import ChatPermissions, Update
 from datetime import datetime, timedelta
 from collections import deque
+from telegram.ext import InlineQueryHandler
 from openai import OpenAI
 from telegram.constants import ChatAction
 from telegram.helpers import mention_html
@@ -12060,19 +12061,19 @@ async def endhack(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
 
 # =========================================================
-#                🌌 NIKI ADVANCED WHISPER 🌌
+#                🌌 NIKI INLINE WHISPER 🌌
 # =========================================================
 # FEATURES:
-# ✅ Baka Style Whisper
+# ✅ Real Baka Style Inline Whisper
 # ✅ Username + User ID Support
 # ✅ Popup Whisper
 # ✅ Anonymous Whisper
-# ✅ Auto Expire System
-# ✅ One Time Whisper
-# ✅ Reply Whisper
-# ✅ Stylish Buttons
+# ✅ Auto Expire
+# ✅ One Time Open
+# ✅ Reply System
+# ✅ Stylish UI
+# ✅ Inline Loading
 # ✅ Anti Others Open
-# ✅ Group Friendly
 # =========================================================
 
 import uuid
@@ -12081,14 +12082,15 @@ import time
 from telegram import (
     Update,
     InlineKeyboardButton,
-    InlineKeyboardMarkup
+    InlineKeyboardMarkup,
+    InlineQueryResultArticle,
+    InputTextMessageContent
 )
 
 from telegram.ext import (
     ContextTypes,
-    MessageHandler,
     CallbackQueryHandler,
-    filters
+    InlineQueryHandler
 )
 
 # =========================================================
@@ -12097,11 +12099,10 @@ from telegram.ext import (
 
 whispers = {}
 
-WHISPER_EXPIRE = 600  # 10 minutes
-
+WHISPER_EXPIRE = 600
 
 # =========================================================
-#                 AUTO DELETE EXPIRED
+#                  CLEANUP EXPIRED
 # =========================================================
 
 def cleanup_whispers():
@@ -12118,47 +12119,66 @@ def cleanup_whispers():
     for wid in expired:
         whispers.pop(wid, None)
 
-
 # =========================================================
-#                   CREATE WHISPER
+#                 INLINE WHISPER
 # =========================================================
 
-async def niki_whisper(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def inline_whisper(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     cleanup_whispers()
 
-    if not update.message or not update.message.text:
+    query = update.inline_query
+
+    if not query:
         return
 
-    text = update.message.text.strip()
-
-    # -----------------------------------
-    # BOT TAG CHECK
-    # Example:
-    # @iim_nikibot @username hello
-    # @iim_nikibot 123456 hello
-    # -----------------------------------
-
-    if not text.lower().startswith("@iim_nikibot"):
-        return
-
-    args = text.split(maxsplit=2)
-
-    if len(args) < 3:
-
-        return await update.message.reply_text(
-            "❌ Usage:\n"
-            "@iim_nikibot @username message\n\n"
-            "or\n\n"
-            "@iim_nikibot userid message"
-        )
-
-    target = args[1]
-    whisper_text = args[2]
+    text = query.query.strip()
 
     # =====================================================
-    # ANONYMOUS CHECK
-    # use: -a
+    # EMPTY QUERY
+    # =====================================================
+
+    if not text:
+
+        return await query.answer(
+            [],
+            cache_time=1
+        )
+
+    # =====================================================
+    # SPLIT
+    # =====================================================
+
+    args = text.split(maxsplit=1)
+
+    if len(args) < 2:
+
+        result = InlineQueryResultArticle(
+
+            id=str(uuid.uuid4()),
+
+            title="💌 Whisper Usage",
+
+            description="@username message",
+
+            input_message_content=InputTextMessageContent(
+                "❌ Usage:\n\n"
+                "@username hello\n\n"
+                "or\n\n"
+                "123456 hello"
+            )
+        )
+
+        return await query.answer(
+            [result],
+            cache_time=1
+        )
+
+    target = args[0]
+    whisper_text = args[1]
+
+    # =====================================================
+    # ANONYMOUS
     # =====================================================
 
     anonymous = False
@@ -12169,7 +12189,7 @@ async def niki_whisper(update: Update, context: ContextTypes.DEFAULT_TYPE):
         whisper_text = whisper_text[3:]
 
     # =====================================================
-    # TARGET SYSTEM
+    # TARGET
     # =====================================================
 
     target_username = None
@@ -12185,12 +12205,24 @@ async def niki_whisper(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     else:
 
-        return await update.message.reply_text(
-            "❌ Invalid target user."
+        result = InlineQueryResultArticle(
+
+            id=str(uuid.uuid4()),
+
+            title="❌ Invalid Target",
+
+            input_message_content=InputTextMessageContent(
+                "Invalid username or user id."
+            )
+        )
+
+        return await query.answer(
+            [result],
+            cache_time=1
         )
 
     # =====================================================
-    # CREATE WHISPER ID
+    # CREATE WHISPER
     # =====================================================
 
     whisper_id = str(uuid.uuid4())[:10]
@@ -12202,8 +12234,8 @@ async def niki_whisper(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "target_username": target_username,
         "target_id": target_id,
 
-        "sender_name": update.effective_user.first_name,
-        "sender_id": update.effective_user.id,
+        "sender_name": query.from_user.first_name,
+        "sender_id": query.from_user.id,
 
         "anonymous": anonymous,
 
@@ -12211,6 +12243,18 @@ async def niki_whisper(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         "opened": False
     }
+
+    # =====================================================
+    # TARGET SHOW
+    # =====================================================
+
+    if target_username:
+
+        target_show = f"@{target_username}"
+
+    else:
+
+        target_show = str(target_id)
 
     # =====================================================
     # BUTTONS
@@ -12235,24 +12279,19 @@ async def niki_whisper(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ])
 
     # =====================================================
-    # TARGET DISPLAY
+    # INLINE RESULT
     # =====================================================
 
-    if target_username:
+    result = InlineQueryResultArticle(
 
-        target_show = f"@{target_username}"
+        id=whisper_id,
 
-    else:
+        title=f"💌 Send Whisper To {target_show}",
 
-        target_show = f"<code>{target_id}</code>"
+        description="Private hidden message",
 
-    # =====================================================
-    # SEND MESSAGE
-    # =====================================================
+        input_message_content=InputTextMessageContent(
 
-    await update.message.reply_text(
-
-        text=(
             "╔═════ 💌 ═════╗\n"
             "      🌌 NIKI WHISPER 🌌\n"
             "╚══════════════╝\n\n"
@@ -12264,13 +12303,16 @@ async def niki_whisper(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "✨ Click button to open whisper."
         ),
 
-        parse_mode="HTML",
         reply_markup=keyboard
     )
 
+    await query.answer(
+        [result],
+        cache_time=1
+    )
 
 # =========================================================
-#                   OPEN WHISPER
+#                  OPEN WHISPER
 # =========================================================
 
 async def open_whisper(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -12278,14 +12320,15 @@ async def open_whisper(update: Update, context: ContextTypes.DEFAULT_TYPE):
     cleanup_whispers()
 
     query = update.callback_query
+
     user = query.from_user
 
-    data_id = query.data.split("_")[1]
+    whisper_id = query.data.split("_")[1]
 
-    data = whispers.get(data_id)
+    data = whispers.get(whisper_id)
 
     # =====================================================
-    # NOT FOUND
+    # EXPIRED
     # =====================================================
 
     if not data:
@@ -12296,29 +12339,27 @@ async def open_whisper(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
     # =====================================================
-    # CHECK TARGET
+    # ACCESS CHECK
     # =====================================================
 
     allowed = False
-
-    # USERNAME CHECK
 
     if data["target_username"]:
 
         if user.username:
 
             if user.username.lower() == data["target_username"]:
-                allowed = True
 
-    # USER ID CHECK
+                allowed = True
 
     if data["target_id"]:
 
         if user.id == data["target_id"]:
+
             allowed = True
 
     # =====================================================
-    # ACCESS DENIED
+    # DENIED
     # =====================================================
 
     if not allowed:
@@ -12354,7 +12395,7 @@ async def open_whisper(update: Update, context: ContextTypes.DEFAULT_TYPE):
         sender = data["sender_name"]
 
     # =====================================================
-    # SHOW WHISPER
+    # SHOW MESSAGE
     # =====================================================
 
     await query.answer(
@@ -12367,9 +12408,8 @@ async def open_whisper(update: Update, context: ContextTypes.DEFAULT_TYPE):
         show_alert=True
     )
 
-
 # =========================================================
-#                  REPLY WHISPER
+#                   REPLY WHISPER
 # =========================================================
 
 async def reply_whisper(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -12395,6 +12435,7 @@ async def reply_whisper(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         f"💌 Reply Whisper To:\n"
         f"<code>{sender_id}</code>\n\n"
+
         f"Example:\n"
         f"@iim_nikibot {sender_id} hello",
 
@@ -12402,9 +12443,7 @@ async def reply_whisper(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
-
-
-
+            
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
@@ -12696,6 +12735,12 @@ def main():
         )
     )
     #===================WHISPER =========================
+   
+    app.add_handler(
+        InlineQueryHandler(
+            inline_whisper
+        )
+    )
     app.add_handler(
 
         CallbackQueryHandler(
@@ -12752,14 +12797,7 @@ def main():
         group=4
     )
     
-    # 💌 WHISPER SYSTEM
-    app.add_handler(
-        MessageHandler(
-            filters.TEXT & ~filters.COMMAND,
-            niki_whisper
-        ),
-        group=2
-    )
+    
     # 💖 LOVE FLOW
     app.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, love_flow),
