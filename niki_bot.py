@@ -12765,7 +12765,7 @@ async def game_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [
                 InlineKeyboardButton(
                     "🌌 Oᴘᴇɴ Nɪᴋɪ Mɪɴɪ Gᴀᴍᴇꜱ 🎮",
-                    url="YOUR_CHANNEL_LINK"
+                    url="https://t.me/YTN_BISHAL/759"
                 )
             ],
             [
