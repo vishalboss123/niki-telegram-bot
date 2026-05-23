@@ -12466,7 +12466,7 @@ def user_mention(user):
 # 👤 GET REPLY USER
 # =========================================================
 
-def get_user(update):
+def get_reply_user(update):
     return update.message.reply_to_message.from_user if update.message.reply_to_message else None
 
 # =====================================================
@@ -12475,7 +12475,7 @@ def get_user(update):
 
 async def warn(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    user = get_user(update)
+    user = get_reply_user(update)
     if not user:
         return
 
@@ -12494,7 +12494,7 @@ async def warn(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def warns(update, context):
 
-    user = get_user(update)
+    user = get_reply_user(update)
     if not user:
         return
 
@@ -12509,7 +12509,7 @@ async def warns(update, context):
 
 async def unwarn(update, context):
 
-    user = get_user(update)
+    user = get_reply_user(update)
     if not user:
         return
 
@@ -12529,7 +12529,7 @@ async def unwarn(update, context):
 
 async def kicked(update, context):
 
-    user = get_user(update)
+    user = get_reply_user(update)
     if not user:
         return
 
@@ -12542,14 +12542,13 @@ async def kicked(update, context):
         ui(f"👢 USER KICKED\n👤 {user_mention(user)}"),
         parse_mode="HTML"
     )
-
 # =========================================================
 # 👑 PROMOTE / DEMOTE
 # =========================================================
 
 async def promote(update, context):
 
-    user = get_user(update)
+    user = get_reply_user(update)
     if not user:
         return
 
@@ -12574,7 +12573,7 @@ async def promote(update, context):
 
 async def demote(update, context):
 
-    user = get_user(update)
+    user = get_reply_user(update)
     if not user:
         return
 
@@ -12601,7 +12600,7 @@ async def demote(update, context):
 
 async def add(update, context):
 
-    user = get_user(update)
+    user = get_reply_user(update)
     if not user:
         return
 
@@ -12616,7 +12615,7 @@ async def add(update, context):
 
 async def remove(update, context):
 
-    user = get_user(update)
+    user = get_reply_user(update)
     if not user:
         return
 
@@ -12626,7 +12625,6 @@ async def remove(update, context):
         ui(f"➖ POWER REMOVED\n👤 {user_mention(user)}"),
         parse_mode="HTML"
     )
-
 # =========================================================
 # ❌ DEMOTE ALL
 # =========================================================
@@ -12646,16 +12644,15 @@ async def demote_all(update, context):
 
 async def title(update, context):
 
-    user = get_user(update)
+    user = get_reply_user(update)
     if not user:
         return
 
     title_text = " ".join(context.args)
 
-    await context.bot.promote_chat_member(
-        update.effective_chat.id,
-        user.id,
-        can_manage_chat=True,
+    await context.bot.set_chat_administrator_custom_title(
+        chat_id=update.effective_chat.id,
+        user_id=user.id,
         custom_title=title_text
     )
 
@@ -12957,7 +12954,7 @@ def main():
     app.add_handler(CommandHandler("warns", warns))
     app.add_handler(CommandHandler("unwarn", unwarn))
 
-    app.add_handler(CommandHandler("kick", kick))
+    app.add_handler(CommandHandler("kicked", kicked))
 
     app.add_handler(CommandHandler("promote", promote))
     app.add_handler(CommandHandler("demote", demote))
