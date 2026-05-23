@@ -12746,6 +12746,99 @@ async def help_cmd(update, context):
 Note: You can use '.' or '!' as prefix.
 Note: . or / both supported
 """), parse_mode="HTML")
+#=====================GAMES===================
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import CommandHandler, ContextTypes
+
+# =========================================================
+#                    🎮 GAME PANEL 🎮
+# =========================================================
+
+async def game_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    text = (
+        "🎮 <b>Cʟɪᴄᴋ Tʜᴇ Bᴜᴛᴛᴏɴ Bᴇʟᴏᴡ Tᴏ Kɴᴏᴡ Aʙᴏᴜᴛ Nɪᴋɪ Mɪɴɪ Gᴀᴍᴇꜱ.</b>"
+    )
+
+    keyboard = InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton(
+                    "🌌 Oᴘᴇɴ Nɪᴋɪ Mɪɴɪ Gᴀᴍᴇꜱ 🎮",
+                    url="YOUR_CHANNEL_LINK"
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    "🎯 Aʟʟ Gᴀᴍᴇ Cᴏᴍᴍᴀɴᴅꜱ",
+                    callback_data="all_game_commands"
+                )
+            ]
+        ]
+    )
+
+    await update.message.reply_text(
+        text=text,
+        reply_markup=keyboard,
+        parse_mode="HTML"
+    )
+
+
+# =========================================================
+#                 🎮 GAME COMMAND LIST 🎮
+# =========================================================
+
+async def game_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    await query.answer()
+
+    text = (
+        "🎮 <b>𝐆ᴀᴍᴇs</b>\n"
+        "━━━━━━━━━━━━━━━━━━━\n"
+        "➜ /dice - 🎲 Tʀʏ Yᴏᴜʀ Lᴜᴄᴋ\n"
+        "➜ /coin - 🪙 Fʟɪᴘ A Cᴏɪɴ\n"
+        "➜ /duel - ⚔️ Dᴜᴇʟ A Usᴇʀ\n"
+        "➜ /cduel - ⚔️ Cᴏɪɴ Dᴜᴇʟ\n"
+        "➜ /slot - 🎰 Pʟᴀʏ Sʟᴏᴛ\n"
+        "➜ /dart - 🎯 Pʟᴀʏ Dᴀʀᴛ\n"
+        "➜ /mines - 💣 Pʟᴀʏ Mɪɴᴇs\n"
+        "➜ /bomb - 💣 Sᴛᴀʀᴛ Bᴏᴍʙ Gᴀᴍᴇ\n"
+        "➜ /bjoin - ➕ Jᴏɪɴ Bᴏᴍʙ Gᴀᴍᴇ\n"
+        "➜ /pass - 🎯 Pᴀss Tʜᴇ Bᴏᴍʙ\n"
+        "➜ /left - 🚪 Lᴇᴀᴠᴇ Gᴀᴍᴇ\n"
+        "➜ /gun - 🔫 Sᴛᴀʀᴛ Gᴜɴ Gᴀᴍᴇ\n"
+        "➜ /gjoin - ➕ Jᴏɪɴ Gᴜɴ Gᴀᴍᴇ\n"
+        "➜ /shoot - 🎯 Sʜᴏᴏᴛ Eɴᴇᴍʏ\n"
+        "➜ /slotlb - 🏆 Sʟᴏᴛ Lᴇᴀᴅᴇʀʙᴏᴀʀᴅ\n"
+        "➜ /hack - 💻 Hᴀᴄᴋ Gᴀᴍᴇ\n"
+        "➜ /register - 🧠 Rᴇɢɪsᴛᴇʀ Hᴀᴄᴋᴇʀ\n"
+        "➜ /starthack - 🚀 Sᴛᴀʀᴛ Hᴀᴄᴋ Gᴀᴍᴇ\n"
+        "➜ /guess - 🔍 Gᴜᴇss Tʜᴇ Cᴏᴅᴇ\n"
+        "➜ /players - 👥 Hᴀᴄᴋ Pʟᴀʏᴇʀs\n"
+        "➜ /hackinfo - 📜 Hᴀᴄᴋ Gᴀᴍᴇ Iɴғᴏ\n"
+        "➜ /endhack - 🛑 Eɴᴅ Hᴀᴄᴋ Gᴀᴍᴇ\n\n"
+
+        "🔤 <b>𝐖ᴏʀᴅ 𝐆ᴀᴍᴇs</b>\n"
+        "━━━━━━━━━━━━━━━━━━━\n"
+        "➜ /wordseek - 🔍 Fɪɴᴅ Hɪᴅᴅᴇɴ Wᴏʀᴅs\n"
+        "➜ /new4 - 🔤 4 Lᴇᴛᴛᴇʀ Gᴀᴍᴇ\n"
+        "➜ /new5 - 🔤 5 Lᴇᴛᴛᴇʀ Gᴀᴍᴇ\n"
+        "➜ /new6 - 🔤 6 Lᴇᴛᴛᴇʀ Gᴀᴍᴇ\n"
+        "➜ /end - 🛑 Eɴᴅ Gᴀᴍᴇ\n"
+        "➜ /wordlb - 🏆 Wᴏʀᴅ Lᴇᴀᴅᴇʀʙᴏᴀʀᴅ\n"
+        "➜ /wprofile - 👤 Wᴏʀᴅ Pʀᴏғɪʟᴇ\n"
+        "➜ /wbadges - 🎖️ Wᴏʀᴅ Bᴀᴅɢᴇs"
+    )
+
+    await query.message.reply_text(
+        text=text,
+        parse_mode="HTML"
+    )
+
+
+
+
 
 
 # =================== MAIN FUNCTION ===================
@@ -12974,6 +13067,8 @@ def main():
     app.add_handler(CommandHandler("d", d))
 
     app.add_handler(CommandHandler("help", help_cmd))
+    app.add_handler(CommandHandler("game", game_cmd))
+
     app.add_handler(CommandHandler("userinfo", userinfo))
     
     # ================= WORD GAME CALLBACK =================
@@ -13034,7 +13129,15 @@ def main():
             pattern="^(start_|help_cmds|economy_menu|games_menu|music_menu|manage_menu|reward_menu|social_menu|home_menu)"
         )
     )
+    
+    # ================= GAME PANEL =================
 
+    app.add_handler(
+        CallbackQueryHandler(
+            game_callback,
+            pattern="^all_game_commands$"
+        )
+    )
     # ================= NUMBER / BET SYSTEM =================
 
     app.add_handler(
