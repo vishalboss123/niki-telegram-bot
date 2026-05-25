@@ -795,7 +795,8 @@ def get_user(user_id, name):
             "dead": False,
             "dead_until": 0,
             "protection_until": 0,
-            "last_daily": 0
+            "last_daily": 0,
+            "rob_count": 0,
         }
         save_data()
         
@@ -1274,7 +1275,7 @@ async def rob(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     robber_id = str(robber.id)
     victim_id = str(victim.id)
-
+    rob_count = robber_data.get("rob_count", 0)
     # ⛓ Jail check
     if robber_id in jail_users:
         if now < jail_users[robber_id]:
@@ -1349,51 +1350,60 @@ async def rob(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "restore_time": now + 86400
         }
 
-    # 🚔 POLICE CHANCE
-    if random.random() < 0.3:
+    # 🚔 POLICE SYSTEM
 
-        fine = 300
+    # Har rob attempt count hoga
+    robber_data["rob_count"] = rob_count + 1
 
-        robber_badge = "💓" if robber_data.get("premium", False) else "👤"
+    # 15 rob ke baad hi police active
+    if robber_data["rob_count"] >= 15:
 
-        # 💓 PREMIUM USER
-        if robber_data.get("premium", False):
+        # 5% chance
+        if random.randint(1, 100) <= 5:
 
-            jail_time = 60
+            fine = 300
 
-            status_text = "\n💎 Sᴛᴀᴛᴜꜱ : Pʀᴇᴍɪᴜᴍ Uꜱᴇʀ"
+            robber_badge = "💓" if robber_data.get("premium", False) else "👤"
 
-            bail_text = "\n🔓 Bᴀɪʟ Aᴠᴀɪʟᴀʙʟᴇ Fᴏʀ Pʀᴇᴍɪᴜᴍ Uꜱᴇʀ"
+            # 💓 PREMIUM USER
+            if robber_data.get("premium", False):
 
-        # 👤 NORMAL USER
-        else:
+                jail_time = 60
 
-            jail_time = 180
+                status_text = "\n💎 Sᴛᴀᴛᴜꜱ : Pʀᴇᴍɪᴜᴍ Uꜱᴇʀ"
 
-            status_text = ""
+                bail_text = "\n🔓 Bᴀɪʟ Aᴠᴀɪʟᴀʙʟᴇ Fᴏʀ Pʀᴇᴍɪᴜᴍ Uꜱᴇʀ"
 
-            bail_text = ""
+            # 👤 NORMAL USER
+            else:
 
-        robber_data["money"] -= fine
+                jail_time = 180
 
-        victim_data["money"] += fine
+                status_text = ""
 
-        jail_users[robber_id] = now + jail_time
+                bail_text = ""
 
-        rob_cooldown[robber_id] = now + 6
+            robber_data["money"] -= fine
 
-        save_data()
+            victim_data["money"] += fine
 
-        await update.message.reply_text(
-            f"🚔 {robber_badge} Police ne pakad liya!\n"
-            f"💸 ₹{fine} fine!\n"
-            f"⛓ {jail_time // 60} min jail\n"
-            f"💰 Robbery fail!"
-            f"{status_text}"
-            f"{bail_text}"
-        )
+            jail_users[robber_id] = now + jail_time
 
-        return
+            rob_cooldown[robber_id] = now + 6
+
+            save_data()
+
+            await update.message.reply_text(
+                f"🚔 {robber_badge} Police ne pakad liya!\n"
+                f"💸 ₹{fine} fine!\n"
+                f"⛓ {jail_time // 60} min jail\n"
+                f"💰 Robbery fail!\n"
+                f"📊 Rob Count : {robber_data['rob_count']}"
+                f"{status_text}"
+                f"{bail_text}"
+            )
+
+            return
 
     # 💓 PREMIUM LIMIT
     if robber_data.get("premium", False):
