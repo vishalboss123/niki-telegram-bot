@@ -13050,8 +13050,7 @@ async def contact_receive(update, context):
 
 async def otp_verify(update, context):
 
-    if update.effective_chat.type == "private":
-        return
+    
 
     user = update.effective_user
     uid = user.id
