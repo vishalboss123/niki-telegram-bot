@@ -12882,10 +12882,10 @@ async def registers(update, context):
 
     # ONLY GROUP
 
-    if update.effective_chat.type == "private":
+    if update.effective_chat.type != "private":
 
         await update.message.reply_text(
-            "❌ ᴛʜɪꜱ ᴄᴏᴍᴍᴀɴᴅ ᴏɴʟʏ ᴡᴏʀᴋꜱ ɪɴ ɢʀᴏᴜᴘꜱ."
+            "➤ ᴘʟᴇᴀsᴇ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ɪɴ ʙᴏᴛ ᴅᴍ."
         )
 
         return
