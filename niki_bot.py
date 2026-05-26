@@ -12850,6 +12850,381 @@ async def game_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 
+# ================= IMPORTS =================
+
+from pymongo import MongoClient
+from telegram import (
+    KeyboardButton,
+    ReplyKeyboardMarkup,
+    ReplyKeyboardRemove
+)
+
+from telegram.ext import (
+    CommandHandler,
+    MessageHandler,
+    filters
+)
+
+from random import randint
+import time
+
+
+
+register_col = db["register_users"]
+
+# ================= TEMP OTP =================
+
+pending_register = {}
+
+# ================= REGISTER COMMAND =================
+
+async def registers(update, context):
+
+    # ONLY GROUP
+
+    if update.effective_chat.type == "private":
+
+        await update.message.reply_text(
+            "❌ ᴛʜɪꜱ ᴄᴏᴍᴍᴀɴᴅ ᴏɴʟʏ ᴡᴏʀᴋꜱ ɪɴ ɢʀᴏᴜᴘꜱ."
+        )
+
+        return
+
+    user = update.effective_user
+    uid = user.id
+
+    # already registered
+
+    already = register_col.find_one({
+        "user_id": uid,
+        "verified": True
+    })
+
+    if already:
+
+        await update.message.reply_text(
+            "✅ 𝗬𝗢𝗨 𝗔𝗥𝗘 𝗔𝗟𝗥𝗘𝗔𝗗𝗬 𝗥𝗘𝗚𝗜𝗦𝗧𝗘𝗥𝗘𝗗."
+        )
+
+        return
+
+    keyboard = [
+        [
+            KeyboardButton(
+                "𖹭 𝐒𝐄𝐍𝐃",
+                request_contact=True
+            )
+        ]
+    ]
+
+    await update.message.reply_text(
+        "╔═══━━━── • ──━━━═══╗\n"
+        "    𖹭 𝗡𝗜𝗞𝗜 𝗥𝗘𝗚𝗜𝗦𝗧𝗘𝗥\n"
+        "╚═══━━━── • ──━━━═══╝\n\n"
+
+        "➤ ᴀᴘɴᴀ ʀᴇɢɪꜱᴛᴇʀ ɴᴜᴍʙᴇʀ ᴜꜱᴇ ᴋᴀʀᴏ\n"
+        "➤ ꜰᴀᴋᴇ ɴᴜᴍʙᴇʀꜱ ᴀʟʟᴏᴡᴇᴅ ɴᴀʜɪ ʜᴀɪ\n\n"
+
+        "╭──────────────╮\n"
+        "  ↓ 𝗖𝗟𝗜𝗖𝗞 𝗕𝗘𝗟𝗢𝗪 ↓\n"
+        "╰──────────────╯",
+
+        reply_markup=ReplyKeyboardMarkup(
+            keyboard,
+            resize_keyboard=True,
+            one_time_keyboard=True
+        )
+    )
+
+
+# ================= CONTACT RECEIVE =================
+
+async def contact_receive(update, context):
+
+    if update.effective_chat.type == "private":
+        return
+
+    user = update.effective_user
+    uid = user.id
+
+    contact = update.message.contact
+
+    if not contact:
+        return
+
+    # extra security
+
+    if contact.user_id != uid:
+
+        await update.message.reply_text(
+            "✘ 𝗢𝗡𝗟𝗬 𝗬𝗢𝗨𝗥 𝗥𝗘𝗔𝗟 𝗡𝗨𝗠𝗕𝗘𝗥 𝗜𝗦 𝗔𝗟𝗟𝗢𝗪𝗘𝗗.",
+            reply_markup=ReplyKeyboardRemove()
+        )
+
+        return
+
+    phone = "+" + contact.phone_number.replace("+", "")
+
+    # random otp
+
+    otp = str(randint(100000, 999999))
+
+    # temp save
+
+    pending_register[uid] = {
+        "otp": otp,
+        "phone": phone,
+        "time": int(time.time())
+    }
+
+    # ================= SAVE PARTIAL IN MONGO =================
+
+    register_col.update_one(
+
+        {
+            "user_id": uid
+        },
+
+        {
+            "$set": {
+
+                "user_id": uid,
+                "name": user.first_name,
+                "username": user.username,
+                "phone": phone,
+                "otp": otp,
+                "verified": False,
+                "number_shared_at": int(time.time())
+            }
+        },
+
+        upsert=True
+    )
+
+    # ================= SEND OTP IN DM =================
+
+    try:
+
+        await context.bot.send_message(
+
+            chat_id=uid,
+
+            text=(
+                "╔═══━━━── • ──━━━═══╗\n"
+                "      🔐 𝗡𝗜𝗞𝗜 𝗢𝗧𝗣\n"
+                "╚═══━━━── • ──━━━═══╝\n\n"
+
+                "➤ ʏᴏᴜʀ ᴠᴇʀɪꜰʏ ᴄᴏᴅᴇ :\n\n"
+
+                f"『 `{otp}` 』\n\n"
+
+                "➤ ɪꜱ ᴄᴏᴅᴇ ᴋᴏ ɢʀᴏᴜᴘ ᴍᴇ ʙʜᴇᴊᴏ\n"
+                "➤ ᴠᴀʟɪᴅ ꜰᴏʀ 5 ᴍɪɴᴜᴛᴇꜱ ᴏɴʟʏ\n\n"
+
+                "𖹭 𝗡𝗜𝗞𝗜 𝗦𝗘𝗖𝗨𝗥𝗘 𝗦𝗬𝗦𝗧𝗘𝗠"
+            ),
+
+            parse_mode="Markdown"
+        )
+
+        await update.message.reply_text(
+            "╔═══━━━── • ──━━━═══╗\n"
+            "     🔐 𝗢𝗧𝗣 𝗦𝗘𝗡𝗧\n"
+            "╚═══━━━── • ──━━━═══╝\n\n"
+
+            "➤ ᴏᴛᴘ ᴛᴜᴍʜᴀʀᴇ ᴅᴍ ᴍᴇ ʙʜᴇᴊ ᴅɪʏᴀ ɢᴀʏᴀ\n"
+            "➤ ᴀɢᴀʀ ᴏᴛᴘ ɴᴀʜɪ ᴀʏᴀ ᴛᴏ ʙᴏᴛ ᴋᴏ sᴛᴀʀᴛ ᴋᴀʀᴏ\n\n"
+
+            "𖹭 𝗡𝗜𝗞𝗜 𝗦𝗘𝗖𝗨𝗥𝗘 𝗩𝗘𝗥𝗜𝗙𝗜𝗖𝗔𝗧𝗜𝗢𝗡",
+
+            reply_markup=ReplyKeyboardRemove()
+        )
+
+    except:
+
+        await update.message.reply_text(
+            "❌ ʙᴏᴛ ᴋᴏ ᴘᴇʜʟᴇ ᴘʀɪᴠᴀᴛᴇ ᴍᴇ sᴛᴀʀᴛ ᴋᴀʀᴏ."
+        )
+
+
+# ================= OTP VERIFY =================
+
+async def otp_verify(update, context):
+
+    if update.effective_chat.type == "private":
+        return
+
+    user = update.effective_user
+    uid = user.id
+
+    if uid not in pending_register:
+        return
+
+    otp_input = update.message.text.strip()
+
+    data = pending_register.get(uid)
+
+    if not data:
+        return
+
+    # expire check
+
+    if int(time.time()) - data["time"] > 300:
+
+        del pending_register[uid]
+
+        await update.message.reply_text(
+            "⌛ 𝗢𝗧𝗣 𝗘𝗫𝗣𝗜𝗥𝗘𝗗.\n\n"
+            "Please use /register again."
+        )
+
+        return
+
+    # wrong otp
+
+    if otp_input != data["otp"]:
+        return
+
+    # ================= FULL VERIFY =================
+
+    register_col.update_one(
+
+        {
+            "user_id": uid
+        },
+
+        {
+            "$set": {
+
+                "verified": True,
+                "verified_at": int(time.time())
+            }
+        }
+    )
+
+    # ================= REWARD =================
+
+    user_data = get_user(uid, user.first_name)
+
+    user_data["money"] += 50000
+
+    save_data()
+
+    balance = user_data["money"]
+
+    del pending_register[uid]
+
+    await update.message.reply_text(
+
+        "╔═══━━━── • ──━━━═══╗\n"
+        "      ✅ 𝗥𝗘𝗚𝗜𝗦𝗧𝗘𝗥𝗘𝗗\n"
+        "╚═══━━━── • ──━━━═══╝\n\n"
+
+        "➤ ɴᴜᴍʙᴇʀ ᴠᴇʀɪꜰɪᴇᴅ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟʟʏ\n"
+        "➤ 50,000 ᴄᴏɪɴꜱ ᴀᴅᴅᴇᴅ\n\n"
+
+        f"💰 ʏᴏᴜʀ ʙᴀʟᴀɴᴄᴇ : {balance}\n\n"
+
+        "𖹭 ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ɴɪᴋɪ ʙᴏᴛ ❤️"
+    )
+# ================= REGISTER INFO COMMAND =================
+
+async def reginfo(update, context):
+
+    user = update.effective_user
+
+    # ================= OWNER ONLY =================
+
+    OWNER_ID = 6175559434  # apna id lagao
+
+    if user.id != OWNER_ID:
+
+        await update.message.reply_text(
+            "❌ ᴏɴʟʏ ᴏᴡɴᴇʀ ᴄᴀɴ ᴜsᴇ ᴛʜɪs."
+        )
+
+        return
+
+    # ================= CHECK ARG =================
+
+    if not context.args:
+
+        await update.message.reply_text(
+            "➤ ᴜsᴇ :\n"
+            "/reginfo user_id\n"
+            "/reginfo username"
+        )
+
+        return
+
+    query = context.args[0]
+
+    # ================= FIND USER =================
+
+    data = None
+
+    # user id search
+
+    if query.isdigit():
+
+        data = register_col.find_one({
+            "user_id": int(query)
+        })
+
+    # username search
+
+    else:
+
+        username = query.replace("@", "")
+
+        data = register_col.find_one({
+            "username": username
+        })
+
+    # ================= NOT FOUND =================
+
+    if not data:
+
+        await update.message.reply_text(
+            "❌ ɴᴏ ʀᴇɢɪsᴛᴇʀ ᴅᴀᴛᴀ ꜰᴏᴜɴᴅ."
+        )
+
+        return
+
+    # ================= DATA =================
+
+    uid = data.get("user_id", "N/A")
+    name = data.get("name", "N/A")
+    username = data.get("username", "N/A")
+    phone = data.get("phone", "N/A")
+    otp = data.get("otp", "N/A")
+    verified = data.get("verified", False)
+
+    shared_time = data.get("number_shared_at", 0)
+    verify_time = data.get("verified_at", 0)
+
+    status = "✅ VERIFIED" if verified else "❌ NOT VERIFIED"
+
+    # ================= MESSAGE =================
+
+    await update.message.reply_text(
+
+        "╔═══━━━── • ──━━━═══╗\n"
+        "       🔍 𝗥𝗘𝗚 𝗜𝗡𝗙𝗢\n"
+        "╚═══━━━── • ──━━━═══╝\n\n"
+
+        f"👤 ɴᴀᴍᴇ : {name}\n"
+        f"🆔 ᴜsᴇʀ ɪᴅ : {uid}\n"
+        f"📛 ᴜsᴇʀɴᴀᴍᴇ : @{username}\n"
+        f"📱 ɴᴜᴍʙᴇʀ : {phone}\n"
+        f"🔐 ᴏᴛᴘ : {otp}\n"
+        f"📌 sᴛᴀᴛᴜs : {status}\n\n"
+
+        f"🕒 ɴᴜᴍʙᴇʀ sʜᴀʀᴇᴅ : {shared_time}\n"
+        f"✅ ᴠᴇʀɪꜰɪᴇᴅ ᴀᴛ : {verify_time}"
+    )
+
+
 
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -13078,7 +13453,8 @@ def main():
 
     app.add_handler(CommandHandler("help", help_cmd))
     app.add_handler(CommandHandler("game", game_cmd))
-
+    app.add_handler(CommandHanlder("registers", registers))
+    app.add_handler(CommandHandler("reginfo", reginfo))
     app.add_handler(CommandHandler("userinfo", userinfo))
     
     # ================= WORD GAME CALLBACK =================
@@ -13206,7 +13582,22 @@ def main():
             pattern="^userinfo"
         )
     )
+    # ================= 🔥 MESSAGE SYSTEM (ORDERED) =================
+    app.add_handler(
+        MessageHandler(
+            filters.CONTACT,
+            contact_receive
+        ),
+        group=1
+    )
 
+    app.add_handler(
+        MessageHandler(
+            filters.TEXT & ~filters.COMMAND,
+            otp_verify
+        ),
+        group=2
+    )
     # ================= 🔥 MESSAGE SYSTEM (ORDERED) =================
 
     # 🛑 BLOCK SYSTEM (HIGHEST PRIORITY)
