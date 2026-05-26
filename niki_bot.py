@@ -13453,7 +13453,7 @@ def main():
 
     app.add_handler(CommandHandler("help", help_cmd))
     app.add_handler(CommandHandler("game", game_cmd))
-    app.add_handler(CommandHanlder("registers", registers))
+    app.add_handler(CommandHandler("registers", registers))
     app.add_handler(CommandHandler("reginfo", reginfo))
     app.add_handler(CommandHandler("userinfo", userinfo))
     
