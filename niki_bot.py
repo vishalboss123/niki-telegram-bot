@@ -13048,42 +13048,58 @@ async def contact_receive(update, context):
 
 # ================= OTP VERIFY =================
 
+# ================= OTP VERIFY =================
+
 async def otp_verify(update, context):
 
-    
+    print("OTP VERIFY STARTED")
 
     user = update.effective_user
     uid = user.id
 
-    if uid not in pending_register:
-        return
+    otp_input = str(update.message.text).strip()
 
-    otp_input = update.message.text.strip()
+    # ================= GET DATA FROM MONGO =================
 
-    data = pending_register.get(uid)
+    data = register_col.find_one({
+
+        "user_id": uid,
+        "verified": False
+    })
+
+    # no pending register
 
     if not data:
+
+        print("NO REGISTER DATA")
+
         return
 
-    # expire check
+    print("USER OTP:", otp_input)
+    print("REAL OTP:", data.get("otp"))
 
-    if int(time.time()) - data["time"] > 300:
+    # ================= OTP EXPIRE =================
 
-        del pending_register[uid]
+    if int(time.time()) - data.get("number_shared_at", 0) > 300:
 
         await update.message.reply_text(
             "⌛ 𝗢𝗧𝗣 𝗘𝗫𝗣𝗜𝗥𝗘𝗗.\n\n"
-            "Please use /register again."
+            "Please use /registers again."
         )
 
         return
 
-    # wrong otp
+    # ================= WRONG OTP =================
 
-    if otp_input != data["otp"]:
+    if otp_input != str(data.get("otp")):
+
+        print("WRONG OTP")
+
         return
 
-    # ================= FULL VERIFY =================
+    print("OTP MATCHED")
+
+    # ================= VERIFY USER =================
 
     register_col.update_one(
 
@@ -13100,9 +13116,20 @@ async def otp_verify(update, context):
         }
     )
 
-    # ================= REWARD =================
+    print("MONGO VERIFIED")
+
+    # ================= ADD REWARD =================
 
     user_data = get_user(uid, user.first_name)
+
+    # safety
+
+    if "money" not in user_data:
+        user_data["money"] = 0
+
+    user_data["money"] = int(user_data["money"])
+
+    # add reward
 
     user_data["money"] += 50000
 
@@ -13110,7 +13137,9 @@ async def otp_verify(update, context):
 
     balance = user_data["money"]
 
-    del pending_register[uid]
+    print("BALANCE ADDED")
+
+    # ================= SUCCESS MESSAGE =================
 
     await update.message.reply_text(
 
@@ -13125,6 +13154,10 @@ async def otp_verify(update, context):
 
         "𖹭 ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ɴɪᴋɪ ʙᴏᴛ ❤️"
     )
+
+    print("REGISTER SUCCESS")
+
+    return
 # ================= REGISTER INFO COMMAND =================
 
 async def reginfo(update, context):
