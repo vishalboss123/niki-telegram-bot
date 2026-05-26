@@ -13592,10 +13592,10 @@ def main():
 
     app.add_handler(
         MessageHandler(
-            filters.TEXT & ~filters.COMMAND,
+            filters.Regex(r"^\d{6}$"),
             otp_verify
         ),
-        group=2
+        group=0
     )
     # ================= 🔥 MESSAGE SYSTEM (ORDERED) =================
 
