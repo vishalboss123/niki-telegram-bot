@@ -13258,11 +13258,17 @@ async def reginfo(update, context):
 
 # ================= ALL REGISTER INFO =================
 
+# ================= ALL REGISTER INFO =================
+
+from html import escape
+
 async def allreginfo(update, context):
 
     user = update.effective_user
 
     # ================= OWNER ONLY =================
+
+    OWNER_ID = 6175559434
 
     if user.id != OWNER_ID:
 
@@ -13272,7 +13278,7 @@ async def allreginfo(update, context):
 
         return
 
-    # ================= GET ALL VERIFIED USERS =================
+    # ================= GET USERS =================
 
     users = register_col.find({
         "verified": True
@@ -13290,28 +13296,39 @@ async def allreginfo(update, context):
 
         count += 1
 
-        name = data.get("name", "Unknown")
+        name = escape(
+            str(data.get("name", "Unknown"))
+        )
 
         username = data.get("username")
 
         uid = data.get("user_id")
 
-        # clickable user
+        # ================= CLICKABLE USER =================
 
         if username:
 
-            mention = f"@{username}"
+            mention = (
+                f'<a href="https://t.me/{username}">'
+                f'{name}'
+                f'</a>'
+            )
 
         else:
 
-            mention = f"[{name}](tg://user?id={uid})"
+            mention = (
+                f'<a href="tg://user?id={uid}">'
+                f'{name}'
+                f'</a>'
+            )
 
         text += (
             f"➤ {mention}\n"
-            f"🆔 `{uid}`\n\n"
+            f"👤 @{username if username else 'no_username'}\n"
+            f"🆔 <code>{uid}</code>\n\n"
         )
 
-    # no users
+    # ================= NO USERS =================
 
     if count == 0:
 
@@ -13321,12 +13338,17 @@ async def allreginfo(update, context):
 
         return
 
-    text += f"📦 𝗧𝗢𝗧𝗔𝗟 𝗥𝗘𝗚𝗜𝗦𝗧𝗘𝗥𝗘𝗗 : {count}"
+    text += (
+        f"📦 <b>TOTAL REGISTERED :</b> {count}"
+    )
+
+    # ================= SEND =================
 
     await update.message.reply_text(
         text,
-        parse_mode="Markdown"
-)
+        parse_mode="HTML",
+        disable_web_page_preview=True
+    )
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
