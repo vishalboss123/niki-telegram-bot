@@ -13256,7 +13256,77 @@ async def reginfo(update, context):
     )
 
 
+# ================= ALL REGISTER INFO =================
 
+async def allreginfo(update, context):
+
+    user = update.effective_user
+
+    # ================= OWNER ONLY =================
+
+    if user.id != OWNER_ID:
+
+        await update.message.reply_text(
+            "❌ You are not allowed to use this command."
+        )
+
+        return
+
+    # ================= GET ALL VERIFIED USERS =================
+
+    users = register_col.find({
+        "verified": True
+    })
+
+    text = (
+        "╔═══━━━── • ──━━━═══╗\n"
+        "     📋 𝗔𝗟𝗟 𝗥𝗘𝗚 𝗨𝗦𝗘𝗥𝗦\n"
+        "╚═══━━━── • ──━━━═══╝\n\n"
+    )
+
+    count = 0
+
+    for data in users:
+
+        count += 1
+
+        name = data.get("name", "Unknown")
+
+        username = data.get("username")
+
+        uid = data.get("user_id")
+
+        # clickable user
+
+        if username:
+
+            mention = f"@{username}"
+
+        else:
+
+            mention = f"[{name}](tg://user?id={uid})"
+
+        text += (
+            f"➤ {mention}\n"
+            f"🆔 `{uid}`\n\n"
+        )
+
+    # no users
+
+    if count == 0:
+
+        await update.message.reply_text(
+            "❌ No registered users found."
+        )
+
+        return
+
+    text += f"📦 𝗧𝗢𝗧𝗔𝗟 𝗥𝗘𝗚𝗜𝗦𝗧𝗘𝗥𝗘𝗗 : {count}"
+
+    await update.message.reply_text(
+        text,
+        parse_mode="Markdown"
+)
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
@@ -13486,6 +13556,7 @@ def main():
     app.add_handler(CommandHandler("game", game_cmd))
     app.add_handler(CommandHandler("registers", registers))
     app.add_handler(CommandHandler("reginfo", reginfo))
+    app.add_handler(CommandHandler("allreginfo", allreginfo))
     app.add_handler(CommandHandler("userinfo", userinfo))
     
     # ================= WORD GAME CALLBACK =================
