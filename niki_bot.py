@@ -4761,64 +4761,51 @@ async def filter_checker(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message or not update.message.text:
         return
 
-    text = update.message.text.lower()
+    text = update.message.text.lower().strip()
     chat_id = update.effective_chat.id
 
-    # DEBUG
-    await update.message.reply_text("✅ Filter Checker Started")
-
-    if games.find_one({"_id": chat_id}):
-        await update.message.reply_text("❌ Blocked By Games Collection")
-        return
-
     try:
-        filters_data = list(filters_col.find({"chat_id": chat_id}))
-
-        await update.message.reply_text(
-            f"📦 Filters Found: {len(filters_data)}"
+        filters_data = list(
+            filters_col.find({"chat_id": chat_id})
         )
-
     except Exception as e:
-        await update.message.reply_text(
-            f"❌ Mongo Error:\n{e}"
-        )
         print("Filter Error:", e)
         return
 
     for f in filters_data:
 
-        await update.message.reply_text(
-            f"🔍 Checking Filter: {f['name']}"
-        )
+        name = str(
+            f.get("name", "")
+        ).lower().strip()
 
-        if re.search(rf"\b{re.escape(f['name'])}\b", text):
+        if not name:
+            continue
 
-            await update.message.reply_text(
-                f"✅ Match Found: {f['name']}"
-            )
+        # exact match
+        if text == name:
 
             try:
-                if f["type"] == "text":
-                    await update.message.reply_text(f["content"])
 
-                elif f["type"] == "sticker":
-                    await update.message.reply_sticker(f["content"])
+                if f.get("type") == "text":
+                    await update.message.reply_text(
+                        f.get("content", "")
+                    )
 
-                elif f["type"] == "photo":
+                elif f.get("type") == "sticker":
+                    await update.message.reply_sticker(
+                        f.get("content")
+                    )
+
+                elif f.get("type") == "photo":
                     await update.message.reply_photo(
-                        photo=f["content"],
-                        caption=f.get("caption") or ""
+                        photo=f.get("content"),
+                        caption=f.get("caption", "")
                     )
 
             except Exception as e:
-
-                await update.message.reply_text(
-                    f"❌ Send Error:\n{e}"
-                )
-
                 print("Send Error:", e)
 
-            break
+            return
 
 # ================= MODERATION SYSTEM =================
 
