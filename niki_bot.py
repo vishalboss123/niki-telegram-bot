@@ -3499,9 +3499,10 @@ SHAYARI_LIST = [
 def get_data(chat_id):
     chat_id = str(chat_id)
 
-    data = couple_col.find_one({"_id": chat_id})
-    if not data:
-        data = {
+    doc = couple_col.find_one({"_id": chat_id})
+
+    if doc is None:
+        doc = {
             "_id": chat_id,
             "count": 0,
             "last_used": 0,
@@ -3510,17 +3511,36 @@ def get_data(chat_id):
             "history": [],
             "leaderboard": {}
         }
-        couple_col.insert_one(data)
 
-    return data
+        couple_col.insert_one(doc)
+
+        # fresh copy from mongo
+        doc = couple_col.find_one({"_id": chat_id})
+
+    return dict(doc)
 
 
 def update_data(chat_id, data):
     chat_id = str(chat_id)
 
-    data.pop("_id", None)  # ❗ VERY IMPORTANT
-    couple_col.update_one({"_id": chat_id}, {"$set": data})
+    update_doc = dict(data)
 
+    # mongo _id remove
+    update_doc.pop("_id", None)
+
+    couple_col.update_one(
+        {"_id": chat_id},
+        {"$set": update_doc},
+        upsert=True
+    )
+
+    # verify save
+    saved = couple_col.find_one({"_id": chat_id})
+
+    if not saved:
+        print(f"❌ Couple data save failed: {chat_id}")
+    else:
+        print(f"✅ Couple data saved: {chat_id}")
 # ================= SET PHOTO =================
 # ================= SET PHOTO =================
 async def setcouplepic(update, context):
