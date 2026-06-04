@@ -3672,14 +3672,43 @@ async def couple(update, context):
 """
 
     # ===== SEND =====
-    if data.get("photo"):
-        msg = await context.bot.send_photo(
-            chat_id=chat_id,
-            photo=data["photo"],
-            caption=caption,
-            parse_mode="HTML"
+    photo_id = data.get("photo")
+
+    if photo_id:
+
+        await context.bot.send_message(
+            chat_id,
+            f"🔍 Debug:\nPhoto ID Found ✅\n{photo_id}"
         )
+
+        try:
+            msg = await context.bot.send_photo(
+                chat_id=chat_id,
+                photo=photo_id,
+                caption=caption,
+                parse_mode="HTML"
+            )
+
+        except Exception as e:
+
+            await context.bot.send_message(
+                chat_id,
+                f"❌ Photo Error:\n{e}"
+            )
+
+            msg = await context.bot.send_message(
+                chat_id=chat_id,
+                text=caption,
+                parse_mode="HTML"
+            )
+
     else:
+
+        await context.bot.send_message(
+            chat_id,
+            "❌ No couple photo found in database."
+        )
+
         msg = await context.bot.send_message(
             chat_id=chat_id,
             text=caption,
