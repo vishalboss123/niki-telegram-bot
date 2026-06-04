@@ -3522,6 +3522,7 @@ def update_data(chat_id, data):
     couple_col.update_one({"_id": chat_id}, {"$set": data})
 
 # ================= SET PHOTO =================
+# ================= SET PHOTO =================
 async def setcouplepic(update, context):
     if not update.message.reply_to_message or not update.message.reply_to_message.photo:
         await update.message.reply_text("❌ Photo pe reply karo!")
@@ -3541,7 +3542,13 @@ async def setcouplepic(update, context):
 
     update_data(chat_id, data)
 
-    await update.message.reply_text("✅ Couple photo permanently saved 💖")
+    # ✅ verify save
+    check_data = get_data(chat_id)
+
+    if check_data.get("photo"):
+        await update.message.reply_text("✅ Couple photo permanently saved 💖")
+    else:
+        await update.message.reply_text("❌ Photo database me save nahi hua!")
 
 # ================= COUPLE =================
 async def couple(update, context):
