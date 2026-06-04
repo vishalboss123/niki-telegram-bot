@@ -4756,25 +4756,46 @@ async def dfilter_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # ================= AUTO FILTER CHECK =================
+# ================= AUTO FILTER CHECK =================
 async def filter_checker(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message or not update.message.text:
         return
 
     text = update.message.text.lower()
     chat_id = update.effective_chat.id
-    
+
+    # DEBUG
+    await update.message.reply_text("✅ Filter Checker Started")
 
     if games.find_one({"_id": chat_id}):
+        await update.message.reply_text("❌ Blocked By Games Collection")
         return
+
     try:
         filters_data = list(filters_col.find({"chat_id": chat_id}))
+
+        await update.message.reply_text(
+            f"📦 Filters Found: {len(filters_data)}"
+        )
+
     except Exception as e:
+        await update.message.reply_text(
+            f"❌ Mongo Error:\n{e}"
+        )
         print("Filter Error:", e)
         return
 
     for f in filters_data:
-        # 🔥 exact word match (no fake trigger)
+
+        await update.message.reply_text(
+            f"🔍 Checking Filter: {f['name']}"
+        )
+
         if re.search(rf"\b{re.escape(f['name'])}\b", text):
+
+            await update.message.reply_text(
+                f"✅ Match Found: {f['name']}"
+            )
 
             try:
                 if f["type"] == "text":
@@ -4788,10 +4809,16 @@ async def filter_checker(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         photo=f["content"],
                         caption=f.get("caption") or ""
                     )
+
             except Exception as e:
+
+                await update.message.reply_text(
+                    f"❌ Send Error:\n{e}"
+                )
+
                 print("Send Error:", e)
 
-            break  # ek hi filter chalega    
+            break
 
 # ================= MODERATION SYSTEM =================
 
