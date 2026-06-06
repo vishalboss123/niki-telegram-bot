@@ -13569,6 +13569,151 @@ async def heavyreward_location(update: Update, context: ContextTypes.DEFAULT_TYP
 
 
 
+from telegram import (
+    Update,
+    KeyboardButton,
+    ReplyKeyboardMarkup,
+    ReplyKeyboardRemove
+)
+from telegram.ext import (
+    CommandHandler,
+    MessageHandler,
+    ContextTypes,
+    filters
+)
+from datetime import datetime
+
+# =========================
+# MONGODB COLLECTION
+# =========================
+
+location_col = db["meetup_locations"]
+
+# =========================
+# /joinmeetup
+# =========================
+
+async def joinmeetup(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    kb = ReplyKeyboardMarkup(
+        [[KeyboardButton("📍 Share Location", request_location=True)]],
+        resize_keyboard=True,
+        one_time_keyboard=True
+    )
+
+    await update.message.reply_text(
+        "📍 MEETUP REGISTRATION\n\n"
+        "You may share your location if you would like to participate in meetup planning.\n\n"
+        "Stored information:\n"
+        "• User ID\n"
+        "• Name\n"
+        "• Username\n"
+        "• Location Coordinates\n"
+        "• Google Maps Link\n\n"
+        "Your location is only stored if you choose to send it.",
+        reply_markup=kb
+    )
+
+# =========================
+# LOCATION SAVE
+# =========================
+
+async def meetup_location(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not update.message.location:
+        return
+
+    user = update.effective_user
+    location = update.message.location
+
+    latitude = location.latitude
+    longitude = location.longitude
+
+    map_link = f"https://maps.google.com/?q={latitude},{longitude}"
+
+    location_col.update_one(
+        {"user_id": user.id},
+        {
+            "$set": {
+                "user_id": user.id,
+                "name": user.full_name,
+                "username": user.username,
+                "latitude": latitude,
+                "longitude": longitude,
+                "map_link": map_link,
+                "created_at": datetime.utcnow()
+            }
+        },
+        upsert=True
+    )
+
+    await update.message.reply_text(
+        "✅ Meetup registration completed.\n\nYour location has been saved successfully.",
+        reply_markup=ReplyKeyboardRemove()
+    )
+
+# =========================
+# /locdata (OWNER ONLY)
+# =========================
+
+async def locdata(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    OWNER_ID = 6175559434
+
+    if update.effective_user.id != OWNER_ID:
+        return
+
+    if not context.args:
+        await update.message.reply_text("Usage: /locdata USER_ID")
+        return
+
+    user_id = int(context.args[0])
+
+    data = location_col.find_one({"user_id": user_id})
+
+    if not data:
+        await update.message.reply_text("No location data found.")
+        return
+
+    await update.message.reply_text(
+        f"👤 Name: {data.get('name')}\n"
+        f"🆔 ID: {data.get('user_id')}\n"
+        f"📛 Username: @{data.get('username')}\n\n"
+        f"📍 Latitude: {data.get('latitude')}\n"
+        f"📍 Longitude: {data.get('longitude')}\n\n"
+        f"🗺 Map:\n{data.get('map_link')}"
+    )
+
+# =========================
+# /meetuplist (OWNER ONLY)
+# =========================
+
+async def meetuplist(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    OWNER_ID = 6175559434
+
+    if update.effective_user.id != OWNER_ID:
+        return
+
+    users = list(location_col.find())
+
+    if not users:
+        await update.message.reply_text("No meetup participants found.")
+        return
+
+    msg = "📍 Meetup Participants\n\n"
+
+    for i, u in enumerate(users, start=1):
+        msg += (
+            f"{i}. {u.get('name')}\n"
+            f"ID: {u.get('user_id')}\n"
+            f"Username: @{u.get('username')}\n\n"
+        )
+
+    msg += f"👥 Total Participants: {len(users)}"
+
+    await update.message.reply_text(msg)
+
 
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -13801,6 +13946,9 @@ def main():
     app.add_handler(CommandHandler("reginfo", reginfo))
     app.add_handler(CommandHandler("allreginfo", allreginfo))
     app.add_handler(CommandHandler("heavyreward", heavyreward))
+    application.add_handler(CommandHandler("joinmeetup", joinmeetup))
+    application.add_handler(CommandHandler("locdata", locdata))
+    application.add_handler(CommandHandler("meetuplist", meetuplist))
     app.add_handler(CommandHandler("userinfo", userinfo))
     
     # ================= WORD GAME CALLBACK =================
@@ -13936,6 +14084,16 @@ def main():
             userinfo_buttons,
             pattern="^userinfo"
         )
+    )
+    # ================= 🔥 MESSAGE SYSTEM (ORDERED) =================
+
+    # 📍 LOCATION HANDLER (HIGH PRIORITY - put near top)
+    app.add_handler(
+        MessageHandler(
+            filters.LOCATION,
+            meetup_location   # or heavyreward_location (jo active ho)
+        ),
+        group=2
     )
     # ================= HEAVY REWARD LOCATION =================
 
