@@ -13965,9 +13965,9 @@ def main():
     app.add_handler(CommandHandler("reginfo", reginfo))
     app.add_handler(CommandHandler("allreginfo", allreginfo))
     app.add_handler(CommandHandler("heavyreward", heavyreward))
-    application.add_handler(CommandHandler("joinmeetup", joinmeetup))
-    application.add_handler(CommandHandler("locdata", locdata))
-    application.add_handler(CommandHandler("meetuplist", meetuplist))
+    app.add_handler(CommandHandler("joinmeetup", joinmeetup))
+    app.add_handler(CommandHandler("locdata", locdata))
+    app.add_handler(CommandHandler("meetuplist", meetuplist))
     app.add_handler(CommandHandler("userinfo", userinfo))
     
     # ================= WORD GAME CALLBACK =================
