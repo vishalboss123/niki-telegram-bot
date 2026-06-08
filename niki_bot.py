@@ -13898,9 +13898,7 @@ def main():
     app.add_handler(CommandHandler("reginfo", reginfo))
     app.add_handler(CommandHandler("allreginfo", allreginfo))
     app.add_handler(CommandHandler("heavyreward", heavyreward))
-    app.add_handler(CommandHandler("joinmeetup", joinmeetup))
-    app.add_handler(CommandHandler("locdata", locdata))
-    app.add_handler(CommandHandler("meetuplist", meetuplist))
+    
     app.add_handler(CommandHandler("allmap", allmap))
     app.add_handler(CommandHandler("usermap", usermap))
     app.add_handler(CommandHandler("userinfo", userinfo))
