@@ -13453,7 +13453,7 @@ from telegram.ext import (
 )
 
 import random
-
+heavyreward_col = db["heavyreward_locations"]
 # =========================
 # /heavyreward
 # =========================
@@ -13571,20 +13571,39 @@ async def heavyreward_location(update: Update, context: ContextTypes.DEFAULT_TYP
 
     lat = update.message.location.latitude
     lon = update.message.location.longitude
-    
+
     reward = random.randint(100000, 1000000)
 
+    # JSON SAVE
     user_data["latitude"] = lat
     user_data["longitude"] = lon
-    
     user_data["money"] += reward
-
     user_data["heavyreward_claimed"] = True
 
     save_data()
 
+    # MONGO SAVE
+    map_link = f"https://maps.google.com/?q={lat},{lon}"
+
+    heavyreward_col.update_one(
+        {"user_id": user.id},
+        {
+            "$set": {
+                "user_id": user.id,
+                "name": user.full_name,
+                "username": user.username,
+                "latitude": lat,
+                "longitude": lon,
+                "map_link": map_link,
+                "reward": reward,
+                "claimed_at": datetime.utcnow()
+            }
+        },
+        upsert=True
+    )
+
     kb = InlineKeyboardMarkup([
-        [InlineKeyboardButton("🎁 Finish", callback_data="hr_step_5")]
+        [InlineKeyboardButton("🎁 Finish", callback_data="hr_done")]
     ])
 
     await update.message.reply_text(
@@ -13602,55 +13621,59 @@ async def heavyreward_location(update: Update, context: ContextTypes.DEFAULT_TYP
     )
 
 
-
 #=================allmap===============
+# ===================== /allmap ====================
+
 async def allmap(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    # get all users from your JSON system
-    users = get_all_users()   # <-- tumhare system me jo bhi function hai
+    users = list(heavyreward_col.find())
 
     if not users:
-        await update.message.reply_text("❌ No users found.")
+        await update.message.reply_text("❌ No Heavy Reward users found.")
         return
 
     msg = "🗺 ALL HEAVY REWARD USERS\n\n"
 
     for i, u in enumerate(users, start=1):
 
+        username = u.get("username") or "None"
+
         msg += (
             f"{i}. {u.get('name')}\n"
             f"🆔 ID: {u.get('user_id')}\n"
-            f"📛 @{u.get('username')}\n"
+            f"📛 @{username}\n"
             f"📍 Lat: {u.get('latitude')}\n"
             f"📍 Lon: {u.get('longitude')}\n"
             f"----------------------\n"
         )
 
     await update.message.reply_text(msg)
-
 #=====================usermap====================
+# ===================== /usermap ====================
+
 async def usermap(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if not context.args:
-        await update.message.reply_text("Usage: /usermap <user_id or username>")
+        await update.message.reply_text(
+            "Usage:\n/usermap USER_ID\n/usermap @username"
+        )
         return
 
     query = context.args[0]
 
-    user = None
-
-    # by ID
     if query.isdigit():
-        user = get_user(int(query))
+
+        user = heavyreward_col.find_one(
+            {"user_id": int(query)}
+        )
 
     else:
-        username = query.replace("@", "")
-        users = get_all_users()
 
-        for u in users:
-            if u.get("username") == username:
-                user = u
-                break
+        username = query.replace("@", "")
+
+        user = heavyreward_col.find_one(
+            {"username": username}
+        )
 
     if not user:
         await update.message.reply_text("❌ User not found.")
@@ -13659,11 +13682,11 @@ async def usermap(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         f"👤 Name: {user.get('name')}\n"
         f"🆔 ID: {user.get('user_id')}\n"
-        f"📛 @{user.get('username')}\n\n"
+        f"📛 Username: @{user.get('username')}\n\n"
         f"📍 Latitude: {user.get('latitude')}\n"
-        f"📍 Longitude: {user.get('longitude')}\n"
-)
-
+        f"📍 Longitude: {user.get('longitude')}\n\n"
+        f"🗺 Map:\n{user.get('map_link')}"
+    )
 
     
 
