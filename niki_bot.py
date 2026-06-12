@@ -73,8 +73,17 @@ import random
 import asyncio
 import os
 import re
-test_leaderboard()
-print("Leaderboard Test OK")
+
+print("🔥 BEFORE TEST 🔥")
+
+try:
+    path = test_leaderboard()
+    print(path)
+    print("✅ Leaderboard Test OK")
+except Exception as e:
+    print("❌ TEST ERROR:", e)
+
+print("🔥 AFTER TEST 🔥")
 # =================== GLOBALS ===================
 kill_cooldown = {}
 rob_cooldown = {}
