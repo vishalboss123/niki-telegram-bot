@@ -57,6 +57,7 @@ from telegram import ChatPermissions
 from telegram.helpers import mention_html
 from telegram.ext import ChatJoinRequestHandler
 from deep_translator import GoogleTranslator
+from leaderboard import test_leaderboard
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
@@ -72,7 +73,8 @@ import random
 import asyncio
 import os
 import re
-
+test_leaderboard()
+print("Leaderboard Test OK")
 # =================== GLOBALS ===================
 kill_cooldown = {}
 rob_cooldown = {}
