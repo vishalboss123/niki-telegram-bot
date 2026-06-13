@@ -629,6 +629,72 @@ Uꜱᴇ Nɪᴋɪ’ꜱ Eᴄᴏɴᴏᴍʏ Sʏꜱᴛᴇᴍ Tᴏ Eᴀʀɴ, Mᴀɴ�
     
 # =================== TOP RICHEST COMMAND ===================
 
+import io
+from PIL import Image, ImageDraw, ImageFont
+
+
+def create_toprich_image(sorted_rich):
+
+    # 🖤 canvas
+    img = Image.new("RGB", (1200, 1800), (10, 10, 15))
+    draw = ImageDraw.Draw(img)
+
+    font = ImageFont.load_default()
+
+    # 🏆 HEADER (GOLD)
+    draw.rectangle([(0, 0), (1200, 170)], fill=(20, 20, 25))
+    draw.text((380, 70), "🏆 TOP RICHEST PLAYERS 🏆", fill=(255, 215, 0), font=font)
+
+    y = 220
+
+    # 🔥 TOP 10 LOOP
+    for idx, (uid, user) in enumerate(sorted_rich, 1):
+
+        name = user.get("name", "Unknown")
+        money = user.get("money", 0)
+
+        # 🎨 rank colors
+        if idx == 1:
+            color = (255, 215, 0)   # gold
+            rank = "🥇"
+        elif idx == 2:
+            color = (192, 192, 192) # silver
+            rank = "🥈"
+        elif idx == 3:
+            color = (205, 127, 50)  # bronze
+            rank = "🥉"
+        else:
+            color = (40, 40, 55)
+            rank = f"{idx}."
+
+        # 📦 card box
+        draw.rectangle([(90, y), (1110, y + 140)], fill=color)
+
+        # ✍️ text
+        draw.text(
+            (120, y + 45),
+            f"{rank} {name}   💰 ₹{money:,}",
+            fill="white",
+            font=font
+        )
+
+        y += 160
+
+    # 💖 FOOTER
+    draw.text(
+        (350, 1720),
+        "💖 Rɪᴄʜᴇꜱᴛ Pʟᴀʏᴇʀꜱ Oғ Nɪᴋɪ 😈",
+        fill=(255, 215, 0),
+        font=font
+    )
+
+    bio = io.BytesIO()
+    bio.name = "toprich.png"
+    img.save(bio, "PNG")
+    bio.seek(0)
+
+    return bio
+
 async def toprich(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if not await check_bot_active(update, context):
@@ -640,18 +706,21 @@ async def toprich(update: Update, context: ContextTypes.DEFAULT_TYPE):
     }
 
     if not users_only:
-
-        await update.message.reply_text(
-            "❌ Nᴏ Dᴀᴛᴀ Fᴏᴜɴᴅ!"
-        )
+        await update.message.reply_text("❌ Nᴏ Dᴀᴛᴀ Fᴏᴜɴᴅ!")
         return
 
+    # 🏆 SORT TOP 10
     sorted_rich = sorted(
         users_only.items(),
         key=lambda x: x[1]["money"],
         reverse=True
     )[:10]
 
+    # 🖼️ SEND IMAGE
+    image = create_toprich_image(sorted_rich)
+    await update.message.reply_photo(photo=image)
+
+    # 📝 YOUR EXISTING TEXT (UNCHANGED)
     msg = (
         "╔═══━━━─── • ───━━━═══╗\n"
         "     💰 𝐓𝐎𝐏 𝐑𝐈𝐂𝐇 💰\n"
@@ -664,8 +733,8 @@ async def toprich(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         msg += (
             f"{idx}. {badge} "
-            f"{user.get('name', 'Unknown')} "
-            f"➜ ₹{user.get('money', 0)}\n"
+            f"{user.get('name','Unknown')} "
+            f"➜ ₹{user.get('money',0)}\n"
         )
 
     msg += (
@@ -676,7 +745,6 @@ async def toprich(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     await update.message.reply_text(msg)
-
 
 # =================== TOP KILLERS COMMAND ===================
 
