@@ -629,122 +629,56 @@ Uꜱᴇ Nɪᴋɪ’ꜱ Eᴄᴏɴᴏᴍʏ Sʏꜱᴛᴇᴍ Tᴏ Eᴀʀɴ, Mᴀɴ�
     
 # =================== TOP RICHEST COMMAND ===================
 
-import io
-from PIL import Image, ImageDraw, ImageFont
 
-
-def create_toprich_image(sorted_rich):
-
-    # 🖤 canvas
-    img = Image.new("RGB", (1200, 1800), (10, 10, 15))
-    draw = ImageDraw.Draw(img)
-
-    font = ImageFont.load_default()
-
-    # 🏆 HEADER (GOLD)
-    draw.rectangle([(0, 0), (1200, 170)], fill=(20, 20, 25))
-    draw.text((380, 70), "🏆 TOP RICHEST PLAYERS 🏆", fill=(255, 215, 0), font=font)
-
-    y = 220
-
-    # 🔥 TOP 10 LOOP
-    for idx, (uid, user) in enumerate(sorted_rich, 1):
-
-        name = user.get("name", "Unknown")
-        money = user.get("money", 0)
-
-        # 🎨 rank colors
-        if idx == 1:
-            color = (255, 215, 0)   # gold
-            rank = "🥇"
-        elif idx == 2:
-            color = (192, 192, 192) # silver
-            rank = "🥈"
-        elif idx == 3:
-            color = (205, 127, 50)  # bronze
-            rank = "🥉"
-        else:
-            color = (40, 40, 55)
-            rank = f"{idx}."
-
-        # 📦 card box
-        draw.rectangle([(90, y), (1110, y + 140)], fill=color)
-
-        # ✍️ text
-        draw.text(
-            (120, y + 45),
-            f"{rank} {name}   💰 ₹{money:,}",
-            fill="white",
-            font=font
-        )
-
-        y += 160
-
-    # 💖 FOOTER
-    draw.text(
-        (350, 1720),
-        "💖 Rɪᴄʜᴇꜱᴛ Pʟᴀʏᴇʀꜱ Oғ Nɪᴋɪ 😈",
-        fill=(255, 215, 0),
-        font=font
-    )
-
-    bio = io.BytesIO()
-    bio.name = "toprich.png"
-    img.save(bio, "PNG")
-    bio.seek(0)
-
-    return bio
 
 async def toprich(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    if not await check_bot_active(update, context):
-        return
+if not await check_bot_active(update, context):  
+    return  
 
-    users_only = {
-        uid: u for uid, u in data.items()
-        if isinstance(u, dict) and "money" in u
-    }
+users_only = {  
+    uid: u for uid, u in data.items()  
+    if isinstance(u, dict) and "money" in u  
+}  
 
-    if not users_only:
-        await update.message.reply_text("❌ Nᴏ Dᴀᴛᴀ Fᴏᴜɴᴅ!")
-        return
+if not users_only:  
 
-    # 🏆 SORT TOP 10
-    sorted_rich = sorted(
-        users_only.items(),
-        key=lambda x: x[1]["money"],
-        reverse=True
-    )[:10]
+    await update.message.reply_text(  
+        "❌ Nᴏ Dᴀᴛᴀ Fᴏᴜɴᴅ!"  
+    )  
+    return  
 
-    # 🖼️ SEND IMAGE
-    image = create_toprich_image(sorted_rich)
-    await update.message.reply_photo(photo=image)
+sorted_rich = sorted(  
+    users_only.items(),  
+    key=lambda x: x[1]["money"],  
+    reverse=True  
+)[:10]  
 
-    # 📝 YOUR EXISTING TEXT (UNCHANGED)
-    msg = (
-        "╔═══━━━─── • ───━━━═══╗\n"
-        "     💰 𝐓𝐎𝐏 𝐑𝐈𝐂𝐇 💰\n"
-        "╚═══━━━─── • ───━━━═══╝\n\n"
-    )
+msg = (  
+    "╔═══━━━─── • ───━━━═══╗\n"  
+    "     💰 𝐓𝐎𝐏 𝐑𝐈𝐂𝐇 💰\n"  
+    "╚═══━━━─── • ───━━━═══╝\n\n"  
+)  
 
-    for idx, (uid, user) in enumerate(sorted_rich, 1):
+for idx, (uid, user) in enumerate(sorted_rich, 1):  
 
-        badge = "💓" if user.get("premium", False) else "👤"
+    badge = "💓" if user.get("premium", False) else "👤"  
 
-        msg += (
-            f"{idx}. {badge} "
-            f"{user.get('name','Unknown')} "
-            f"➜ ₹{user.get('money',0)}\n"
-        )
+    msg += (  
+        f"{idx}. {badge} "  
+        f"{user.get('name', 'Unknown')} "  
+        f"➜ ₹{user.get('money', 0)}\n"  
+    )  
 
-    msg += (
-        "\n━━━━━━━━━━━━━━━━━━\n"
-        "💖 Rɪᴄʜᴇꜱᴛ Pʟᴀʏᴇʀꜱ Oғ Nɪᴋɪ 😈\n\n"
-        "💓 Premium User\n"
-        "👤 Normal User"
-    )
+msg += (  
+    "\n━━━━━━━━━━━━━━━━━━\n"  
+    "💖 Rɪᴄʜᴇꜱᴛ Pʟᴀʏᴇʀꜱ Oғ Nɪᴋɪ 😈\n\n"  
+    "💓 Premium User\n"  
+    "👤 Normal User"  
+)  
 
-    await update.message.reply_text(msg)
+await update.message.reply_text(msg)
+
 
 # =================== TOP KILLERS COMMAND ===================
 
