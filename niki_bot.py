@@ -633,20 +633,19 @@ Uꜱᴇ Nɪᴋɪ’ꜱ Eᴄᴏɴᴏᴍʏ Sʏꜱᴛᴇᴍ Tᴏ Eᴀʀɴ, Mᴀɴ�
 
 async def toprich(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    if not await check_bot_active(update, context):  
-        return  
+    if not await check_bot_active(update, context):
+        return
 
-    users_only = {  
-        uid: u for uid, u in data.items()  
-        if isinstance(u, dict) and "money" in u  
-    }  
+    users_only = {
+        uid: u for uid, u in data.items()
+        if isinstance(u, dict) and "money" in u
+    }
 
-    if not users_only:  
-
-        await update.message.reply_text(  
-            "❌ Nᴏ Dᴀᴛᴀ Fᴏᴜɴᴅ!"  
-        )  
-        return  
+    if not users_only:
+        await update.message.reply_text(
+            "❌ Nᴏ Dᴀᴛᴀ Fᴏᴜɴᴅ!"
+        )
+        return
 
     sorted_rich = sorted(
         users_only.items(),
@@ -654,28 +653,37 @@ async def toprich(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reverse=True
     )[:10]
 
-    msg = (  
-        "╔═══━━━─── • ───━━━═══╗\n"  
-        "     💰 𝐓𝐎𝐏 𝐑𝐈𝐂𝐇 💰\n"  
-        "╚═══━━━─── • ───━━━═══╝\n\n"  
-    )  
+    msg = (
+        "╔═══━━━─── • ───━━━═══╗\n"
+        "     💰 𝐓𝐎𝐏 𝐑𝐈𝐂𝐇 💰\n"
+        "╚═══━━━─── • ───━━━═══╝\n\n"
+    )
 
-    for idx, (uid, user) in enumerate(sorted_rich, 1):  
+    for idx, (uid, user) in enumerate(sorted_rich, 1):
 
-        badge = "💓" if user.get("premium", False) else "👤"  
+        badge = "💓" if user.get("premium", False) else "👤"
 
-        msg += (  
-            f"{idx}. {badge} "  
-            f"{user.get('name', 'Unknown')} "  
-            f"➜ ₹{user.get('money', 0)}\n"  
-        )  
-    
-    msg += (  
-        "\n━━━━━━━━━━━━━━━━━━\n"  
-        "💖 Rɪᴄʜᴇꜱᴛ Pʟᴀʏᴇʀꜱ Oғ Nɪᴋɪ 😈\n\n"  
-        "💓 Premium User\n"  
-        "👤 Normal User"  
-    )  
+        name = str(user.get("name", "Unknown"))
+
+        # RTL / invisible unicode remove
+        name = re.sub(
+            r'[\u200B-\u200F\u202A-\u202E\u2066-\u2069]',
+            '',
+            name
+        )
+
+        msg += (
+            f"{idx}. {badge} "
+            f"{name} "
+            f"➜ ₹{int(user.get('money', 0))}\n"
+        )
+
+    msg += (
+        "\n━━━━━━━━━━━━━━━━━━\n"
+        "💖 Rɪᴄʜᴇꜱᴛ Pʟᴀʏᴇʀꜱ Oғ Nɪᴋɪ 😈\n\n"
+        "💓 Premium User\n"
+        "👤 Normal User"
+    )
 
     await update.message.reply_text(msg)
 
