@@ -633,51 +633,51 @@ Uꜱᴇ Nɪᴋɪ’ꜱ Eᴄᴏɴᴏᴍʏ Sʏꜱᴛᴇᴍ Tᴏ Eᴀʀɴ, Mᴀɴ�
 
 async def toprich(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-if not await check_bot_active(update, context):  
-    return  
+    if not await check_bot_active(update, context):  
+        return  
 
-users_only = {  
-    uid: u for uid, u in data.items()  
-    if isinstance(u, dict) and "money" in u  
-}  
+    users_only = {  
+        uid: u for uid, u in data.items()  
+        if isinstance(u, dict) and "money" in u  
+    }  
 
-if not users_only:  
+    if not users_only:  
 
-    await update.message.reply_text(  
-        "❌ Nᴏ Dᴀᴛᴀ Fᴏᴜɴᴅ!"  
+        await update.message.reply_text(  
+            "❌ Nᴏ Dᴀᴛᴀ Fᴏᴜɴᴅ!"  
+        )  
+        return  
+
+    sorted_rich = sorted(  
+        users_only.items(),  
+        key=lambda x: x[1]["money"],  
+        reverse=True  
+    )[:10]  
+
+    msg = (  
+        "╔═══━━━─── • ───━━━═══╗\n"  
+        "     💰 𝐓𝐎𝐏 𝐑𝐈𝐂𝐇 💰\n"  
+        "╚═══━━━─── • ───━━━═══╝\n\n"  
     )  
-    return  
 
-sorted_rich = sorted(  
-    users_only.items(),  
-    key=lambda x: x[1]["money"],  
-    reverse=True  
-)[:10]  
+    for idx, (uid, user) in enumerate(sorted_rich, 1):  
 
-msg = (  
-    "╔═══━━━─── • ───━━━═══╗\n"  
-    "     💰 𝐓𝐎𝐏 𝐑𝐈𝐂𝐇 💰\n"  
-    "╚═══━━━─── • ───━━━═══╝\n\n"  
-)  
+        badge = "💓" if user.get("premium", False) else "👤"  
 
-for idx, (uid, user) in enumerate(sorted_rich, 1):  
-
-    badge = "💓" if user.get("premium", False) else "👤"  
-
+        msg += (  
+            f"{idx}. {badge} "  
+            f"{user.get('name', 'Unknown')} "  
+            f"➜ ₹{user.get('money', 0)}\n"  
+        )  
+    
     msg += (  
-        f"{idx}. {badge} "  
-        f"{user.get('name', 'Unknown')} "  
-        f"➜ ₹{user.get('money', 0)}\n"  
+        "\n━━━━━━━━━━━━━━━━━━\n"  
+        "💖 Rɪᴄʜᴇꜱᴛ Pʟᴀʏᴇʀꜱ Oғ Nɪᴋɪ 😈\n\n"  
+        "💓 Premium User\n"  
+        "👤 Normal User"  
     )  
 
-msg += (  
-    "\n━━━━━━━━━━━━━━━━━━\n"  
-    "💖 Rɪᴄʜᴇꜱᴛ Pʟᴀʏᴇʀꜱ Oғ Nɪᴋɪ 😈\n\n"  
-    "💓 Premium User\n"  
-    "👤 Normal User"  
-)  
-
-await update.message.reply_text(msg)
+    await update.message.reply_text(msg)
 
 
 # =================== TOP KILLERS COMMAND ===================
