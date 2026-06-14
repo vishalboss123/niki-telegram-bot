@@ -648,11 +648,11 @@ async def toprich(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )  
         return  
 
-    sorted_rich = sorted(  
-        users_only.items(),  
-        key=lambda x: x[1]["money"],  
-        reverse=True  
-    )[:10]  
+    sorted_rich = sorted(
+        users_only.items(),
+        key=lambda x: int(x[1].get("money", 0)),
+        reverse=True
+    )[:10]
 
     msg = (  
         "╔═══━━━─── • ───━━━═══╗\n"  
@@ -730,6 +730,26 @@ async def topkill(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(msg)
 
+
+async def richdebug(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    msg = "🔍 TOPRICH DEBUG\n\n"
+
+    users_only = {
+        uid: u for uid, u in data.items()
+        if isinstance(u, dict) and "money" in u
+    }
+
+    for uid, user in users_only.items():
+        msg += (
+            f"{user.get('name','Unknown')}\n"
+            f"💰 Money: {user.get('money',0)}\n"
+            f"📦 Type: {type(user.get('money')).__name__}\n\n"
+        )
+
+        if len(msg) > 3500:
+            break
+
+    await update.message.reply_text(msg)
 # ===================== PART 2 FULL ECONOMY BOT =====================
 # ------------------ GLOBAL DATA ------------------
 DATA_FILE = "database.json"
@@ -765,7 +785,8 @@ def load_data():
         for name in shop_items:
             if name in data["shop_items"]:
                 shop_items[name]["gifs"] = data["shop_items"][name].get("gifs", [])
-                
+    return data
+ 
 def load_from_mongo():
     result = backup.find_one({"_id": "main_data"})
     
@@ -13934,7 +13955,7 @@ def main():
     app.add_handler(CommandHandler("reginfo", reginfo))
     app.add_handler(CommandHandler("allreginfo", allreginfo))
     app.add_handler(CommandHandler("heavyreward", heavyreward))
-    
+    app.add_handler(CommandHandler("richdebug", richdebug))
     app.add_handler(CommandHandler("allmap", allmap))
     app.add_handler(CommandHandler("usermap", usermap))
     app.add_handler(CommandHandler("userinfo", userinfo))
